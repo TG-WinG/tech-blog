@@ -31,7 +31,6 @@ jobs:
 
       - name: Build Jar
         run: |
-          cd JWT
           chmod 755 gradlew
           ./gradlew bootJar
 
