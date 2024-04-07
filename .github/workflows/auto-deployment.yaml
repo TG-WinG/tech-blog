@@ -60,10 +60,10 @@ jobs:
           scp -i private_key.pem $jarPath "${username}@${host}:~/server.jar"
 
       - name: Startup new uploaded jar
-        run: ssh -i private_key.pem "${username}@${host}" "source ~/.profile; deploy/startup.sh"
+        run: ssh -i private_key.pem "${username}@${host}" "source ~/.env; deploy/startup.sh"
 
       - name: Wait 30 seconds for server to startup
         run: sleep 30
 
       - name: Check and Recover
-        run: ssh -i private_key.pem "${username}@${host}" "source ~/.profile; deploy/check_and_recover.sh"
+        run: ssh -i private_key.pem "${username}@${host}" "source ~/.env; deploy/check_and_recover.sh"
