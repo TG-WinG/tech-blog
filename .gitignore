@@ -38,3 +38,9 @@ out/
 
 ### MacOS ###
 **/.DS_Store
+
+### Environment ###
+env.sh
+
+### SSH Connection ###
+private_key.pem
