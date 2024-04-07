@@ -54,7 +54,6 @@ jobs:
       - name: Send jar file to EC2
         run: |
           jarPath=$(./gradlew -q jarPath)
-          cd ..
           scp -i private_key.pem $jarPath "${username}@${host}:~/server.jar"
 
       - name: Startup new uploaded jar
