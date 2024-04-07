@@ -3,6 +3,7 @@ package kr.tgwing.tech.blog.entity;
 
 import jakarta.persistence.*;
 import kr.tgwing.tech.blog.dto.PostDto;
+import kr.tgwing.tech.common.BaseEntity;
 import lombok.*;
 
 @Entity
@@ -12,7 +13,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name="post")
-public class PostEntity extends BaseEntity{
+public class PostEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
