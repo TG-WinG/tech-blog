@@ -17,7 +17,8 @@ public class FileController {
 
     @Autowired
     FileServiceImpl fileServiceImpl;
-    @PostMapping(path = "/file/image", consumes = {MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE, MediaType.IMAGE_GIF_VALUE})
+
+    @PostMapping(path = "/file/image")
     public ResponseEntity<String> uploadImage(
             @RequestPart(value = "name") String name,
             @RequestPart(value = "image") MultipartFile image
