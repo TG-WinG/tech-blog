@@ -2,10 +2,7 @@ package kr.tgwing.tech.user.entity;
 
 import jakarta.persistence.*;
 import kr.tgwing.tech.common.BaseEntity;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.Serializable;
 import java.sql.Date;
@@ -13,6 +10,7 @@ import java.sql.Date;
 @Entity
 @Getter
 @Builder
+@Setter
 @NoArgsConstructor @AllArgsConstructor
 @Table(name = "user")
 public class UserEntity extends BaseEntity implements Serializable {
@@ -38,6 +36,8 @@ public class UserEntity extends BaseEntity implements Serializable {
     @Column(nullable = false, length = 11)
     private String phoneNumber;
 
-    private String profilePicture;
+    @Column
+    private String role;
 
+    private String profilePicture;
 }

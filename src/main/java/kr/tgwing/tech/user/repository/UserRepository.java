@@ -7,13 +7,17 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
-    UserEntity findByStudentId(String studentId);
+    Optional<UserEntity> findByStudentId(String studentId);
 
 
     @Transactional
     @Modifying
-    @Query("UPDATE UserEntity U SET U.name = :name,  U.phoneNumber = :phoneNumber, U.profilePicture = : profilePicture WHERE U.id = :id")
+    @Query("UPDATE UserEntity U SET U.name = :name, U.phoneNumber = :phoneNumber, U.profilePicture = :profilePicture WHERE U.studentId = :id")
     void changeUser(String id, String name, String phoneNumber, String profilePicture);
+
+    Boolean existsByName(String name);
 }
