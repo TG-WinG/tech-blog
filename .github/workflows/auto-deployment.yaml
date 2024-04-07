@@ -46,8 +46,8 @@ jobs:
 
       - name: Upload deployment scripts
         run: |
-          sudo chmod 755 JWT/deploy/*
-          scp -i private_key.pem -r JWT/deploy "${username}@${host}:~"
+          sudo chmod 755 script/deploy/*
+          scp -i private_key.pem -r script/deploy/* "${username}@${host}:deploy"
 
       - name: Kill current running Spring process
         run: ssh -i private_key.pem "${username}@${host}" "deploy/shutdown.sh; deploy/backup.sh"
