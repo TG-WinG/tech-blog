@@ -31,42 +31,6 @@ public class UserController {
         return ResponseEntity.ok(studentId);
     }
 
-    @GetMapping("/profile")
-    public ResponseEntity<ProfileDTO> showProfile(Principal principal){
-        String name = principal.getName();
-        ProfileDTO show = userService.showUser(name);
-
-        if(show != null){
-            return ResponseEntity.ok(show);
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
-
-    @GetMapping("/profile/change")
-    public ResponseEntity<ProfileDTO> showProfileChanged(Principal principal){
-        String name = principal.getName();
-        ProfileDTO show = userService.showUser(name);
-
-        if(show != null){
-            return ResponseEntity.ok(show);
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
-
-    @PutMapping("/profile/change")
-    public ResponseEntity<Long> changeProfile(@RequestBody ProfileReqDTO request, Principal principal){
-        String name = principal.getName();
-        Long change = userService.changeUser(name, request);
-
-
-        if(change != null){
-            return ResponseEntity.ok(change); //요거가 response다시
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-    }
-
-    @GetMapping("/profile/myPosting")
-
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody UserDTO userDTO) {
@@ -82,12 +46,6 @@ public class UserController {
 
         return ResponseEntity.ok("okokok");
     }
-
-    @GetMapping("/admin/test")
-    public ResponseEntity<String> test2() {
-
-            return ResponseEntity.ok("admin round");
-        }
-    }
+}
 
 
