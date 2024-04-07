@@ -1,12 +1,9 @@
 package kr.tgwing.tech.blog.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import kr.tgwing.tech.blog.dto.PostDto;
 import lombok.*;
-
-import java.util.List;
 
 @Entity
 @Getter
@@ -49,9 +46,9 @@ public class PostEntity extends BaseEntity{
                 .thumbnail(postEntity.thumbnail).build();
     }
 
-    public void updateContent(PostDto postDto) {
-        this.title = postDto.getTitle();
-        this.content = postDto.getContent();
-        this.thumbnail = postDto.getThumbnail();
-    }
+//    public void updateContent(PostDto postDto) {
+//        this.title = postDto.getTitle();
+//        this.content = postDto.getContent();
+//        this.thumbnail = postDto.getThumbnail();
+//    }
 }
