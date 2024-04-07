@@ -1,6 +1,8 @@
 package kr.tgwing.tech.user.controller;
 
 import kr.tgwing.tech.user.dto.LoginDTO;
+import kr.tgwing.tech.user.dto.ProfileDTO;
+import kr.tgwing.tech.user.dto.ProfileReqDTO;
 import kr.tgwing.tech.user.dto.UserDTO;
 import kr.tgwing.tech.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -41,14 +43,16 @@ public class UserController {
         return ResponseEntity.ok("로그아웃되었습니다.");
     }
 
-//    @PutMapping("/profile")
-//    public ResponseEntity<> changeProfile(@PathVariable Long id, @RequestBody profileDTO request){
-//        UserDTO change = userService.changeUser(id, request);
-//        if(change != null){
-//            return ResponseEntity.ok().build(); //요거가 response다시
-//        }
-//        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-//    }
+    @PutMapping("/profile")
+    public ResponseEntity<ProfileDTO> changeProfile(@RequestBody ProfileReqDTO request, Principal principal){
+        String name = principal.getName();
+
+        UserDTO change = userService.changeUser(name, request);
+        if(change != null){
+            return ResponseEntity.ok().build(); //요거가 response다시
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
 
 }
 
