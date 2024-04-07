@@ -1,4 +1,4 @@
-package kr.tgwing.tech.swagger;
+package kr.tgwing.tech.common.swagger;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
