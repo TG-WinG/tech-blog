@@ -14,13 +14,15 @@ import java.util.Optional;
 @Repository
 public interface PostRepository extends JpaRepository<PostEntity, Long> {
     Optional<PostEntity> findById(Long id);
+    @Override
+    List<PostEntity> findAll();
 
-//    List<PostEntity> findByTitleContains(String search);
+    //    List<PostEntity> findByTitleContains(String search);
     List<PostEntity> findByContentContains(String search);
     Page<PostEntity> findAllByOrderByIdDesc(Pageable pageable);
 
-    @Query(value = "select * from post p where  p.type = 0", nativeQuery = true)
-    List<PostEntity> findAllNotice();
+//    @Query(value = "select * from post p where  p.type = 0", nativeQuery = true)
+//    List<PostEntity> findAllNotice();
 
     @Query(value = "select count(*) from post p where p.type = 0", nativeQuery = true)
     int getCount();

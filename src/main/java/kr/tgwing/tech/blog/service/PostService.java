@@ -30,8 +30,7 @@ public class PostService {
 //    private final AuthService authService;
 
     public List<PostDto> getAllPosts() { // 모든 공지 가져오기
-        // findAllNotice() : type=NOT인 post를 모두 가져옴
-        List<PostEntity> allPosts = postRepository.findAllNotice();
+        List<PostEntity> allPosts = postRepository.findAll();
 
         // 가져온 List가 비어있는 경우 == 공지 없음
 //        if (allPosts.isEmpty()) throw new PostNotFoundException();
@@ -40,16 +39,13 @@ public class PostService {
         return dtos;
     }
 
-    public PostDto getPost(Long id) // 특정 게시글 가져오기
+    public PostDto getPost(Long postId) // 특정 게시글 가져오기
     {
-        // 입력된 id에 해당하는 글 찾기
-        Optional<PostEntity> postEntityInOp = postRepository.findById(id);
-//        PostEntity postEntity = postEntityInOp.orElseThrow(PostNotFoundException::new);
+        // 입력된 postId에 해당하는 글 찾기
+        Optional<PostEntity> postEntityInOp = postRepository.findById(postId);
+//        PostEntity postEntity = postEntityInOp.orElseThrow(PostNotFoundException::new); 예외처리 생략
         PostEntity postEntity = postEntityInOp.orElseThrow();
 
-        // 공지인지 확인
-//        if (postEntity.getType() == Type.NOT) return toDto(postEntity); // dto로 변환해서 보내기
-//        else throw new IsNotNoticeException();
         return toDto(postEntity);
     }
 
@@ -79,54 +75,37 @@ public class PostService {
 
     public List<PostDto> searchPosts(String search) // 공지 내용으로 검색하기
     {
-        // findByContentContains() : 검색한 text를 포함하고 있는 공지를 모두 가져옴
         List<PostEntity> searchedEntity = postRepository.findByContentContains(search);
         // 가져온 List가 비어있는 경우 == 공지 없음
 //        if (searchedEntity.isEmpty()) throw new PostNotFoundException();
+        if (searchedEntity.isEmpty()) throw new ResponseStatusException(HttpStatus.NO_CONTENT);
 
         // 공지인지 확인 후 dto list에 담고, 공지가 아닌 경우 null로 변환
         List<PostDto> postDtos = searchedEntity.stream().map(postEntity -> toDto(postEntity)).collect(Collectors.toList());
 
-        // null 제거
-        while(postDtos.remove(null)){}
-
         return postDtos;
     }
 
-    public PostDto createPost(PostDto requestDto, String token)  // 공지 생성하기
+    public PostDto createPost(PostDto requestDto)  // 공지 생성하기
     {
         // 글을 작성할 user 조회
 //        Optional<UserEntity> userById = userRepository.findById(requestDto.getWriter());
 //        // userEntity를 받아오지 못한 경우 - 회원을 찾을 수 없음 (Exception)
 //        UserEntity userEntity = userById.orElseThrow(UserNotFoundException::new);
 
-        /**
-         * requestDTO에 받아올 정보 : title, content, thumbnail + writer(userId)를 함께 받아와야 함
-         */
-
-//        authService.extractStudentId(jwt); --> userEntity.getStudentId()와 같은지 확인 필요 (URL 요청자와 요청 JSON 정보가 같은지)
-        String jwt = token.split(" ")[1];
-
-//        String studentId = authService.extractStudentId(jwt);
-//        if (!studentId.equals(userEntity.getStudentId())) throw new InfoMismatchException();
-
-
-//        if (userEntity.getLevel() == Level.MANAGER) { // user가 관리자 level인 경우에만 동작
+//        if (userEntity.getLevel() == Level.MANAGER) { // user가 관리자인 경우
         if(true) { // level 해결까지는 무조건 if 통과
-            PostEntity postEntity = toEntity(requestDto); // DTO 기반으로 엔티티 생성 - writer는 요청된 user의 ID
+            PostEntity postEntity = toEntity(requestDto); // DTO기반 엔티티 생성: writer=요청 user
 
-            System.out.println("postEntity = " + postEntity); // request 엔티티 확인
+            PostEntity savedEntity = postRepository.save(postEntity);
 
-            PostEntity savedEntity = postRepository.save(postEntity); // response 엔티티 확인
-
-            System.out.println("savedEntity = " + savedEntity); // response 엔티티 확인
-            PostDto responseDto = toDto(savedEntity); // 저장된 엔티티 를 DTO로 변환해서 return
+            PostDto responseDto = toDto(savedEntity);
             return responseDto;
 
         } else { // user가 관리자가 아닌 경우
             // 공지 생성 불가능 - 접근 권한 없음 (Exception)
 //            throw new HasNoAuthorityException();
-
+            return null;
         }
     }
 
@@ -143,7 +122,7 @@ public class PostService {
         // DB 내 게시글 작성자 - 요청된 유저 ID 동일 & DB 내 게시글 작성자 - 요청된 게시글 작성자 동일
         if(postEntity.getWriter() == userId && postEntity.getWriter() == postDto.getWriter()) {
             System.out.println("유저 정보 일치");
-            postEntity.updateContent(postDto);
+            postEntity.updateContent(postDto); // 수정 요
 
             PostEntity savedEntity = postRepository.save(postEntity);
             PostDto responseDto = toDto(savedEntity);
@@ -165,7 +144,7 @@ public class PostService {
             postRepository.deleteById(postId);
         } else {
             System.out.println("삭제 불가 - 작성자가 아님");
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED); }
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN); }
     }
 
     public Page<PostDto> findPostsInPage(int page, int size, Pageable pageable) {
@@ -182,18 +161,10 @@ public class PostService {
 
         // stream이 비어있는 경우
         postPage.stream().findFirst().orElseThrow(()-> new ResponseStatusException(HttpStatus.NO_CONTENT));
-        // page를 잘못 입력한 경우
-//        int total = (int) postPage.getTotalElements();
-//        int limitPage;
-//        if ( total % size > 0) { limitPage = (int)total/size + 1; }
-//        else { limitPage = (int)total/size; }
-//        if(page > limitPage) {throw new ResponseStatusException(HttpStatus.BAD_REQUEST);}
 
         // page가 총 데이터 건수를 초과하는 경우
         long totalCount = postPage.getTotalElements();
-//        System.out.println("totalCount = " + totalCount);
         long requestCount = (postPage.getTotalPages() - 1) * postPage.getSize();
-//        System.out.println("requestCount = " + requestCount);
         if(!(totalCount > requestCount)) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST); }
 
         // Entity -> Dto 변환 - Dto 담은 page 반환

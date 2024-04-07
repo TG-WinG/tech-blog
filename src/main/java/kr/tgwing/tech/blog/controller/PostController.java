@@ -21,18 +21,16 @@ import java.util.List;
 public class PostController {
 
     /*
-     * 공지글 가져오기 - GET, /tgwing.kr/info/notice
-     * 특정 공지글 가져오기 - GET, /tgwing.kr/info/notice/{id}
-     * 공지 내용 검색 - GET, /tgwing.kr/notice/search?text={search}
-     * 공지 작성 - POST, /tgwing.kr/notice/post
-     * 공지 수정 - PUT, /tgwing.kr/notice/put/{id}
-     * 공지 삭제 - DELETE, /tgwing.kr/notice/delete/{id}
+     * 블로그 전체 가져오기 - GET, /tgwing.kr/blog
+     * 특정 블로그 가져오기 - GET, /tgwing.kr/blog/{id}
+     * 블로그 내용 검색 - GET, /tgwing.kr/blog/search?text={search}
+     * 블로그 작성 - POST, /tgwing.kr/blog/post
+     * 블로그 수정 - PUT, /tgwing.kr/blog/modify/{id}
+     * 블로그 삭제 - DELETE, /tgwing.kr/blog/delete/{id}
      * */
     private final PostService postService;
-    private final PostRepository postRepository;
-//    private final UserRepository userRepository;
 
-    @GetMapping("/info/notice") // 공지글 가져오기 - GET, /tgwing.kr/info/notice
+    @GetMapping("/blog") // 블로그 전체 가져오기 - GET, /tgwing.kr/notice
     public ResponseEntity<List<PostDto>> getAllPosts() {
         System.out.println("-- Retrieve All of Posts (to Front...) --");
 
@@ -41,7 +39,7 @@ public class PostController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
-    @GetMapping("/notice/{postId}") // 특정 보기 - GET, /tgwing.kr/notice/{id}
+    @GetMapping("/blog/{postId}") // 특정 블로그 가져오기 - GET, /tgwing.kr/blog/{postId}
     public ResponseEntity<PostDto> getPost(@PathVariable("postId") Long postId) {
         System.out.println("-- Retreive Specific Post by Id --");
         // 특정 게시글 id에 대한 post 정보를 모아 반환 (id, title, description, writtenDate, ?조회수?
@@ -50,7 +48,7 @@ public class PostController {
         return ResponseEntity.ok(post);
     }
 
-    @GetMapping("/notice/search") // 공지 내용 검색 - GET, /tgwing.kr/notice/search?text={search}
+    @GetMapping("/blog/search") // 블로그 내용 검색 - GET, /tgwing.kr/blog/search?text={search}
     public ResponseEntity<List<PostDto>> searchPost(@RequestParam String text)
     {
         System.out.println("-- Retrieve Posts which description has search text --");
@@ -61,25 +59,20 @@ public class PostController {
         return ResponseEntity.ok(postDtos);
     }
 
-    @PostMapping("/notice/post") // 공지 작성 - POST, /tgwing.kr/notice/post
-    public ResponseEntity<PostDto> post(@RequestBody PostDto requestDto,
-                                        @RequestHeader("authorization") String token)
+    @PostMapping("/blog/post") // 블로그 작성 - POST, /tgwing.kr/blog/post
+    public ResponseEntity<PostDto> post(@RequestBody PostDto requestDto)
     {
         System.out.println("-- Post new post --");
         System.out.println("Request Dto = " + requestDto);
         // RequestDTO : writer, title, content, thumbnail(선택)
 
         // dto 가져온 값을 엔티티로 바꾸고 DB에 save
-        // 다시 꺼내와서 완성된 객체의 구성요소(id, title, description, writtenDate ...)
 
-        // 유저의 level 확인 필요 - level = MANAGER인 경우에만 작성가능
-        // 로그인 되어있지 않은 경우 NORMAL, 로그인 된 경우 MEMBER, 관리자인 경우 MANAGER
-
-        PostDto responseDto = postService.createPost(requestDto, token);
+        PostDto responseDto = postService.createPost(requestDto);
         return ResponseEntity.ok(responseDto);
     }
 //    @CrossOrigin
-    @PatchMapping ("/notice/modify/{id}") // 공지 수정 - PUT, /tgwing.kr/notice/modify/{id}
+    @PutMapping ("/blog/modify/{id}") // 블로그 수정 - PUT, /tgwing.kr/blog/modify/{id}
     public ResponseEntity<PostDto> modify(@RequestBody PostDto requestDto,
                                        @RequestParam Long userId,
                                        @PathVariable("id") Long id)
@@ -95,7 +88,7 @@ public class PostController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @DeleteMapping("/notice/delete/{id}") // 공지 삭제 - DELETE, /tgwing.kr/notice/delete/{id}
+    @DeleteMapping("/blog/delete/{id}") // 블로그 삭제 - DELETE, /tgwing.kr/blog/delete/{id}
     public ResponseEntity<Void> delete(@PathVariable("id") Long postId,
                                        @RequestParam Long userId)
     {
@@ -105,7 +98,7 @@ public class PostController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/notice") // 공지 게시판 보기 - GET, /tgwing.kr/notice?page={pp}&length={ll}
+    @GetMapping("/blog") // 공지 게시판 보기 - GET, /tgwing.kr/blog?page={pp}&length={ll}
     @Transactional
     public ResponseEntity<Page> getPostsInPage(@RequestParam int page,
                                                @RequestParam(defaultValue = "15") int size,
