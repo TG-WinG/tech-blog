@@ -1,10 +1,12 @@
 package kr.tgwing.tech.file.service;
 
 import kr.tgwing.tech.utils.S3Uploader;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+@Profile("dev")
 @Service
 public class FileServiceImpl implements FileService {
     private final S3Uploader s3Uploader;
