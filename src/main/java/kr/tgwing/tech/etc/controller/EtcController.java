@@ -5,9 +5,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api")
 public class EtcController {
-    @GetMapping("/heath")
+    @GetMapping("/health")
     public String getHealth() {
         return "I'm healthy😀";
     }
