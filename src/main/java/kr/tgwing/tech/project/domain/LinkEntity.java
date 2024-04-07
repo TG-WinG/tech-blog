@@ -1,7 +1,8 @@
-package kr.tgwing.tech.project.domain.project;
+package kr.tgwing.tech.project.domain;
 
 
 import jakarta.persistence.*;
+import kr.tgwing.tech.common.BaseEntity;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,7 @@ import jakarta.persistence.Entity;
 @NoArgsConstructor
 @Table(name= "link")
 @Entity
-public class LinkEntity {
+public class LinkEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="link_id")

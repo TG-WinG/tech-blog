@@ -1,4 +1,4 @@
-package kr.tgwing.tech.project.service.project;
+package kr.tgwing.tech.project.service;
 
 import kr.tgwing.tech.project.dto.ProjectBriefDTO;
 import kr.tgwing.tech.project.dto.ProjectCreateDTO;

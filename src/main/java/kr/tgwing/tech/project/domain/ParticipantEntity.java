@@ -1,6 +1,7 @@
-package kr.tgwing.tech.project.domain.project;
+package kr.tgwing.tech.project.domain;
 
 import jakarta.persistence.*;
+import kr.tgwing.tech.common.BaseEntity;
 import kr.tgwing.tech.project.domain.Enum.DevRole;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import org.hibernate.annotations.DynamicInsert;
 @DynamicInsert
 @NoArgsConstructor
 @Table(name= "participant")
-public class ParticipantEntity {
+public class ParticipantEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="participant_id")

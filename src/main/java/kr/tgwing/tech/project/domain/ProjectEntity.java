@@ -1,6 +1,7 @@
-package kr.tgwing.tech.project.domain.project;
+package kr.tgwing.tech.project.domain;
 
 import jakarta.persistence.*;
+import kr.tgwing.tech.common.BaseEntity;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,7 +17,7 @@ import java.util.List;
 @DynamicInsert
 @NoArgsConstructor
 @Table(name= "project")
-public class ProjectEntity {
+public class ProjectEntity extends BaseEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="project_id")
     private Long id;

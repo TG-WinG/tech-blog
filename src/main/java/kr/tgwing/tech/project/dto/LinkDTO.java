@@ -1,7 +1,7 @@
 package kr.tgwing.tech.project.dto;
 
-import kr.tgwing.tech.project.domain.project.LinkEntity;
-import kr.tgwing.tech.project.domain.project.ProjectEntity;
+import kr.tgwing.tech.project.domain.LinkEntity;
+import kr.tgwing.tech.project.domain.ProjectEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;

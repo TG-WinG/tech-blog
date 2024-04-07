@@ -60,10 +60,8 @@ public class SecurityConfig {
 //                        .clearAuthentication(true))
 
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/register", "/login")
-                        .permitAll()
-                        .requestMatchers("/admin/**")
-                        .hasRole("ADMIN")
+                        .requestMatchers("/register", "/login").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)

@@ -1,9 +1,8 @@
-package kr.tgwing.tech.project.service.project;
+package kr.tgwing.tech.project.service;
 
-import kr.tgwing.tech.project.domain.project.LinkEntity;
-import kr.tgwing.tech.project.domain.project.ParticipantEntity;
-import kr.tgwing.tech.project.domain.project.ProjectEntity;
-import kr.tgwing.tech.dto.*;
+import kr.tgwing.tech.project.domain.LinkEntity;
+import kr.tgwing.tech.project.domain.ParticipantEntity;
+import kr.tgwing.tech.project.domain.ProjectEntity;
 import kr.tgwing.tech.project.dto.*;
 import kr.tgwing.tech.project.respository.participant.ParticipantRepository;
 import kr.tgwing.tech.project.respository.link.LinkRepository;
