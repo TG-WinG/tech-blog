@@ -12,7 +12,7 @@ import java.sql.Date;
 @Builder
 @Setter
 @NoArgsConstructor @AllArgsConstructor
-@Table(name = "user")
+@Table(name = "users")
 public class UserEntity extends BaseEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
