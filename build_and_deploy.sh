@@ -6,7 +6,14 @@ source env.sh
 host=$EC2_HOST
 username=$EC2_USERNAME
 
-./gradlew bootJar
+output=$(./gradlew bootJar --info)
+status=$?
+
+if [ $status -ne 0 ]; then
+  echo " === build error ==="
+  echo "$output"
+  exit 1
+fi
 
 # Upload deployment scripts
 chmod 755 script/deploy/*
