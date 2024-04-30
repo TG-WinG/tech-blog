@@ -30,7 +30,7 @@ public class UserEntity extends BaseEntity implements Serializable {
     @Column(nullable = false)
     private String name; // 이름
 
-    @Column(nullable = false)
+    @Column
     private Date birth;
 
     @Column(nullable = false, length = 11)
