@@ -8,6 +8,7 @@ import kr.tgwing.tech.user.dto.ProfileReqDTO;
 import kr.tgwing.tech.user.dto.UserDTO;
 import kr.tgwing.tech.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import org.apache.tomcat.util.http.parser.Authorization;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import java.security.Principal;
 
 @RestController
 @RequiredArgsConstructor
+@Log4j2
 public class UserController {
 
     private final UserService userService;
@@ -35,7 +37,8 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody UserDTO userDTO) {
 
-        System.out.println(userDTO);
+        log.info("UserController Register...............");
+        log.info(userDTO);
 
         try{
             userService.register(userDTO);
@@ -46,6 +49,7 @@ public class UserController {
 
         return ResponseEntity.ok("okokok");
     }
+
 }
 
 

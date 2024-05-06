@@ -3,6 +3,7 @@ package kr.tgwing.tech.user.entity;
 import jakarta.persistence.*;
 import kr.tgwing.tech.common.BaseEntity;
 import lombok.*;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.io.Serializable;
 import java.sql.Date;
@@ -31,13 +32,15 @@ public class UserEntity extends BaseEntity implements Serializable {
     private String name; // 이름
 
     @Column(nullable = false)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date birth;
 
-    @Column(nullable = false, length = 11)
+    @Column(nullable = false, length = 13)
     private String phoneNumber;
 
     @Column
     private String role;
 
+    @Column
     private String profilePicture;
 }
