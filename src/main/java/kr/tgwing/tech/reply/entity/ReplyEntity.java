@@ -38,7 +38,6 @@ public class ReplyEntity extends BaseEntity {
                 .id(replyEntity.id)
                 .writer(replyEntity.writer)
                 .description(replyEntity.description)
-                .modDate(replyEntity.getModDate())
                 .build();
     }
 

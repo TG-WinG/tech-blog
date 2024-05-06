@@ -26,15 +26,7 @@ public class ReplyController {
 
     private final ReplyServiceImpl replyService;
     private final JwtUtil jwtUtil;
-
-    @GetMapping("/info/notice/comment/{id}") // 특정 게시물 전체 댓글 가져오기
-    public ResponseEntity<List<ReplyDto>> getAllReplies(@PathVariable("id") Long postId) {
-        System.out.println("--- Get All Replies ---");
-
-        // post id 받고, 해당 post의 id를 reference로 가진 replies를 가져옴
-        List<ReplyDto> results = replyService.getAll(postId);
-        return ResponseEntity.ok(results);
-    }
+    
 
     @PostMapping("/notice/comment/post/{id}")
     public ResponseEntity<ReplyDto> postReply(@PathVariable("id") Long postId,
