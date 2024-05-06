@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 
 @RestController
+@RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -46,6 +47,14 @@ public class UserController {
 
         return ResponseEntity.ok("okokok");
     }
+
+//    @PostMapping("/password/check")
+//    public ResponseEntity<Void> passwordCheck(@RequestBody ) {
+//
+//
+//
+//        return ResponseEntity.ok().build();
+//    }
 }
 
 
