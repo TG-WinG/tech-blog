@@ -1,10 +1,5 @@
 package kr.tgwing.tech.user.dto;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import kr.tgwing.tech.user.entity.Role;
 import kr.tgwing.tech.user.entity.UserEntity;
 import lombok.*;
 

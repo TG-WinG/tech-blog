@@ -16,6 +16,7 @@ public class ExceptionMapper { // 예외 객체 -> 예외 상태로 바꿔주는
     }
 
     private static void setUpUserException() {
+
     }
 
     private static void setUpPostException() {

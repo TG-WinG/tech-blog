@@ -1,32 +1,36 @@
 package kr.tgwing.tech.user.service;
 
-import kr.tgwing.tech.user.dto.LoginDTO;
-import kr.tgwing.tech.user.dto.ProfileDTO;
-import kr.tgwing.tech.user.dto.ProfileReqDTO;
-import kr.tgwing.tech.user.dto.UserDTO;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import kr.tgwing.tech.user.dto.*;
 import kr.tgwing.tech.user.entity.UserEntity;
 import kr.tgwing.tech.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.util.Optional;
-
-import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final JavaMailSender javaMailSender;
+    private final SpringTemplateEngine templateEngine;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
     public void register(UserDTO userDTO) throws Exception{
-        String username = userDTO.getName();
+        String studentId = userDTO.getStudentId();
         String password = userDTO.getPassword();
 
-        Boolean isExist = userRepository.existsByName(username);
+        Boolean isExist = userRepository.existsByStudentId(studentId);
 
         if (isExist) {
             return;
@@ -39,8 +43,6 @@ public class UserServiceImpl implements UserService {
 
         userRepository.save(data);
     }
-
-
 
 
     @Override
@@ -67,6 +69,7 @@ public class UserServiceImpl implements UserService {
             return null;
         }
     };
+
     @Override
     public ProfileDTO showUser(String studentId){
         Optional<UserEntity> byStudentId = userRepository.findByStudentId(studentId);
@@ -91,4 +94,81 @@ public class UserServiceImpl implements UserService {
             return null;
         }
     }
+
+    @Override
+    public Boolean checkUser(CheckUserDTO checkUserDTO) {
+        Optional<UserEntity> user = userRepository.findByStudentId(checkUserDTO.getStudentId());
+        if(user.isPresent()) {
+            if(user.get().getEmail().equals(checkUserDTO.getEmail()) && user.get().getName().equals(checkUserDTO.getName()))
+                return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public String sendEmail(EmailMessageDTO emailMessageDTO) {
+        String authNum = createCode();
+
+        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+        try {
+            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
+            mimeMessageHelper.setTo(emailMessageDTO.getReceiver());
+            mimeMessageHelper.setSubject(emailMessageDTO.getSubject());
+            mimeMessageHelper.setText(setContext(authNum, "email"), true);
+            javaMailSender.send(mimeMessage);
+
+        } catch (MessagingException e) {
+            throw new RuntimeException(e);
+        }
+
+        return authNum;
+    }
+
+    public String createCode() {
+        Random random = new Random();
+        StringBuffer key = new StringBuffer();
+        for (int i = 0; i < 8; i++) {
+            int index = random.nextInt(4);
+
+            switch (index) {
+                case 0: key.append((char) ((int) random.nextInt(26) + 97)); break;
+                case 1: key.append((char) ((int) random.nextInt(26) + 65)); break;
+                default: key.append(random.nextInt(9));
+            }
+        }
+        return key.toString();
+    }
+
+    public String setContext(String code, String type) {
+        org.thymeleaf.context.Context context = new Context();
+        context.setVariable("code", code);
+
+        return templateEngine.process("email", context);
+    }
+
+    @Override
+    public void setNewPassword(Object studentId, PasswordCheckDTO password) {
+        String newPassword = password.getNewPassword();
+        System.out.println("newPassword = " + newPassword);
+        System.out.println("studentId.toString() = " + studentId.toString());
+
+        if(newPassword.equals(password.getCheckPassword())) {
+            Optional<UserEntity> user = userRepository.findByStudentId(studentId.toString());
+            System.out.println("user = " + user);
+
+            if(user.isPresent()) {
+                user.get().setPassword(bCryptPasswordEncoder.encode(newPassword));
+                userRepository.save(user.get());
+            }
+            else {
+                // 비밀번호 불일치함.
+            }
+
+        }
+        else {
+            throw new IllegalStateException(); // 비밀번호가 서로 일치하지 않습니다.
+        }
+    }
+
 }
