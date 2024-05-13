@@ -18,26 +18,20 @@ public class ProfileController {
     private final UserService userService;
     @GetMapping(value = {"", "/change"})
     public ResponseEntity<ProfileDTO> showProfile(Principal principal){
-        String name = principal.getName();
-        ProfileDTO show = userService.showUser(name);
+        String studentId = principal.getName();
+        ProfileDTO profileDTO = userService.showUser(studentId);
 
-        if(show != null){
-            return ResponseEntity.ok(show);
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        return ResponseEntity.ok(profileDTO);
     }
 
     @PutMapping("/change")
     public ResponseEntity<Long> changeProfile(@RequestBody ProfileReqDTO request, Principal principal){
-        String name = principal.getName();
-        Long change = userService.changeUser(name, request);
+        String studentId = principal.getName();
+        Long change = userService.changeUser(studentId, request);
 
-
-        if(change != null){
-            return ResponseEntity.ok(change); //요거가 response다시
-        }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        return ResponseEntity.ok(change); //요거가 response다시
     }
+
 
 //    @GetMapping("/myPosting")
 

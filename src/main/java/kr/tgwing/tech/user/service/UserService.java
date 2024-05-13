@@ -4,9 +4,9 @@ package kr.tgwing.tech.user.service;
 import kr.tgwing.tech.user.dto.*;
 
 public interface UserService{
-    void register(UserDTO userDTO) throws Exception;
+    Long register(UserDTO userDTO);
 
-    void logout(String token, String studentId);
+    Long logout(String studentId);
 
     Long changeUser(String name, ProfileReqDTO request);
 
@@ -17,5 +17,6 @@ public interface UserService{
     String sendEmail(EmailMessageDTO emailMessage); // 메일로 인증번호 전송하기
 
     void setNewPassword(Object studentId, PasswordCheckDTO password);
+
 
 }

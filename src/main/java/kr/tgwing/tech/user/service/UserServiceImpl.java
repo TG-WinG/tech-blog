@@ -2,14 +2,20 @@ package kr.tgwing.tech.user.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import kr.tgwing.tech.common.exception.CommonException;
 import kr.tgwing.tech.user.dto.*;
 import kr.tgwing.tech.user.entity.UserEntity;
+import kr.tgwing.tech.user.exception.MessageException;
+import kr.tgwing.tech.user.exception.PasswordException;
+import kr.tgwing.tech.user.exception.UserDuplicatedException;
+import kr.tgwing.tech.user.exception.UserNotFoundException;
 import kr.tgwing.tech.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
@@ -26,82 +32,73 @@ public class UserServiceImpl implements UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
-    public void register(UserDTO userDTO) throws Exception{
+    public Long register(UserDTO userDTO){
         String studentId = userDTO.getStudentId();
         String password = userDTO.getPassword();
 
-        Boolean isExist = userRepository.existsByStudentId(studentId);
+        Optional<UserEntity> user = userRepository.findByStudentId(studentId);
 
-        if (isExist) {
-            return;
-        }
+        if(user.isPresent())
+            throw new UserDuplicatedException();
 
         UserEntity data = UserDTO.toUserEntity(userDTO);
 
         data.setPassword(bCryptPasswordEncoder.encode(password)); // 비밀번호 암호화
         data.setRole("ROLE_USER"); // register를 통해서 회원가입하는 유저들은 모두 USER역할
 
-        userRepository.save(data);
+        UserEntity save = userRepository.save(data);
+
+        return save.getId();
     }
 
 
     @Override
-    public void logout(String token, String studentId) {
+    public Long logout(String studentId) {
+        UserEntity user = userRepository.findByStudentId(studentId).orElseThrow(UserNotFoundException::new);
 
+        return user.getId();
     }
 
-
+    // user 정보 수정하기
     @Override
     public Long changeUser(String studentId, ProfileReqDTO request){
-        Optional<UserEntity> userEntity = userRepository.findByStudentId(studentId);
-        // 만약 사용자 정보가 존재한다면 업데이트를 수행
-        if (userEntity.isPresent()) {
-            userRepository.changeUser(studentId, request.getName(), request.getPhoneNumber(), request.getProfilePicture());
-        }
 
-        Optional<UserEntity> byStudentId = userRepository.findByStudentId(studentId);
-        Long id = byStudentId.get().getId();
-        // 업데이트된 사용자 정보가 존재한다면 UserDTO로 변환하여 반환
-        if (byStudentId.isPresent()) {
-            return id;
-        }
-        else{
-            return null;
-        }
+        UserEntity userEntity = userRepository.findByStudentId(studentId)
+                .orElseThrow(UserNotFoundException::new);
+
+        userRepository.changeUser(studentId, request.getName(), request.getPhoneNumber(), request.getProfilePicture());
+
+        Long id = userEntity.getId();
+
+        return id;
     };
+
 
     @Override
     public ProfileDTO showUser(String studentId){
-        Optional<UserEntity> byStudentId = userRepository.findByStudentId(studentId);
+
+        UserEntity user = userRepository.findByStudentId(studentId)
+                .orElseThrow(UserNotFoundException::new);
         // 만약 사용자 정보가 존재한다면 업데이트를 수행
-        if (byStudentId.isPresent()) {
-            UserEntity user = byStudentId.get();
 
-            // UserEntity를 UserDTO로 변환
-            ProfileDTO userDTO = ProfileDTO.builder()
-                    .studentId(user.getStudentId())
-                    .email(user.getEmail())
-                    .name(user.getName())
-                    .birth(user.getBirth())
-                    .phoneNumber(user.getPhoneNumber())
-                    .profilePicture(user.getProfilePicture())
-                    .build();
+        ProfileDTO profileDTO = ProfileDTO.builder()
+                .studentId(user.getStudentId())
+                .email(user.getEmail())
+                .name(user.getName())
+                .birth(user.getBirth())
+                .phoneNumber(user.getPhoneNumber())
+                .profilePicture(user.getProfilePicture())
+                .build();
 
-            return userDTO;
-        }
-
-        else{
-            return null;
-        }
+        return profileDTO;
     }
 
     @Override
     public Boolean checkUser(CheckUserDTO checkUserDTO) {
-        Optional<UserEntity> user = userRepository.findByStudentId(checkUserDTO.getStudentId());
-        if(user.isPresent()) {
-            if(user.get().getEmail().equals(checkUserDTO.getEmail()) && user.get().getName().equals(checkUserDTO.getName()))
-                return true;
-        }
+        UserEntity user = userRepository.findByStudentId(checkUserDTO.getStudentId())
+                .orElseThrow(UserNotFoundException::new);
+
+        if(user.getEmail().equals(checkUserDTO.getEmail()) && user.getName().equals(checkUserDTO.getName())) return true;
 
         return false;
     }
@@ -111,15 +108,19 @@ public class UserServiceImpl implements UserService {
         String authNum = createCode();
 
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+
         try {
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
             mimeMessageHelper.setTo(emailMessageDTO.getReceiver());
             mimeMessageHelper.setSubject(emailMessageDTO.getSubject());
             mimeMessageHelper.setText(setContext(authNum, "email"), true);
+
             javaMailSender.send(mimeMessage);
 
         } catch (MessagingException e) {
+
             throw new RuntimeException(e);
+
         }
 
         return authNum;
@@ -137,6 +138,7 @@ public class UserServiceImpl implements UserService {
                 default: key.append(random.nextInt(9));
             }
         }
+
         return key.toString();
     }
 
@@ -150,24 +152,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public void setNewPassword(Object studentId, PasswordCheckDTO password) {
         String newPassword = password.getNewPassword();
-        System.out.println("newPassword = " + newPassword);
-        System.out.println("studentId.toString() = " + studentId.toString());
 
         if(newPassword.equals(password.getCheckPassword())) {
-            Optional<UserEntity> user = userRepository.findByStudentId(studentId.toString());
-            System.out.println("user = " + user);
+            UserEntity user = userRepository.findByStudentId(studentId.toString()).orElseThrow(UserNotFoundException::new);
 
-            if(user.isPresent()) {
-                user.get().setPassword(bCryptPasswordEncoder.encode(newPassword));
-                userRepository.save(user.get());
-            }
-            else {
-                // 비밀번호 불일치함.
-            }
-
+            user.setPassword(bCryptPasswordEncoder.encode(newPassword));
+            userRepository.save(user);
         }
         else {
-            throw new IllegalStateException(); // 비밀번호가 서로 일치하지 않습니다.
+            throw new PasswordException();// 비밀번호가 서로 일치하지 않습니다.
         }
     }
 

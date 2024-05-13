@@ -1,8 +1,11 @@
 package kr.tgwing.tech.user.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import kr.tgwing.tech.common.ApiResponse;
 import kr.tgwing.tech.security.util.JwtUtil;
 import kr.tgwing.tech.user.dto.*;
+import kr.tgwing.tech.user.exception.MessageException;
 import kr.tgwing.tech.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -39,19 +42,27 @@ public class UserController {
 
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<ApiResponse<Long>> register(@RequestBody UserDTO userDTO) {
 
         log.info("UserController Register...............");
         log.info(userDTO);
 
-        try{
-            userService.register(userDTO);
+        Long userId = userService.register(userDTO);
 
-        } catch (Exception e) {
+        return ResponseEntity.ok(ApiResponse.ok(userId));
+    }
 
-        }
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Long>> logout(HttpServletRequest request, HttpServletResponse response) {
 
-        return ResponseEntity.ok("okokok");
+        String authorization = request.getHeader("authorization");
+        String token = authorization.split(" ")[1];
+        String studentId = jwtUtil.getStudentId(token);
+
+        Long userId = userService.logout(studentId);
+        response.setHeader("authorization", null);
+
+        return ResponseEntity.ok(ApiResponse.ok(userId));
     }
 
     // 본인 확인 페이지
@@ -88,19 +99,17 @@ public class UserController {
 
     // 인증번호 확인 페이지
     @PostMapping("/password/checkNumber")
-    public ResponseEntity checkNumber(@RequestParam("emailKey") String emailKey,
-                                      @RequestParam("studentKey") String studentKey,
+    public ResponseEntity checkNumber(@RequestParam("studentKey") String studentKey,
+                                      @RequestParam("emailKey") String emailKey,
                                       @RequestBody CheckNumberDTO checkNumberDTO) {
 
         // redis로 가져와서 code의 숫자값과 입력으로 들어온 숫자가 같은지 확인하기
         ValueOperations valueOperations = redisTemplate.opsForValue();
         Object code = valueOperations.get(emailKey);
 
+        if(!code.equals(checkNumberDTO.getCode())) throw new MessageException(); // 인증코드가 일치하지 않습니다.
 
-        if(!code.equals(checkNumberDTO.getCode()))
-            throw new IllegalStateException(); // 인증코드가 일치하지 않습니다.
-
-        return ResponseEntity.ok(new Pair<>(emailKey, studentKey));
+        return ResponseEntity.ok(new Pair<>(studentKey, emailKey));
     }
 
     // 비밀번호 재설정 페이지
