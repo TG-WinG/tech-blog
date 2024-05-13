@@ -14,6 +14,10 @@ public record ApiResponse<T> (String message, T data){
         return new ApiResponse<>("created", result);
     }
 
+    public static <T> ApiResponse<T> updated(T result) {
+        return new ApiResponse<>("update", result);
+    }
+
     public static <T> ApiResponse<T> delete(T result) {
         return new ApiResponse<>("delete", result);
     }

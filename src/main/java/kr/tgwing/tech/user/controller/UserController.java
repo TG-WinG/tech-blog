@@ -1,5 +1,7 @@
 package kr.tgwing.tech.user.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.tgwing.tech.common.ApiResponse;
@@ -25,22 +27,15 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @RequestMapping("/user")
 @Log4j2
+@Tag(name = "로그인 하기 전 기능 + 로그아웃")
 public class UserController {
 
     private final UserService userService;
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, String> redisTemplate;
 
-    @GetMapping("/test")
-    public ResponseEntity<String> test(@RequestHeader("authorization") String token) {
 
-        String s = token.split(" ")[1];
-        String studentId = jwtUtil.getStudentId(s);
-
-        return ResponseEntity.ok(studentId);
-    }
-
-
+    @Operation(summary = "회원 등록하기")
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<Long>> register(@RequestBody UserDTO userDTO) {
 
@@ -52,6 +47,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.ok(userId));
     }
 
+    @Operation(summary = "로그아웃하기")
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Long>> logout(HttpServletRequest request, HttpServletResponse response) {
 
@@ -65,9 +61,9 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.ok(userId));
     }
 
-    // 본인 확인 페이지
-    @PostMapping("/password/checkUser")
-    public ResponseEntity<Pair<String, String>> checkUser(@RequestBody CheckUserDTO checkUserDTO) {
+    @Operation(summary = "비밀전호 재설정하기 전, 본인확인하기")
+    @PostMapping("/password")
+    public ResponseEntity<ApiResponse<Pair<String, String>>> checkUser(@RequestBody CheckUserDTO checkUserDTO) {
         log.info("UserController checkUser................");
         log.info(checkUserDTO);
 
@@ -94,12 +90,12 @@ public class UserController {
         valueOperations.set(studentKey, checkUserDTO.getStudentId());
         valueOperations.set(emailKey, code);
 
-        return ResponseEntity.ok(new Pair<>(studentKey, emailKey)); // ok
+        return ResponseEntity.ok(ApiResponse.created(new Pair<>(studentKey, emailKey)));
     }
 
-    // 인증번호 확인 페이지
+    @Operation(summary = "본인확인 이메일 인증하기")
     @PostMapping("/password/checkNumber")
-    public ResponseEntity checkNumber(@RequestParam("studentKey") String studentKey,
+    public ResponseEntity<ApiResponse<String>> checkNumber(@RequestParam("studentKey") String studentKey,
                                       @RequestParam("emailKey") String emailKey,
                                       @RequestBody CheckNumberDTO checkNumberDTO) {
 
@@ -109,12 +105,12 @@ public class UserController {
 
         if(!code.equals(checkNumberDTO.getCode())) throw new MessageException(); // 인증코드가 일치하지 않습니다.
 
-        return ResponseEntity.ok(new Pair<>(studentKey, emailKey));
+        return ResponseEntity.ok(ApiResponse.created(studentKey));
     }
 
-    // 비밀번호 재설정 페이지
-    @PostMapping("/password/setPassword") // 쿼리 파라미터로 넘겨받기
-    public ResponseEntity setNewPassword(@RequestParam("studentKey") String studentKey,
+    @Operation(summary = "비밀번호 재설정하기")
+    @PostMapping("/password/reset") // 쿼리 파라미터로 넘겨받기
+    public ResponseEntity<ApiResponse<Long>> setNewPassword(@RequestParam("studentKey") String studentKey,
                                          @RequestBody PasswordCheckDTO passwordCheckDTO) {
 
         log.info("UserController setNewPassword................");
@@ -124,9 +120,9 @@ public class UserController {
         ValueOperations valueOperations = redisTemplate.opsForValue();
         Object studentId = valueOperations.get(studentKey);
 
-        userService.setNewPassword(studentId, passwordCheckDTO);
+        Long userId = userService.setNewPassword(studentId, passwordCheckDTO);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(ApiResponse.updated(userId));
     }
 
 }

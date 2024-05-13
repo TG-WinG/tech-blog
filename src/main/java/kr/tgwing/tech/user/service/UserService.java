@@ -16,7 +16,7 @@ public interface UserService{
 
     String sendEmail(EmailMessageDTO emailMessage); // 메일로 인증번호 전송하기
 
-    void setNewPassword(Object studentId, PasswordCheckDTO password);
+    Long setNewPassword(Object studentId, PasswordCheckDTO password);
 
 
 }

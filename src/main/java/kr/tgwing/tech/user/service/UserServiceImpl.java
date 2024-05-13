@@ -150,14 +150,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void setNewPassword(Object studentId, PasswordCheckDTO password) {
+    public Long setNewPassword(Object studentId, PasswordCheckDTO password) {
         String newPassword = password.getNewPassword();
 
         if(newPassword.equals(password.getCheckPassword())) {
             UserEntity user = userRepository.findByStudentId(studentId.toString()).orElseThrow(UserNotFoundException::new);
 
             user.setPassword(bCryptPasswordEncoder.encode(newPassword));
-            userRepository.save(user);
+            UserEntity save = userRepository.save(user);
+
+            return save.getId();
         }
         else {
             throw new PasswordException();// 비밀번호가 서로 일치하지 않습니다.
