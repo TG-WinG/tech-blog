@@ -100,11 +100,12 @@ public class UserServiceImpl implements UserService {
 
         if(user.getEmail().equals(checkUserDTO.getEmail()) && user.getName().equals(checkUserDTO.getName())) return true;
 
-        return false;
+        else throw new UserNotFoundException();
     }
 
     @Override
     public String sendEmail(EmailMessageDTO emailMessageDTO) {
+
         String authNum = createCode();
 
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();

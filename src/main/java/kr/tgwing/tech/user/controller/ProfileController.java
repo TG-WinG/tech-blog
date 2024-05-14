@@ -21,9 +21,10 @@ public class ProfileController {
 
     private final UserService userService;
 
-    @Operation(summary = "회원정보 조회하기 + 수정페이지 입력부분")
-    @GetMapping(value = {"", "/fix"})
-    public ResponseEntity<ApiResponse<ProfileDTO>> showProfile(Principal principal){
+    @Operation(summary = "회원정보 조회하기")
+    @GetMapping("")
+    public ResponseEntity<ApiResponse<ProfileDTO>> showProfile(
+            Principal principal){
         String studentId = principal.getName();
         ProfileDTO profileDTO = userService.showUser(studentId);
 
@@ -31,8 +32,10 @@ public class ProfileController {
     }
 
     @Operation(summary = "유저 정보 수정 완료" )
-    @PutMapping("/fix")
-    public ResponseEntity<ApiResponse<Long>> changeProfile(@RequestBody ProfileReqDTO request, Principal principal){
+    @PutMapping("")
+    public ResponseEntity<ApiResponse<Long>> changeProfile(
+            @RequestBody ProfileReqDTO request,
+            Principal principal){
         String studentId = principal.getName();
         Long change = userService.changeUser(studentId, request);
 
