@@ -7,6 +7,8 @@ import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,6 +20,12 @@ import java.util.List;
 @Configuration
 public class SwaggerConfig {
 
+    @Value("${custom.swagger.server}")
+    private String swaggerServer;
+
+    @Value("${server.servlet.context-path}")
+    private String context;
+
     @Bean
     public OpenAPI openAPI() {
         SecurityScheme securityScheme = new SecurityScheme()
@@ -27,7 +35,7 @@ public class SwaggerConfig {
 
         Server serverDev = new Server();
         serverDev.setDescription("dev");
-        serverDev.setUrl("http://ec2-43-200-221-178.ap-northeast-2.compute.amazonaws.com/api");
+        serverDev.setUrl("http://" + swaggerServer + context);
         return new OpenAPI()
                 .components(new Components().addSecuritySchemes("bearerAuth", securityScheme))
                 .security(Arrays.asList(securityRequirement))
