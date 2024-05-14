@@ -27,8 +27,7 @@ public class SwaggerConfig {
 
         Server serverDev = new Server();
         serverDev.setDescription("dev");
-//        serverDev.setUrl("http://ec2-43-200-221-178.ap-northeast-2.compute.amazonaws.com/api");
-        serverDev.setUrl("http://localhost:8080/api");
+        serverDev.setUrl("http://ec2-43-200-221-178.ap-northeast-2.compute.amazonaws.com/api");
         return new OpenAPI()
                 .components(new Components().addSecuritySchemes("bearerAuth", securityScheme))
                 .security(Arrays.asList(securityRequirement))
