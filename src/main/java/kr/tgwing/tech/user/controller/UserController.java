@@ -24,8 +24,8 @@ import java.security.Principal;
 import java.util.UUID;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/user")
+@RequiredArgsConstructor
 @Log4j2
 @Tag(name = "로그인 하기 전 기능 + 로그아웃")
 public class UserController {
