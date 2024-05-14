@@ -10,7 +10,7 @@ import java.util.List;
 public interface PostService {
     public PostDto getPost(Long postId);
     public PostDto createPost(PostDto requestDto, String token);
-    public PostDto updatePost(PostDto postDto, Long userId, Long postId, String token);
-    public void deletePost(Long userId, Long postId);
-    public Page<PostDto> getPostsInPage(String text, int page, Pageable pageable);
+    public PostDto updatePost(PostDto postDto, Long postId, String utilStudentId);
+    public void deletePost(Long postId, String utilStudentId);
+    public Page<PostDto> getPostsInPage(String text, Pageable pageable);
 }

@@ -1,7 +1,9 @@
 package kr.tgwing.tech.blog.controller;
 
 import kr.tgwing.tech.blog.dto.PostDto;
+import kr.tgwing.tech.blog.exception.PathHasNoPostIdException;
 import kr.tgwing.tech.blog.service.PostServiceImpl;
+import kr.tgwing.tech.security.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,8 +11,10 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.util.Optional;
+
 @RestController
-//@RequestMapping("/api")
 @RequiredArgsConstructor
 public class PostController {
 
@@ -26,11 +30,10 @@ public class PostController {
 
     @GetMapping("/blog") // 블로그 전체 가져오기 - GET, /tgwing.kr/notice
     public ResponseEntity<Page> getAllPostswithSearch(@RequestParam(value = "text", required = false) String text,
-                                                               @RequestParam int page,
-                                                               @PageableDefault Pageable pageable) {
+                                                      @PageableDefault Pageable pageable) {
         System.out.println("-- Retrieve All of Posts --");
 
-        Page<PostDto> postsInPage = postService.getPostsInPage(text, page, pageable);
+        Page<PostDto> postsInPage = postService.getPostsInPage(text, pageable);
 
         return ResponseEntity.ok(postsInPage);
     }
@@ -47,31 +50,34 @@ public class PostController {
 //    }
 
     @GetMapping("/blog/{postId}") // 특정 블로그 가져오기 - GET, /tgwing.kr/blog/{postId}
-    public ResponseEntity<PostDto> getPost(@PathVariable("postId") Long postId) {
+    public ResponseEntity<PostDto> getPost(@PathVariable(required = false, name = "postId") Optional<Long> optional) {
         System.out.println("-- Retreive Specific Post by Id --");
-        // 특정 게시글 id에 대한 post 정보를 모아 반환 (id, title, description, writtenDate, ?조회수?
+        // 특정 게시글 id에 대한 post 정보를 모아 반환
+
+        Long postId = optional.orElseThrow(PathHasNoPostIdException::new);
 
         PostDto post = postService.getPost(postId);
         return ResponseEntity.ok(post);
     }
 
-    @PostMapping("/blog/post") // 블로그 작성 - POST, /tgwing.kr/blog/post
+    @PostMapping("/blog") // 블로그 작성 - POST, /tgwing.kr/blog/post
     public ResponseEntity<PostDto> post(@RequestBody PostDto requestDto,
-                                        @RequestHeader("authorization") String token)
+                                        Principal principal)
     {
         System.out.println("-- Post new post --");
         System.out.println("Request Dto = " + requestDto);
         // RequestDTO : writer, title, content, thumbnailUri
 
-        PostDto responseDto = postService.createPost(requestDto, token);
+        String utilStudentId = principal.getName();
+
+        PostDto responseDto = postService.createPost(requestDto, utilStudentId);
         return ResponseEntity.ok(responseDto);
     }
 //    @CrossOrigin
-    @PutMapping ("/blog/modify/{id}") // 블로그 수정 - PUT, /tgwing.kr/blog/modify/{id}
+    @PutMapping ("/blog/{postId}") // 블로그 수정 - PUT, /tgwing.kr/blog/modify/{id}
     public ResponseEntity<PostDto> modify(@RequestBody PostDto requestDto,
-                                          @RequestHeader("authorization") String token,
-                                          @RequestParam Long userId,
-                                          @PathVariable("id") Long id)
+                                          @PathVariable Long postId,
+                                          Principal principal)
     {
         System.out.println("-- Modify (title + content) of post --");
         // repository에 대해서 해당 id를 가진 엔티티를 가져오고,
@@ -79,18 +85,20 @@ public class PostController {
 
         System.out.println("Request Dto = " + requestDto);
 
-        PostDto responseDto = postService.updatePost(requestDto, userId, id, token);
+        String utilStudentId = principal.getName();
+        PostDto responseDto = postService.updatePost(requestDto, postId, utilStudentId);
 
         return ResponseEntity.ok(responseDto);
     }
 
-    @DeleteMapping("/blog/delete/{id}") // 블로그 삭제 - DELETE, /tgwing.kr/blog/delete/{id}
-    public ResponseEntity<Void> delete(@PathVariable("id") Long postId,
-                                       @RequestParam Long userId)
+    @DeleteMapping("/blog/{postId}") // 블로그 삭제 - DELETE, /tgwing.kr/blog/delete/{id}
+    public ResponseEntity<Void> delete(@PathVariable Long postId,
+                                       Principal principal)
     {
         System.out.println("-- Delete Specific Post --");
-        // 아이디에 해당하는 글 객체를 그냥 삭제 -> 응답
-        postService.deletePost(userId, postId);
+
+        String utilStudentId = principal.getName();
+        postService.deletePost(postId, utilStudentId);
         return ResponseEntity.noContent().build();
     }
 }
