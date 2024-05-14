@@ -41,15 +41,16 @@ public class PostEntity extends BaseEntity {
 
     public static PostDto toDto(PostEntity postEntity) {
         return PostDto.builder()
+                .id(postEntity.id)
                 .writer(postEntity.writer)
                 .title(postEntity.title)
                 .content(postEntity.content)
                 .thumbnail(postEntity.thumbnail).build();
     }
 
-//    public void updateContent(PostDto postDto) {
-//        this.title = postDto.getTitle();
-//        this.content = postDto.getContent();
-//        this.thumbnail = postDto.getThumbnail();
-//    }
+    public void updateContent(PostDto postDto) {
+        this.title = postDto.getTitle();
+        this.content = postDto.getContent();
+        this.thumbnail = postDto.getThumbnail();
+    }
 }
