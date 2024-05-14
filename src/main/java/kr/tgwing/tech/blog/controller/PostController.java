@@ -15,7 +15,7 @@ import java.security.Principal;
 import java.util.Optional;
 
 @RestController
-//@RequestMapping("/api")
+@RequestMapping("/admin")
 @RequiredArgsConstructor
 public class PostController {
 
