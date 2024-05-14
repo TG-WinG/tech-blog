@@ -1,6 +1,5 @@
 package kr.tgwing.tech.security.service;
 
-import kr.tgwing.tech.user.entity.Role;
 import kr.tgwing.tech.user.entity.UserEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
