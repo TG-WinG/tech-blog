@@ -82,7 +82,6 @@ public class SecurityConfig {
 //                        .clearAuthentication(true))
 
                 .authorizeHttpRequests(request -> request
-
                         .requestMatchers(PERMIT_URL_ARRAY)
                         .permitAll()
                         .requestMatchers("/user/**", "/login")
