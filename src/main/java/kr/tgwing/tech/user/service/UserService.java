@@ -10,6 +10,8 @@ public interface UserService{
 
     Long changeUser(String name, ProfileReqDTO request);
 
+    Long removeUser(String name);
+
     ProfileDTO showUser(String name);
 
     Boolean checkUser(CheckUserDTO checkUserDTO); // 본인 확인하기

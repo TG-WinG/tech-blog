@@ -7,6 +7,7 @@ import kr.tgwing.tech.user.dto.ProfileDTO;
 import kr.tgwing.tech.user.dto.ProfileReqDTO;
 import kr.tgwing.tech.user.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.config.RepositoryNameSpaceHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -40,6 +41,16 @@ public class ProfileController {
         Long change = userService.changeUser(studentId, request);
 
         return ResponseEntity.ok(ApiResponse.updated(change));
+    }
+
+    @Operation(summary = "회원 탈퇴" )
+    @DeleteMapping("")
+    public ResponseEntity<ApiResponse<Long>> removeProfile(Principal principal){
+        String studentId = principal.getName();
+        Long remove = userService.removeUser(studentId);
+
+        return ResponseEntity.ok(ApiResponse.delete(remove));
+
     }
 
 

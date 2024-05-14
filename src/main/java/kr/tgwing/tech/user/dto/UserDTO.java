@@ -16,8 +16,6 @@ public class UserDTO {
     private String name; // 이름
     private Date birth;
     private String phoneNumber;
-    private String role;
-    private String profilePicture;
 
     public static UserEntity toUserEntity(UserDTO userDTO) {
 
@@ -28,8 +26,6 @@ public class UserDTO {
                 .name(userDTO.getName())
                 .birth(userDTO.getBirth())
                 .phoneNumber(userDTO.getPhoneNumber())
-                .role(userDTO.getRole())
-                .profilePicture(userDTO.getProfilePicture())
                 .build();
     }
 }

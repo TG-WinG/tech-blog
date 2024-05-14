@@ -73,6 +73,13 @@ public class UserServiceImpl implements UserService {
         return id;
     };
 
+    @Override
+    public Long removeUser(String studentId){
+        userRepository.deleteByStudentId(studentId);
+        return null;
+    }
+
+
 
     @Override
     public ProfileDTO showUser(String studentId){
