@@ -82,9 +82,10 @@ public class SecurityConfig {
 //                        .clearAuthentication(true))
 
                 .authorizeHttpRequests(request -> request
+
                         .requestMatchers(PERMIT_URL_ARRAY)
                         .permitAll()
-                        .requestMatchers("/register", "/login")
+                        .requestMatchers("/user/**", "/login")
                         .permitAll()
                         .requestMatchers("/admin/**")
                         .hasRole("ADMIN")

@@ -13,11 +13,15 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
     Optional<UserEntity> findByStudentId(String studentId);
 
+    @Transactional
+    void deleteByStudentId(String studentId);
+
 
     @Transactional
     @Modifying
     @Query("UPDATE UserEntity U SET U.name = :name, U.phoneNumber = :phoneNumber, U.profilePicture = :profilePicture WHERE U.studentId = :id")
     void changeUser(String id, String name, String phoneNumber, String profilePicture);
 
-    Boolean existsByName(String name);
+
+    Boolean existsByStudentId(String studentId);
 }
