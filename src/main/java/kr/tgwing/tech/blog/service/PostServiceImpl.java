@@ -41,7 +41,7 @@ public class PostServiceImpl implements PostService {
     public PostDto getPost(Long postId) // 특정 게시글 가져오기
     {
         // 입력된 postId에 해당하는 글 찾기
-        Optional<PostEntity> postEntityInOp = postRepository.findById(postId); // 없는 Id 입력 시 500error... 예외처리해결
+        Optional<PostEntity> postEntityInOp = postRepository.findById(postId);
         PostEntity postEntity = postEntityInOp.orElseThrow(PostNotFoundException::new);
 
         return toDto(postEntity);
@@ -88,9 +88,11 @@ public class PostServiceImpl implements PostService {
         Optional<UserEntity> userById = userRepository.findById(postEntity.getWriter());
         UserEntity userEntity = userById.orElseThrow(UserNotFoundException::new); // 유저 notfound 예외처리
 
+        log.info("util학번 = {}", utilStudentId);
+        log.info("user학번 = {}", userEntity.getStudentId());
 
         // DB 내 게시글 작성자 - 요청된 유저 ID 동일 & DB 내 게시글 작성자 - 요청된 게시글 작성자 동일
-        if(!Objects.equals(userEntity.getStudentId(), utilStudentId)) {
+        if(Objects.equals(userEntity.getStudentId(), utilStudentId)) {
             log.info("학번 일치 - 작성자 확인");
             postEntity.updateContent(postDto); // entity 정보 수정
 
@@ -112,7 +114,7 @@ public class PostServiceImpl implements PostService {
         UserEntity userEntity = userById.orElseThrow(UserNotFoundException::new);
 
         // 해당 URL을 요청한 사람이 공지 작성자인 경우에만 삭제 가능
-        if(!Objects.equals(userEntity.getStudentId(), utilStudentId)) {
+        if(Objects.equals(userEntity.getStudentId(), utilStudentId)) {
             log.info("학번 일치 - 작성자 확인");
             postRepository.deleteById(postId);
         } else {
