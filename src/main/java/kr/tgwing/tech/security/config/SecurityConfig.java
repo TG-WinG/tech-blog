@@ -1,6 +1,5 @@
 package kr.tgwing.tech.security.config;
 
-
 import kr.tgwing.tech.security.filter.JwtFilter;
 import kr.tgwing.tech.security.util.JwtUtil;
 import kr.tgwing.tech.security.filter.LoginFilter;
@@ -8,6 +7,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -46,6 +46,7 @@ public class SecurityConfig {
             "/api-docs/json/swagger-config",
             "/api-docs/json"
     };
+
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         log.info("WebSecurity......................");
@@ -63,6 +64,7 @@ public class SecurityConfig {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
     }
+
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
 
@@ -77,38 +79,39 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // 토큰 사용하기에 csrf 불가능
                 .cors(AbstractHttpConfigurer::disable)
 
-//                .formLogin(Customizer.withDefaults())// -> 로그인 화면 구성되면 사용해야함.
-//                .logout((logout) -> logout
-//                        .clearAuthentication(true))
+                // .formLogin(Customizer.withDefaults())// -> 로그인 화면 구성되면 사용해야함.
+                // .logout((logout) -> logout
+                // .clearAuthentication(true))
 
                 .authorizeHttpRequests(request -> request
-
                         .requestMatchers(PERMIT_URL_ARRAY)
                         .permitAll()
                         .requestMatchers("/user/**", "/login")
                         .permitAll()
                         .requestMatchers("/admin/**")
                         .hasRole("ADMIN")
-                        .anyRequest().authenticated()
-                )
+                        .requestMatchers(HttpMethod.GET, "/file/**")
+                        .permitAll()
+                        .anyRequest().authenticated())
                 .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
+                        UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }
 
-//    @Bean
-//    @ConditionalOnMissingBean(UserDetailsService.class)
-//    InMemoryUserDetailsManager inMemoryUserDetailsManager() {
-//        User.UserBuilder users = User.withDefaultPasswordEncoder();
-//        UserDetails admin = users
-//                .username("admin")
-//                .password("admin")
-//                .roles("ADMIN")
-//                .build();
-//        return new InMemoryUserDetailsManager(admin);
-//    }
+    // @Bean
+    // @ConditionalOnMissingBean(UserDetailsService.class)
+    // InMemoryUserDetailsManager inMemoryUserDetailsManager() {
+    // User.UserBuilder users = User.withDefaultPasswordEncoder();
+    // UserDetails admin = users
+    // .username("admin")
+    // .password("admin")
+    // .roles("ADMIN")
+    // .build();
+    // return new InMemoryUserDetailsManager(admin);
+    // }
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
