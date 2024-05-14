@@ -3,8 +3,15 @@ package kr.tgwing.tech.blog.service;
 
 import kr.tgwing.tech.blog.dto.PostDto;
 import kr.tgwing.tech.blog.entity.PostEntity;
+import kr.tgwing.tech.blog.exception.PostNotFoundException;
+import kr.tgwing.tech.blog.exception.UserIsNotPostWriterException;
+import kr.tgwing.tech.blog.exception.UserNotFoundException;
+import kr.tgwing.tech.blog.exception.WrongPostRequestException;
 import kr.tgwing.tech.blog.repository.PostRepository;
+import kr.tgwing.tech.user.entity.UserEntity;
+import kr.tgwing.tech.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -15,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -24,18 +32,17 @@ import static kr.tgwing.tech.blog.entity.PostEntity.toDto;
 @Service
 @Transactional
 @RequiredArgsConstructor
+@Slf4j
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
-//    private final UserRepository userRepository;
-//    private final AuthService authService;
+    private final UserRepository userRepository;
 
     @Override
     public PostDto getPost(Long postId) // 특정 게시글 가져오기
     {
         // 입력된 postId에 해당하는 글 찾기
-        Optional<PostEntity> postEntityInOp = postRepository.findById(postId);
-//        PostEntity postEntity = postEntityInOp.orElseThrow(PostNotFoundException::new); 예외처리 생략
-        PostEntity postEntity = postEntityInOp.orElseThrow();
+        Optional<PostEntity> postEntityInOp = postRepository.findById(postId); // 없는 Id 입력 시 500error... 예외처리해결
+        PostEntity postEntity = postEntityInOp.orElseThrow(PostNotFoundException::new);
 
         return toDto(postEntity);
     }
@@ -50,15 +57,17 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostDto createPost(PostDto requestDto, String token)  // 공지 생성하기
+    public PostDto createPost(PostDto requestDto, String utilStudentId)  // 공지 생성하기
     {
         // 글을 작성할 user 조회
-//        Optional<UserEntity> userById = userRepository.findById(requestDto.getWriter());
+        Optional<UserEntity> userById = userRepository.findById(requestDto.getWriter());
 //        // userEntity를 받아오지 못한 경우 - 회원을 찾을 수 없음 (Exception)
-//        UserEntity userEntity = userById.orElseThrow(UserNotFoundException::new);
+        UserEntity userEntity = userById.orElseThrow(UserNotFoundException::new);
 
-        String jwt = token.split(" ")[1];
-//        String studentId = authService.extractStudentId(jwt);
+        // 현재 사용자와 요청 시 들어온 writer가 같은지 확인
+        if (!Objects.equals(userEntity.getStudentId(), utilStudentId)) {
+            throw new WrongPostRequestException();
+        }
 
         // entity에는 저장된 썸네일의 uri만 추가로 넣어서 저장
         PostEntity postEntity = toEntity(requestDto);
@@ -68,47 +77,53 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostDto updatePost(PostDto postDto, Long userId, Long postId, String token) // 게시글 수정하기
+    public PostDto updatePost(PostDto postDto, Long postId, String utilStudentId) // 게시글 수정하기
     {
         Optional<PostEntity> postById = postRepository.findById(postId);
-//        PostEntity postEntity = postById.orElseThrow(PostNotFoundException::new);
-        PostEntity postEntity = postById.orElseThrow();
-
-        String jwt = token.split(" ")[1];
+        PostEntity postEntity = postById.orElseThrow(PostNotFoundException::new);
 
         // 해당 URL을 요청자 ==  공지 작성자 일 때에만 수정 가능
         // 수정 목록 : title, content, thumbnail
 
+        Optional<UserEntity> userById = userRepository.findById(postEntity.getWriter());
+        UserEntity userEntity = userById.orElseThrow(UserNotFoundException::new); // 유저 notfound 예외처리
+
+
         // DB 내 게시글 작성자 - 요청된 유저 ID 동일 & DB 내 게시글 작성자 - 요청된 게시글 작성자 동일
-        if(postEntity.getWriter() == userId && postEntity.getWriter() == postDto.getWriter()) {
-            System.out.println("유저 정보 일치");
-//            postEntity.updateContent(postDto); // 수정 요
+        if(!Objects.equals(userEntity.getStudentId(), utilStudentId)) {
+            log.info("학번 일치 - 작성자 확인");
+            postEntity.updateContent(postDto); // entity 정보 수정
 
             PostEntity savedEntity = postRepository.save(postEntity);
             return toDto(savedEntity);
         }
         else { // 공지 작성자가 아닌 경우 -- 수정 불가능
-            System.out.println("유저 정보 불일치 - 작성자가 아니므로 수정 불가능");
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            log.info("학번 불일치 - 작성자가 아니므로 수정 불가능");
+            throw new UserIsNotPostWriterException();
         }
     }
     @Override
-    public void deletePost(Long userId, Long postId) // 게시글 삭제하기
+    public void deletePost(Long postId, String utilStudentId) // 게시글 삭제하기
     {
         Optional<PostEntity> postById = postRepository.findById(postId);
-        PostEntity postEntity = postById.orElseThrow();
+        PostEntity postEntity = postById.orElseThrow(PostNotFoundException::new);
+
+        Optional<UserEntity> userById = userRepository.findById(postEntity.getWriter());
+        UserEntity userEntity = userById.orElseThrow(UserNotFoundException::new);
 
         // 해당 URL을 요청한 사람이 공지 작성자인 경우에만 삭제 가능
-        if(postEntity.getWriter() == userId) {
+        if(!Objects.equals(userEntity.getStudentId(), utilStudentId)) {
+            log.info("학번 일치 - 작성자 확인");
             postRepository.deleteById(postId);
         } else {
-            System.out.println("삭제 불가 - 작성자가 아님");
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN); }
+            log.info("학번 불일치 - 작성자가 아니므로 삭제 불가능");
+            throw new UserIsNotPostWriterException(); }
     }
 
     @Override
-    public Page<PostDto> getPostsInPage(String text, int page, Pageable pageable) {
+    public Page<PostDto> getPostsInPage(String text, Pageable pageable) {
         int size = pageable.getPageSize();
+        int page = pageable.getPageNumber();
         long total = 0L;
         Page<PostEntity> postPage = null;
 
@@ -124,23 +139,23 @@ public class PostServiceImpl implements PostService {
         else { // - 파라미터로 검색된 블로그만 걸러서 반환
             postPage = searchPosts(text, pageRequest);
             total = postRepository.countByTitleContains(text);
-            System.out.println("total = " + total);
+            log.info("total = " + total);
         }
 
-        if(!(total > page * size)) {throw new ResponseStatusException(HttpStatus.BAD_REQUEST); }
+        if(!(total > page * size)) {throw new WrongPostRequestException(); }
         // 이후 ExceptionHandler 정의 필요
 
         if (postPage.isEmpty()) {
-            System.out.println("조회 불가능");
+            log.info("page 조회 불가");
         }
 
         // stream이 비어있는 경우
-        postPage.stream().findFirst().orElseThrow(()-> new ResponseStatusException(HttpStatus.NO_CONTENT));
+        postPage.stream().findFirst().orElseThrow(()-> new PostNotFoundException());
 
         // page가 총 데이터 건수를 초과하는 경우
         long totalCount = postPage.getTotalElements();
         long requestCount = (postPage.getTotalPages() - 1) * postPage.getSize();
-        if(!(totalCount > requestCount)) { throw new ResponseStatusException(HttpStatus.BAD_REQUEST); }
+        if(!(totalCount > requestCount)) { throw new WrongPostRequestException(); }
 
         // Entity -> Dto 변환 - Dto 담은 page 반환
         List<PostEntity> posts = postPage.getContent();
