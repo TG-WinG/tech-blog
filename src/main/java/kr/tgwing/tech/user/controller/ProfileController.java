@@ -52,9 +52,5 @@ public class ProfileController {
         return ResponseEntity.ok(ApiResponse.delete(remove));
 
     }
-
-
 //    @GetMapping("/myPosting")
-
-
 }

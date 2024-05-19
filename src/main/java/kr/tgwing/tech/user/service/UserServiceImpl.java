@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
         UserEntity data = UserDTO.toUserEntity(userDTO);
 
         data.setPassword(bCryptPasswordEncoder.encode(password)); // 비밀번호 암호화
-        data.setRole("ROLE_USER"); // register를 통해서 회원가입하는 유저들은 모두 USER역할
+//        data.setRole("ROLE_USER"); // register를 통해서 회원가입하는 유저들은 모두 USER역할
 
         UserEntity save = userRepository.save(data);
 
