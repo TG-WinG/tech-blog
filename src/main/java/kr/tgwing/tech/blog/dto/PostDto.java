@@ -10,6 +10,7 @@ import lombok.Data;
 @Builder
 @AllArgsConstructor
 public class PostDto {
+    private Long id;
     private Long writer;
     private String title;
     private String content;
