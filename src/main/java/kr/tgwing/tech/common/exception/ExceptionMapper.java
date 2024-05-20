@@ -1,6 +1,7 @@
 package kr.tgwing.tech.common.exception;
 
 import kr.tgwing.tech.blog.exception.*;
+import kr.tgwing.tech.reply.exception.*;
 import kr.tgwing.tech.user.exception.*;
 import org.springframework.http.HttpStatus;
 
@@ -14,7 +15,7 @@ public class ExceptionMapper { // 예외 객체 -> 예외 상태로 바꿔주는
     static {
         setUpUserException();
         setUpPostException();
-//        setUpReplyException();
+        setUpReplyException();
     }
 
     private static void setUpUserException() {
@@ -43,6 +44,18 @@ public class ExceptionMapper { // 예외 객체 -> 예외 상태로 바꿔주는
                 ExceptionSituation.of("블로그 수정(삭제) 권한이 존재하지 않습니다", HttpStatus.FORBIDDEN, 4404));
         mapper.put(WrongPostRequestException.class,
                 ExceptionSituation.of("요청에 잘못된 정보가 포함되어 있습니다", HttpStatus.BAD_REQUEST, 4406));
+    }
+    private static void setUpReplyException() {
+        mapper.put(CantFindWriterException.class,
+                ExceptionSituation.of("요청된 댓글의 작성자를 찾을 수 없습니다", HttpStatus.NOT_FOUND, 5400));
+        mapper.put(ReplyCantNullableException.class,
+                ExceptionSituation.of("댓글 내용이 존재하지 않습니다", HttpStatus.BAD_REQUEST, 5401));
+        mapper.put(UserIsNotReplyWriterException.class,
+                ExceptionSituation.of("댓글 삭제 권한이 존재하지 않습니다", HttpStatus.FORBIDDEN, 5402));
+        mapper.put(InappropriatePostReplyRelationException.class,
+                ExceptionSituation.of("요청된 댓글과 블로그가 상응하지 않습니다", HttpStatus.CONFLICT, 5403));
+        mapper.put(RepliesNotFoundException.class,
+                ExceptionSituation.of("댓글을 찾을 수 없습니다", HttpStatus.NOT_FOUND, 5404));
     }
 
 
