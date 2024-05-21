@@ -23,6 +23,10 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     @Query("UPDATE UserEntity U SET U.name = :name, U.phoneNumber = :phoneNumber, U.profilePicture = :profilePicture WHERE U.studentId = :id")
     void changeUser(String id, String name, String phoneNumber, String profilePicture);
 
+    @Query("SELECT U FROM UserEntity U WHERE U.studentId = :studentId")
+    UserEntity getEntity(String studentId);
+
     @Query("SELECT u FROM UserEntity u WHERE u.role IS NULL")
     List<UserEntity> findWaitingMember();
 }
+
