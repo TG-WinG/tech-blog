@@ -53,4 +53,8 @@ public class PostEntity extends BaseEntity {
         this.content = postDto.getContent();
         this.thumbnail = postDto.getThumbnail();
     }
+
+    public void setWriter(Long writer) {
+        this.writer = writer;
+    }
 }

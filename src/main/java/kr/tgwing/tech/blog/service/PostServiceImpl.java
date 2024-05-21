@@ -1,6 +1,7 @@
 package kr.tgwing.tech.blog.service;
 
 
+import kr.tgwing.tech.blog.dto.PostCreationDto;
 import kr.tgwing.tech.blog.dto.PostDto;
 import kr.tgwing.tech.blog.entity.PostEntity;
 import kr.tgwing.tech.blog.exception.PostNotFoundException;
@@ -55,20 +56,20 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostDto createPost(PostDto requestDto, String utilStudentId)  // 공지 생성하기
+    public PostDto createPost(PostCreationDto requestDto, String utilStudentId)  // 공지 생성하기
     {
         // 글을 작성할 user 조회
-        Optional<UserEntity> userById = userRepository.findById(requestDto.getWriter());
-//        // userEntity를 받아오지 못한 경우 - 회원을 찾을 수 없음 (Exception)
-        UserEntity userEntity = userById.orElseThrow(UserNotFoundException::new);
+        Optional<UserEntity> byStudentId = userRepository.findByStudentId(utilStudentId);
+        UserEntity userEntity = byStudentId.orElseThrow(UserNotFoundException::new);
 
         // 현재 사용자와 요청 시 들어온 writer가 같은지 확인
         if (!Objects.equals(userEntity.getStudentId(), utilStudentId)) {
             throw new WrongPostRequestException();
         }
 
-        // entity에는 저장된 썸네일의 uri만 추가로 넣어서 저장
-        PostEntity postEntity = toEntity(requestDto);
+        // entity에 작성자 Id 설정해서 저장하기
+        PostEntity postEntity = PostCreationDto.toEntity(requestDto);
+        postEntity.setWriter(userEntity.getId());
         PostEntity savedEntity = postRepository.save(postEntity);
 
         return toDto(savedEntity);
