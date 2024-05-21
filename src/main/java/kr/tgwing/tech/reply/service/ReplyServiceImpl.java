@@ -1,23 +1,27 @@
 package kr.tgwing.tech.reply.service;
 
 import kr.tgwing.tech.blog.entity.PostEntity;
+import kr.tgwing.tech.blog.exception.PostNotFoundException;
 import kr.tgwing.tech.blog.repository.PostRepository;
+import kr.tgwing.tech.reply.dto.ReplyCreationDto;
 import kr.tgwing.tech.reply.dto.ReplyDto;
 import kr.tgwing.tech.reply.entity.ReplyEntity;
+import kr.tgwing.tech.reply.exception.CantFindWriterException;
+import kr.tgwing.tech.reply.exception.InappropriatePostReplyRelationException;
+import kr.tgwing.tech.reply.exception.RepliesNotFoundException;
+import kr.tgwing.tech.reply.exception.UserIsNotReplyWriterException;
 import kr.tgwing.tech.reply.repository.ReplyRepository;
-import kr.tgwing.tech.security.util.JwtUtil;
 import kr.tgwing.tech.user.entity.UserEntity;
+import kr.tgwing.tech.user.exception.UserNotFoundException;
 import kr.tgwing.tech.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Objects;
@@ -28,6 +32,7 @@ import static kr.tgwing.tech.reply.entity.ReplyEntity.toDto;
 
 @Service
 @Transactional
+@Slf4j
 @RequiredArgsConstructor
 public class ReplyServiceImpl implements ReplyService{
     private final PostRepository postRepository;
@@ -35,14 +40,14 @@ public class ReplyServiceImpl implements ReplyService{
     private final UserRepository userRepository;
 
     public List<ReplyDto> getAll(Long postId) {
-//        Optional<PostEntity> postById = postRepository.findById(postId);
-//        PostEntity post = postById.orElseThrow();
+        Optional<PostEntity> postById = postRepository.findById(postId);
+        PostEntity post = postById.orElseThrow(PostNotFoundException::new);
 
         List<ReplyEntity> replies = replyRepository.findAllByPost(postId);
 
         if (replies.isEmpty()) {
-//            System.out.println("댓글 없음");
-//            throw new ReplyNotFoundException();
+            log.info("댓글 없음");
+            throw new RepliesNotFoundException();
         }
         else {
 //            // 확인차 남기는 로그
@@ -52,15 +57,17 @@ public class ReplyServiceImpl implements ReplyService{
             List<ReplyDto> dtos = replies.stream().map(replyEntity -> toDto(replyEntity)).collect(Collectors.toList());
             return dtos;
         }
-        return null;
     }
 
-    public ReplyDto post(ReplyDto reqDto, Long postId) {
+    public ReplyDto post(ReplyCreationDto reqDto, Long postId, String utilStudentId) {
 
-        PostEntity post = postRepository.findById(postId).orElseThrow();
-//        PostEntity post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
+        Optional<UserEntity> byStudentId = userRepository.findByStudentId(utilStudentId);
+        UserEntity userEntity = byStudentId.orElseThrow(UserNotFoundException::new);
 
-        ReplyEntity replyEntity = ReplyDto.toEntity(reqDto, postId);
+        PostEntity post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
+
+        ReplyEntity replyEntity = ReplyCreationDto.toEntity(reqDto, post.getId());
+        replyEntity.setWriter(userEntity.getId());
 
         ReplyEntity savedEntity = replyRepository.save(replyEntity);
         ReplyDto dto = toDto(savedEntity);
@@ -68,53 +75,38 @@ public class ReplyServiceImpl implements ReplyService{
         return dto;
     }
 
-    public ResponseEntity delete(Long postId, ReplyDto reqDto, String tokenStudentId) {
+    public void delete(Long postId, ReplyDto reqDto, String utilStudentId) {
 
         // 요청으로 들어온 post의 id = postId
-
         // requestDto - postId, writer, description, time
+        // utilStudentId - 토큰 발급자 (현 로그인 사용자)
 
-        // tokenStudentId - 토큰 발급자 (현 로그인 사용자)
+        Optional<ReplyEntity> replyById = replyRepository.findById(reqDto.getId()); // 삭제 요청된 댓글엔티티 찾기
+        ReplyEntity replyEntity = replyById.orElseThrow(RepliesNotFoundException::new); // 없으면 그런 댓글 없음 throw
 
-
-        /**
-         * reqDto.getId() -> 레포지토리에서 엔티티 찾기 == ReplyEntity
-         * replyEntity -> getPost() - 댓글이 의존하고 있는 게시글의 아이디 가졍기
-         * replyEntity.getPost() != postId이면 잘못된 주소.
-         *
-         * token에서 꺼낸 studentId (학번)
-         * reqDto.getwriter() -> 레포지토리에서 엔티티 찾기 == UserEntity
-         * userEntity.studentId != token.studentId 이면 삭제 권한 없음
-         */
-
-        Optional<ReplyEntity> replyById = replyRepository.findById(reqDto.getId());
-        ReplyEntity replyEntity = replyById.orElseThrow();
-//        ReplyEntity replyEntity = replyById.orElseThrow(ReplyNotFoundException::new);
-
-        Optional<UserEntity> userById = userRepository.findById(reqDto.getWriter());
-        UserEntity userEntity = userById.orElseThrow();
-//        UserEntity userEntity = userById.orElseThrow(UserNotFoundException::new);
+        Optional<UserEntity> userById = userRepository.findById(reqDto.getWriter()); // 삭제 요청된 댓글의 작성자 찾기
+        UserEntity userEntity = userById.orElseThrow(CantFindWriterException::new); // 없으면 그런 작성자 없음 throw
 
 
-        if(Objects.equals(userEntity.getStudentId(), tokenStudentId)) { // 작성자, 수정자 확인
+        if(Objects.equals(userEntity.getStudentId(), utilStudentId)) { // 작성자, 수정자 일치 확인
 
-            if(Objects.equals(replyEntity.getPost(), postId)) {
-                System.out.println("-----  Delete Reply  ------");
+            if(Objects.equals(replyEntity.getPost(), postId)) { // 요청된 댓글이 달린 블로그id, url로 요청된 블로그id 일치 확인
+                log.info("-----  User id, Post id corresponding, Delete Reply  ------");
                 replyRepository.delete(replyEntity);
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-            else {
-                System.out.println("요청된 게시글 ID와 삭제를 원하는 댓글이 속한 게시글 ID이 서로 다름");
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            else { // post id 불일치 - url이 잘못된 경우
+                log.info("요청된 블로그의 ID와 삭제를 원하는 댓글이 속한 블로그 ID가 서로 다름");
+                throw new InappropriatePostReplyRelationException();
             }
         }
         else {
-            System.out.println("URL 요청자와 공지 작성자가 다름");
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            log.info("현재 유저는 댓글 작성자가 아님 - 삭제 불가");
+            throw new UserIsNotReplyWriterException();
         }
     }
 
-    public Page<ReplyDto> findRepliesInPage(int page, int size, Pageable pageable, Long postId) {
+    public Page<ReplyDto> findRepliesInPage(int size, Pageable pageable, Long postId) {
+        int page = pageable.getPageNumber();
         PageRequest pageRequest = PageRequest.of(page, size);
 
         Page<ReplyEntity> replyPage = replyRepository.findAllByPostOrderByModDateDesc(pageRequest, postId);

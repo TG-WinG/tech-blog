@@ -41,4 +41,8 @@ public class ReplyEntity extends BaseEntity {
                 .build();
     }
 
+    public void setWriter(Long writer) {
+        this.writer = writer;
+    }
+
 }
