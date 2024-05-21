@@ -37,7 +37,7 @@ public class JwtUtil {
                 .getBody().getExpiration().before(new Date());
     }
 
-    public String createJwt(String studentId, String role, Long expiredTime) {
+    public String createJwt(String studentId, String profilePicture, String role, Long expiredTime) {
         // name : token에 들어있는 것으로 사용함
         // secretKey : 서명
 
@@ -45,6 +45,7 @@ public class JwtUtil {
         // claim안에 내가 담고자 하는 정보 담아두기 가능함.
 
         claims.setSubject(studentId); //jwt 주체를 사용자 이름으로 설정
+        claims.put("profilePicture", profilePicture);
         claims.put("role", role); // 내용
 
 
