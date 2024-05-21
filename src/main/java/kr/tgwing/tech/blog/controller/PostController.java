@@ -1,5 +1,6 @@
 package kr.tgwing.tech.blog.controller;
 
+import kr.tgwing.tech.blog.dto.PostCreationDto;
 import kr.tgwing.tech.blog.dto.PostDto;
 import kr.tgwing.tech.blog.exception.PathHasNoPostIdException;
 import kr.tgwing.tech.blog.service.PostServiceImpl;
@@ -61,7 +62,7 @@ public class PostController {
     }
 
     @PostMapping("/blog") // 블로그 작성 - POST, /tgwing.kr/blog/post
-    public ResponseEntity<PostDto> post(@RequestBody PostDto requestDto,
+    public ResponseEntity<PostDto> post(@RequestBody PostCreationDto requestDto,
                                         Principal principal)
     {
         System.out.println("-- Post new post --");
