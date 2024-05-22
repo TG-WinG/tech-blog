@@ -1,8 +1,7 @@
 package kr.tgwing.tech.project.dto;
 
+import jakarta.validation.constraints.NotNull;
 import kr.tgwing.tech.project.domain.Enum.DevRole;
-import kr.tgwing.tech.project.domain.ParticipantEntity;
-import kr.tgwing.tech.project.domain.ProjectEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -11,26 +10,23 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ParticipantDTO {
+
+    @NotNull
     private DevRole devRole;
-    private String username;
+    @NotNull
+    private String studentId;
+    @NotNull
     private String major;
-    private ProjectEntity project;
+    @NotNull
+    private String name;
 
     @Builder
-    public ParticipantDTO(DevRole devRole, String username, String studentId, String major, ProjectEntity project) {
+    public ParticipantDTO(DevRole devRole, String studentId, String major, String name) {
         this.devRole = devRole;
-        this.username = username;
+        this.studentId = studentId;
         this.major = major;
-        this.project = project;
+        this.name = name;
     }
 
-    public static ParticipantEntity toParticipantEntity(ParticipantDTO participantDTO){
-        return ParticipantEntity.builder()
-                .devRole(participantDTO.getDevRole())
-                .username(participantDTO.getUsername())
-                .major(participantDTO.getMajor())
-                .project(participantDTO.getProject())
-                .build();
-    }
 
 }

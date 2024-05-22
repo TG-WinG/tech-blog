@@ -1,5 +1,6 @@
 package kr.tgwing.tech.project.dto;
 
+import jakarta.validation.constraints.NotNull;
 import kr.tgwing.tech.project.domain.LinkEntity;
 import kr.tgwing.tech.project.domain.ProjectEntity;
 import lombok.AccessLevel;
@@ -10,8 +11,11 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LinkDTO {
+    @NotNull
     private String url;
+    @NotNull
     private String description;
+    @NotNull
     private ProjectEntity project;
 
     @Builder
@@ -21,11 +25,4 @@ public class LinkDTO {
         this.project = project;
     }
 
-    public static LinkEntity toLinkEntity(LinkDTO linkDTO){
-        return LinkEntity.builder()
-                .url(linkDTO.getUrl())
-                .description(linkDTO.getDescription())
-                .project(linkDTO.getProject())
-                .build();
-    }
 }

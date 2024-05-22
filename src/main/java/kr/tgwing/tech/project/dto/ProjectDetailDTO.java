@@ -1,5 +1,6 @@
 package kr.tgwing.tech.project.dto;
 
+import jakarta.validation.constraints.NotNull;
 import kr.tgwing.tech.project.domain.LinkEntity;
 import kr.tgwing.tech.project.domain.ParticipantEntity;
 import kr.tgwing.tech.project.domain.ProjectEntity;
@@ -15,23 +16,28 @@ import java.util.List;
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProjectDetailDTO {
-    private Long id;
+    @NotNull
     private String title;
+    @NotNull
     private String description;
+    @NotNull
     private LocalDateTime start;
+    @NotNull
     private LocalDateTime end;
+    @NotNull
     private String thumbnail;
+    @NotNull
     private String devStatus;
+    @NotNull
     private String devType;
 
-    // 참여인원에 대해 ParticipateEntity;
+    @NotNull
     private List<ParticipantEntity> participants = new ArrayList<>();
-    // link
+    @NotNull
     private List<LinkEntity> links = new ArrayList<>();
 
     @Builder
-    public ProjectDetailDTO(Long id, String title, String description, LocalDateTime start, LocalDateTime end, String thumbnail, String devStatus, String devType, List<ParticipantEntity> participants, List<LinkEntity> links) {
-        this.id = id;
+    public ProjectDetailDTO(String title, String description, LocalDateTime start, LocalDateTime end, String thumbnail, String devStatus, String devType, List<ParticipantEntity> participants, List<LinkEntity> links) {
         this.title = title;
         this.description = description;
         this.start = start;
@@ -45,7 +51,6 @@ public class ProjectDetailDTO {
 
     public static ProjectEntity toEntity(ProjectDetailDTO projectDetailDTO){
         return ProjectEntity.builder()
-                .id(projectDetailDTO.getId())
                 .title(projectDetailDTO.getTitle())
                 .description(projectDetailDTO.getDescription())
                 .start(projectDetailDTO.getStart())

@@ -1,10 +1,13 @@
 package kr.tgwing.tech.project.dto;
 
+import jakarta.persistence.Column;
+import jakarta.validation.constraints.NotNull;
 import kr.tgwing.tech.project.domain.ProjectEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,18 +16,34 @@ import java.util.List;
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProjectCreateDTO {
+    @NotNull
+    @Length(min = 1, max = 25)
     private String title;
+
+    @NotNull
     private String description;
+
+    @NotNull
     private LocalDateTime start;
+
+    @NotNull
     private LocalDateTime end;
+
     private String thumbnail;
+
+    @NotNull
+    @Length(min = 1, max = 25)
     private String devStatus;
+
+
+    @NotNull
+    @Length(min = 1, max = 25)
     private String devType;
-    private List<ParticipantDTO> participants = new ArrayList<>();
-    private List<LinkDTO> links = new ArrayList<>();
+    private List<ParticipantDTO> participantDTOS = new ArrayList<>();
+    private List<LinkDTO> linkDTOS = new ArrayList<>();
 
     @Builder
-    public ProjectCreateDTO(String title, String description, LocalDateTime start, LocalDateTime end, String thumbnail, String devStatus, String devType, List<ParticipantDTO> participants, List<LinkDTO> links) {
+    public ProjectCreateDTO(String title, String description, LocalDateTime start, LocalDateTime end, String thumbnail, String devStatus, String devType, List<ParticipantDTO> participantDTOS, List<LinkDTO> linkDTOS) {
         this.title = title;
         this.description = description;
         this.start = start;
@@ -32,26 +51,9 @@ public class ProjectCreateDTO {
         this.thumbnail = thumbnail;
         this.devStatus = devStatus;
         this.devType = devType;
-        this.links = links;
-        this.participants = participants;
+        this.linkDTOS = linkDTOS;
+        this.participantDTOS = participantDTOS;
     }
 
-    public static ProjectEntity toEntity(ProjectCreateDTO projectCreateDTO){
 
-        return ProjectEntity.builder()
-                .title(projectCreateDTO.getTitle())
-                .description(projectCreateDTO.getDescription())
-                .start(projectCreateDTO.getStart())
-                .end(projectCreateDTO.getEnd())
-                .thumbnail(projectCreateDTO.getThumbnail())
-                .devStatus(projectCreateDTO.getDevStatus())
-                .devType(projectCreateDTO.getDevType())
-                .links(projectCreateDTO.getLinks().stream()
-                        .map(LinkDTO::toLinkEntity)
-                        .toList())
-                .participants(projectCreateDTO.getParticipants().stream()
-                        .map(ParticipantDTO::toParticipantEntity)
-                        .toList())
-                .build();
-    }
 }

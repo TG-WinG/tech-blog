@@ -2,10 +2,13 @@ package kr.tgwing.tech.user.entity;
 
 import jakarta.persistence.*;
 import kr.tgwing.tech.common.BaseEntity;
+import kr.tgwing.tech.project.domain.ParticipantEntity;
 import lombok.*;
 
 import java.io.Serializable;
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -40,4 +43,7 @@ public class UserEntity extends BaseEntity implements Serializable {
     private String role;
 
     private String profilePicture;
+
+    @OneToMany(mappedBy = "userEntity",cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<ParticipantEntity> participants = new ArrayList<>();
 }

@@ -4,24 +4,19 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import kr.tgwing.tech.common.BaseEntity;
 import kr.tgwing.tech.project.domain.Enum.DevRole;
-import kr.tgwing.tech.user.entity.UserEntity;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.DynamicInsert;
-import org.springframework.validation.annotation.Validated;
+import kr.tgwing.tech.user.entity.OutsiderEntity;
+import lombok.*;
 
 @Entity
 @Getter
 @Builder
-@DynamicInsert
+@Setter
 @NoArgsConstructor
-@Validated
-@Table(name= "participant")
-public class ParticipantEntity extends BaseEntity {
+@Table(name = "outsider_participant")
+public class OutsiderParticipantEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="participant_id")
+    @Column(name="outsider_participant_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -34,19 +29,19 @@ public class ParticipantEntity extends BaseEntity {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="user_id")
-    private UserEntity userEntity;
+    @JoinColumn(name="outsider_id")
+    private OutsiderEntity outsiderEntity;
 
     @NotNull
     private String major;
 
 
     @Builder
-    public ParticipantEntity(Long id, ProjectEntity project, DevRole devRole, UserEntity userEntity, String major) {
+    public OutsiderParticipantEntity(Long id, ProjectEntity project, DevRole devRole, OutsiderEntity outsiderEntity, String major) {
         this.id = id;
         this.project = project;
         this.devRole = devRole;
-        this.userEntity = userEntity;
+        this.outsiderEntity = outsiderEntity;
         this.major = major;
     }
 }

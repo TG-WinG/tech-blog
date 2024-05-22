@@ -1,6 +1,7 @@
 package kr.tgwing.tech.project.respository.project;
 
 import jakarta.persistence.EntityManager;
+import kr.tgwing.tech.project.domain.ProjectEntity;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -9,5 +10,4 @@ import org.springframework.stereotype.Repository;
 @Slf4j
 @RequiredArgsConstructor
 public class CustomProjectRepository {
-    private final EntityManager em;
 }

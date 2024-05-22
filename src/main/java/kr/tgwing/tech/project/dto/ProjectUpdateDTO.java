@@ -1,5 +1,7 @@
 package kr.tgwing.tech.project.dto;
 
+import jakarta.persistence.Column;
+import jakarta.validation.constraints.NotNull;
 import kr.tgwing.tech.project.domain.LinkEntity;
 import kr.tgwing.tech.project.domain.ParticipantEntity;
 import kr.tgwing.tech.project.domain.ProjectEntity;
@@ -7,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,18 +18,34 @@ import java.util.List;
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProjectUpdateDTO {
+
+    @Length(min = 1, max = 25)
     private String title;
+
+
     private String description;
+
+
     private LocalDateTime start;
+
+
     private LocalDateTime end;
+
     private String thumbnail;
+
+
+    @Length(max = 25)
     private String devStatus;
+
+    @Length(max = 25)
     private String devType;
-    private List<ParticipantEntity> participants = new ArrayList<>();
-    private List<LinkEntity> links = new ArrayList<>();
+
+    private List<ParticipantDTO> participantDTOS = new ArrayList<>();
+
+    private List<LinkDTO> linkDTOS = new ArrayList<>();
 
     @Builder
-    public ProjectUpdateDTO(String title, String description, LocalDateTime start, LocalDateTime end, String thumbnail, String devStatus, String devType, List<ParticipantEntity> participants, List<LinkEntity> links) {
+    public ProjectUpdateDTO(String title, String description, LocalDateTime start, LocalDateTime end, String thumbnail, String devStatus, String devType, List<ParticipantDTO> participantDTOS, List<LinkDTO> linkDTOS) {
         this.title = title;
         this.description = description;
         this.start = start;
@@ -34,20 +53,9 @@ public class ProjectUpdateDTO {
         this.thumbnail = thumbnail;
         this.devStatus = devStatus;
         this.devType = devType;
-        this.participants = participants;
-        this.links = links;
+        this.linkDTOS = linkDTOS;
+        this.participantDTOS = participantDTOS;
     }
 
-    public static ProjectEntity toEntity(ProjectUpdateDTO projectUpdateDTO){
-        return ProjectEntity.builder()
-                .title(projectUpdateDTO.getTitle())
-                .description(projectUpdateDTO.getDescription())
-                .start(projectUpdateDTO.getStart())
-                .end(projectUpdateDTO.getEnd())
-                .devStatus(projectUpdateDTO.getDevStatus())
-                .devType(projectUpdateDTO.getDevType())
-                .participants(projectUpdateDTO.getParticipants())
-                .links(projectUpdateDTO.getLinks())
-                .build();
-    }
+
 }
