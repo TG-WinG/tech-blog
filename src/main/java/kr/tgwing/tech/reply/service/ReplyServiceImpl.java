@@ -61,13 +61,14 @@ public class ReplyServiceImpl implements ReplyService{
 
     public ReplyDto post(ReplyCreationDto reqDto, Long postId, String utilStudentId) {
 
-        Optional<UserEntity> byStudentId = userRepository.findByStudentId(utilStudentId);
-        UserEntity userEntity = byStudentId.orElseThrow(UserNotFoundException::new);
-
+        // 현재 로그인한 유저 정보 가져오기
+        UserEntity userEntity = userRepository.findByStudentId(utilStudentId).orElseThrow(UserNotFoundException::new);
+        // 요청 url의 블로그 정보 가져오기
         PostEntity post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
 
+        // 요청 dto에 담긴 댓글 내용 + 작성된 블로그 정보 포함해서 엔티티 생성
         ReplyEntity replyEntity = ReplyCreationDto.toEntity(reqDto, post.getId());
-        replyEntity.setWriter(userEntity.getId());
+        replyEntity.setWriter(userEntity.getId()); // 엔티티의 writer 항목을 현재 로그인된 유저 id로 적용
 
         ReplyEntity savedEntity = replyRepository.save(replyEntity);
         ReplyDto dto = toDto(savedEntity);
