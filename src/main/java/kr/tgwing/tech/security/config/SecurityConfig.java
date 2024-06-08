@@ -92,6 +92,10 @@ public class SecurityConfig {
                         .hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/file/**")
                         .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/blog/**")
+                        .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/projects/**")
+                        .permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
