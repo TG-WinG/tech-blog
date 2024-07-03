@@ -2,7 +2,9 @@ package kr.tgwing.tech.project.dto;
 
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotNull;
+import kr.tgwing.tech.project.domain.Enum.DevType;
 import kr.tgwing.tech.project.domain.ProjectEntity;
+import kr.tgwing.tech.project.domain.ThumbnailEntity;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -29,7 +31,7 @@ public class ProjectCreateDTO {
     @NotNull
     private LocalDateTime end;
 
-    private String thumbnail;
+    private List<ThumbnailDTO> thumbnailDTOS = new ArrayList<>();
 
     @NotNull
     @Length(min = 1, max = 25)
@@ -37,18 +39,18 @@ public class ProjectCreateDTO {
 
 
     @NotNull
-    @Length(min = 1, max = 25)
-    private String devType;
+    private DevType devType;
+
     private List<ParticipantDTO> participantDTOS = new ArrayList<>();
     private List<LinkDTO> linkDTOS = new ArrayList<>();
 
     @Builder
-    public ProjectCreateDTO(String title, String description, LocalDateTime start, LocalDateTime end, String thumbnail, String devStatus, String devType, List<ParticipantDTO> participantDTOS, List<LinkDTO> linkDTOS) {
+    public ProjectCreateDTO(String title, String description, LocalDateTime start, LocalDateTime end, List<ThumbnailDTO> thumbnailDTOS, String devStatus, DevType devType, List<ParticipantDTO> participantDTOS, List<LinkDTO> linkDTOS) {
         this.title = title;
         this.description = description;
         this.start = start;
         this.end = end;
-        this.thumbnail = thumbnail;
+        this.thumbnailDTOS = thumbnailDTOS;
         this.devStatus = devStatus;
         this.devType = devType;
         this.linkDTOS = linkDTOS;

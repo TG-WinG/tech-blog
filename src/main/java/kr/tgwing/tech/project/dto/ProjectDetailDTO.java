@@ -1,9 +1,8 @@
 package kr.tgwing.tech.project.dto;
 
 import jakarta.validation.constraints.NotNull;
-import kr.tgwing.tech.project.domain.LinkEntity;
-import kr.tgwing.tech.project.domain.ParticipantEntity;
-import kr.tgwing.tech.project.domain.ProjectEntity;
+import kr.tgwing.tech.project.domain.*;
+import kr.tgwing.tech.project.domain.Enum.DevType;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +16,8 @@ import java.util.List;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ProjectDetailDTO {
     @NotNull
+    private Long project_id;
+    @NotNull
     private String title;
     @NotNull
     private String description;
@@ -25,27 +26,30 @@ public class ProjectDetailDTO {
     @NotNull
     private LocalDateTime end;
     @NotNull
-    private String thumbnail;
+    private List<ThumbnailEntity> thumbnails = new ArrayList<>();
     @NotNull
     private String devStatus;
     @NotNull
-    private String devType;
-
+    private DevType devType;
+    @NotNull
+    private List<OutsiderParticipantEntity> outsiderParticipants = new ArrayList<>();
     @NotNull
     private List<ParticipantEntity> participants = new ArrayList<>();
     @NotNull
     private List<LinkEntity> links = new ArrayList<>();
 
     @Builder
-    public ProjectDetailDTO(String title, String description, LocalDateTime start, LocalDateTime end, String thumbnail, String devStatus, String devType, List<ParticipantEntity> participants, List<LinkEntity> links) {
+    public ProjectDetailDTO(Long project_id, String title, String description, LocalDateTime start, LocalDateTime end, List<ThumbnailEntity> thumbnails, String devStatus, DevType devType, List<OutsiderParticipantEntity> outsiderParticipants,List<ParticipantEntity> participants, List<LinkEntity> links) {
+        this.project_id = project_id;
         this.title = title;
         this.description = description;
         this.start = start;
         this.end = end;
-        this.thumbnail = thumbnail;
+        this.thumbnails = thumbnails;
         this.devStatus = devStatus;
         this.devType = devType;
         this.participants = participants;
+        this.outsiderParticipants = outsiderParticipants;
         this.links = links;
     }
 
@@ -55,9 +59,11 @@ public class ProjectDetailDTO {
                 .description(projectDetailDTO.getDescription())
                 .start(projectDetailDTO.getStart())
                 .end(projectDetailDTO.getEnd())
+                .thumbnails(projectDetailDTO.getThumbnails())
                 .devStatus(projectDetailDTO.getDevStatus())
                 .devType(projectDetailDTO.getDevType())
                 .participants(projectDetailDTO.getParticipants())
+                .outsiderParticipants(projectDetailDTO.getOutsiderParticipants())
                 .links(projectDetailDTO.getLinks())
                 .build();
     }

@@ -1,8 +1,10 @@
 package kr.tgwing.tech.project.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import kr.tgwing.tech.common.BaseEntity;
+import kr.tgwing.tech.project.domain.Enum.DevType;
 import kr.tgwing.tech.project.dto.ProjectUpdateDTO;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,13 +41,15 @@ public class ProjectEntity extends BaseEntity {
     @NotNull
     private LocalDateTime end;
 
-    private String thumbnail;
+    @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<ThumbnailEntity> thumbnails = new ArrayList<>();
 
     @NotNull
     private String devStatus;
 
-    @NotNull
-    private String devType;
+
+    @Enumerated(EnumType.STRING)
+    private DevType devType;
 
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ParticipantEntity> participants = new ArrayList<>();
@@ -56,19 +60,18 @@ public class ProjectEntity extends BaseEntity {
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<LinkEntity> links = new ArrayList<>();
 
-
-
     @Builder
-    public ProjectEntity(Long id, String title, String description, LocalDateTime start, LocalDateTime end, String thumbnail, String devStatus, String devType, List<ParticipantEntity> participants, List<LinkEntity> links) {
+    public ProjectEntity(Long id, String title, String description, LocalDateTime start, LocalDateTime end, List<OutsiderParticipantEntity> outsiderParticipants,List<ThumbnailEntity> thumbnails, String devStatus, DevType devType, List<ParticipantEntity> participants, List<LinkEntity> links) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.start = start;
         this.end = end;
-        this.thumbnail = thumbnail;
+        this.thumbnails = thumbnails;
         this.devStatus = devStatus;
         this.devType = devType;
         this.participants = participants;
+        this.outsiderParticipants = outsiderParticipants;
         this.links = links;
     }
 
@@ -85,9 +88,6 @@ public class ProjectEntity extends BaseEntity {
         if (projectUpdateDTO.getEnd() != null) {
             this.end = projectUpdateDTO.getEnd();
         }
-        if (projectUpdateDTO.getThumbnail() != null) {
-            this.thumbnail = projectUpdateDTO.getThumbnail();
-        }
         if (projectUpdateDTO.getDevStatus() != null) {
             this.devStatus = projectUpdateDTO.getDevStatus();
         }
@@ -95,5 +95,4 @@ public class ProjectEntity extends BaseEntity {
             this.devType = projectUpdateDTO.getDevType();
         }
     }
-
 }
