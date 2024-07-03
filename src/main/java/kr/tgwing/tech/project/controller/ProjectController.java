@@ -25,20 +25,11 @@ import java.util.List;
 public class ProjectController {
     private final ProjectServiceImpl projectServiceImpl;
 
-//    @GetMapping("/projects")
-//    public ResponseEntity<?> getProjects(){
-//        List<ProjectBriefDTO> projects = projectServiceImpl.getProjects();
-//        return ResponseEntity.ok(projects);
-//
-//    }
-    @GetMapping("/projects") // 블로그 전체 가져오기 - GET, /tgwing.kr/notice
+    @GetMapping("/projects")
     public ResponseEntity<List<ProjectBriefDTO>> getAllProjectsWithSearch(@RequestParam(value = "text", required = false) String text,
                                                       @RequestParam(value = "page", defaultValue = "0") int page,
                                                       @PageableDefault(size = 10) Pageable pageable) {
-        System.out.println("-- Retrieve All of Projects --");
-
         Page<ProjectBriefDTO> projectsInPage = projectServiceImpl.getProjectsInPage(text, page, pageable);
-        // Extracting the content from Page
         List<ProjectBriefDTO> projectContent = projectsInPage.getContent();
         return ResponseEntity.ok(projectContent);
     }
