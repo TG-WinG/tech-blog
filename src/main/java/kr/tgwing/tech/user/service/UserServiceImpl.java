@@ -2,8 +2,13 @@ package kr.tgwing.tech.user.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import kr.tgwing.tech.common.exception.CommonException;
 import kr.tgwing.tech.user.dto.*;
+import kr.tgwing.tech.user.dto.checkdto.CheckUserDTO;
+import kr.tgwing.tech.user.dto.checkdto.PasswordCheckDTO;
+import kr.tgwing.tech.user.dto.profiledto.ProfileDTO;
+import kr.tgwing.tech.user.dto.profiledto.ProfileReqDTO;
+import kr.tgwing.tech.user.dto.registerdto.UserDTO;
+import kr.tgwing.tech.user.entity.User;
 import kr.tgwing.tech.user.entity.UserEntity;
 import kr.tgwing.tech.user.exception.MessageException;
 import kr.tgwing.tech.user.exception.PasswordException;
@@ -15,7 +20,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
@@ -26,8 +30,8 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
     private final JavaMailSender javaMailSender;
+    private final UserRepository userRepository;
     private final SpringTemplateEngine templateEngine;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
@@ -42,9 +46,6 @@ public class UserServiceImpl implements UserService {
             throw new UserDuplicatedException();
 
         UserEntity data = UserDTO.toUserEntity(userDTO);
-
-        data.setPassword(bCryptPasswordEncoder.encode(password)); // 비밀번호 암호화
-//        data.setRole("ROLE_USER"); // register를 통해서 회원가입하는 유저들은 모두 USER역할
 
         UserEntity save = userRepository.save(data);
 
@@ -126,9 +127,7 @@ public class UserServiceImpl implements UserService {
             javaMailSender.send(mimeMessage);
 
         } catch (MessagingException e) {
-
-            throw new RuntimeException(e);
-
+            throw new MessageException();
         }
 
         return authNum;

@@ -86,10 +86,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(PERMIT_URL_ARRAY)
                         .permitAll()
-                        .requestMatchers("/user/**", "/login")
+                        .requestMatchers("/user/**", "/login", "/admin/**")
                         .permitAll()
-                        .requestMatchers("/admin/**")
-                        .hasRole("ADMIN")
+//                        .requestMatchers("/admin/**")
+//                        .hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/file/**")
                         .permitAll()
                         .anyRequest().authenticated())

@@ -2,25 +2,25 @@ package kr.tgwing.tech.user.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import kr.tgwing.tech.common.ApiResponse;
 import kr.tgwing.tech.security.util.JwtUtil;
 import kr.tgwing.tech.user.dto.*;
+import kr.tgwing.tech.user.dto.checkdto.CheckNumberDTO;
+import kr.tgwing.tech.user.dto.checkdto.CheckUserDTO;
+import kr.tgwing.tech.user.dto.checkdto.PasswordCheckDTO;
+import kr.tgwing.tech.user.dto.registerdto.EmailDto;
+import kr.tgwing.tech.user.dto.registerdto.UserDTO;
+import kr.tgwing.tech.user.exception.EmailCodeException;
 import kr.tgwing.tech.user.exception.MessageException;
 import kr.tgwing.tech.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.antlr.v4.runtime.misc.Pair;
-import org.apache.tomcat.util.http.parser.Authorization;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.UUID;
 
 @RestController
@@ -31,22 +31,47 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
-    private final JwtUtil jwtUtil;
     private final RedisTemplate<String, String> redisTemplate;
 
-    @Operation(summary = "티지윙 맴버인지 확인하기")
-    @PostMapping("/register/check")
-    public ResponseEntity<ApiResponse<Long>> register1(@RequestBody UserDTO userDTO) {
-        log.info("UserController Register...............");
-        log.info(userDTO);
-        Long userId = userService.register(userDTO);
+    @Operation(summary = "티지윙 회원가입 1: 이메일 인증 요청하기")
+    @PostMapping("/register/email")
+    public ResponseEntity<ApiResponse<String>> register1(@RequestBody EmailDto emailDto) {
+        log.info("UserController Register1...............");
+        log.info(emailDto);
 
-        return ResponseEntity.ok(ApiResponse.created(userId));
+        EmailMessageDTO emailMessageDTO = EmailMessageDTO.builder()
+                .receiver(emailDto.getEmail())
+                .subject("[TGWING] Email 인증코드 발급")
+                .build();
+
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+
+        String emailKey = UUID.randomUUID().toString();
+        String code = userService.sendEmail(emailMessageDTO);
+        valueOperations.set(emailKey, code);
+
+        return ResponseEntity.ok(ApiResponse.ok(emailKey));
+    }
+
+    @Operation(summary = "티지윙 회원가입 2: 이메일 인증 확인하기")
+    @PostMapping("/register/check")
+    public ResponseEntity<ApiResponse<String>> register2(
+            @RequestParam("emailKey") String emailKey,
+            @RequestBody CheckNumberDTO checkNumberDTO) {
+        log.info("UserController Register...............");
+        log.info(checkNumberDTO);
+
+        ValueOperations valueOperations = redisTemplate.opsForValue();
+        Object code = valueOperations.get(emailKey);
+
+        if(!code.equals(checkNumberDTO.getCode())) throw new EmailCodeException(); // 인증코드가 일치하지 않습니다.
+
+        return ResponseEntity.ok(ApiResponse.ok("이메일이 인증되었습니다."));
     }
 
     @Operation(summary = "회원 등록하기")
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<Long>> register2(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<ApiResponse<Long>> register(@RequestBody UserDTO userDTO) {
         log.info("UserController Register...............");
         log.info(userDTO);
         Long userId = userService.register(userDTO);
@@ -79,7 +104,6 @@ public class UserController {
         log.info(checkUserDTO);
 
         Boolean isExist = userService.checkUser(checkUserDTO);
-        if(!isExist) throw new IllegalStateException();
 
         EmailMessageDTO emailMessageDTO = EmailMessageDTO.builder()
                         .receiver(checkUserDTO.getEmail())
@@ -90,6 +114,7 @@ public class UserController {
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
         String studentKey = UUID.randomUUID().toString();
         String emailKey = UUID.randomUUID().toString();
+
         log.info(studentKey + " / " + emailKey);
         valueOperations.set(studentKey, checkUserDTO.getStudentId());
         valueOperations.set(emailKey, code);
@@ -110,7 +135,7 @@ public class UserController {
 
         log.info(code);
 
-        if(!code.equals(checkNumberDTO.getCode())) throw new MessageException(); // 인증코드가 일치하지 않습니다.
+        if(!code.equals(checkNumberDTO.getCode())) throw new EmailCodeException(); // 인증코드가 일치하지 않습니다.
 
         return ResponseEntity.ok(ApiResponse.created(studentKey));
     }

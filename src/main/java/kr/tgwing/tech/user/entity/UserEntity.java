@@ -1,46 +1,35 @@
 package kr.tgwing.tech.user.entity;
 
-import jakarta.persistence.*;
-import kr.tgwing.tech.common.BaseEntity;
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
+import lombok.experimental.SuperBuilder;
 
-import java.io.Serializable;
 import java.sql.Date;
 
 @Entity
 @Getter
-@Builder
-@Setter
-@NoArgsConstructor @AllArgsConstructor
+@DiscriminatorValue("M")
+@NoArgsConstructor
 @Table(name = "users")
-public class UserEntity extends BaseEntity implements Serializable {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(length = 10, unique = true, nullable = false)
-    private String studentId;
-
-    @Column(nullable = false)
-    private String password;
-
-    @Column(nullable = false, unique = true, length = 25)
-    private String email;
-
-    @Column(nullable = false)
-    private String name; // 이름
-
-    @Column(nullable = false)
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date birth;
-
-    @Column(nullable = false, length = 13)
-    private String phoneNumber;
+public class UserEntity extends User {
 
     @Column
     private String role;
 
     @Column
     private String profilePicture;
+
+    @Builder
+    public UserEntity (String studentId, String password, String email, String name, Date birth, String phoneNumber, String role, String profilePicture) {
+        super(studentId, password, email, name, birth, phoneNumber);
+        this.role = role;
+        this.profilePicture = profilePicture;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
 }
