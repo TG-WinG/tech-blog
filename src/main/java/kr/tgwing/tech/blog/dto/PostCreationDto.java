@@ -1,9 +1,12 @@
 package kr.tgwing.tech.blog.dto;
 
+import kr.tgwing.tech.blog.entity.HashTagEntity;
 import kr.tgwing.tech.blog.entity.PostEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+
+import java.util.Set;
 
 @Data
 @Builder
@@ -12,12 +15,14 @@ public class PostCreationDto {
     private String title;
     private String content;
     private String thumbnail;
+    private Set<String> hashtags;
 
-    public static PostEntity toEntity(PostCreationDto dto) {
+    public static PostEntity toEntity(PostCreationDto dto, Set<HashTagEntity> hashtags) {
         return PostEntity.builder()
                 .title(dto.title)
                 .content(dto.content)
                 .thumbnail(dto.thumbnail)
+                .hashtags(hashtags)
                 .build();
     }
 

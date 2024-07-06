@@ -3,16 +3,19 @@ package kr.tgwing.tech.blog.service;
 
 import kr.tgwing.tech.blog.dto.PostCreationDto;
 import kr.tgwing.tech.blog.dto.PostDto;
+import kr.tgwing.tech.blog.entity.HashTagEntity;
 import kr.tgwing.tech.blog.entity.PostEntity;
 import kr.tgwing.tech.blog.exception.PostNotFoundException;
 import kr.tgwing.tech.blog.exception.UserIsNotPostWriterException;
 import kr.tgwing.tech.blog.exception.WrongPostRequestException;
+import kr.tgwing.tech.blog.repository.HashtagRepository;
 import kr.tgwing.tech.blog.repository.PostRepository;
 import kr.tgwing.tech.user.entity.UserEntity;
 import kr.tgwing.tech.user.exception.UserNotFoundException;
 import kr.tgwing.tech.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -20,9 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static kr.tgwing.tech.blog.dto.PostDto.toEntity;
@@ -35,6 +36,8 @@ import static kr.tgwing.tech.blog.entity.PostEntity.toDto;
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    @Autowired
+    private HashtagRepository hashtagRepository;
 
     @Override
     public PostDto getPost(Long postId) // 특정 게시글 가져오기
@@ -68,7 +71,9 @@ public class PostServiceImpl implements PostService {
         }
 
         // entity에 작성자 Id 설정해서 저장하기
-        PostEntity postEntity = PostCreationDto.toEntity(requestDto);
+        // 해시태그 엔티티로 바꿔와서 함께 블로그 엔티티 생성
+        Set<HashTagEntity> hashtags = getHashtag(requestDto.getHashtags());
+        PostEntity postEntity = PostCreationDto.toEntity(requestDto, hashtags);
         postEntity.setWriter(userEntity.getId());
         PostEntity savedEntity = postRepository.save(postEntity);
 
@@ -93,7 +98,8 @@ public class PostServiceImpl implements PostService {
         // DB 내 게시글 작성자 - 요청된 유저 ID 동일 & DB 내 게시글 작성자 - 요청된 게시글 작성자 동일
         if(Objects.equals(userEntity.getStudentId(), utilStudentId)) {
             log.info("학번 일치 - 작성자 확인");
-            postEntity.updateContent(postDto); // entity 정보 수정
+            Set<HashTagEntity> hashtags = getHashtag(postDto.getHashtags());
+            postEntity.updateContent(postDto, hashtags); // entity 정보 수정
 
             PostEntity savedEntity = postRepository.save(postEntity);
             return toDto(savedEntity);
@@ -135,7 +141,7 @@ public class PostServiceImpl implements PostService {
         if(text == null) {
             postPage = getAllPosts(pageRequest);
             total = postRepository.count();
-            System.out.println("total = " + total);
+            log.info("total = " + total);
         }
         else { // - 파라미터로 검색된 블로그만 걸러서 반환
             postPage = searchPosts(text, pageRequest);
@@ -165,4 +171,20 @@ public class PostServiceImpl implements PostService {
         return new PageImpl<>(dtos, pageable, postPage.getTotalElements());
     }
 
+    // 해시태그 이름 set 가져와서
+    // 새로운 해시태그 저장 및 해시태그 엔티티 생성
+    // 해시태그 엔티티 set 반환
+    private Set<HashTagEntity> getHashtag(Set<String> hashtags) {
+        Set<HashTagEntity> resultTagEntities = new HashSet<>();
+        for (String tagname : hashtags) {
+            HashTagEntity hashTagEntity = hashtagRepository.findByName(tagname).orElseGet(() -> {
+                HashTagEntity newHashtag = HashTagEntity.builder()
+                        .name(tagname).build();
+                return hashtagRepository.save(newHashtag);
+            });
+            resultTagEntities.add(hashTagEntity);
+        }
+
+        return resultTagEntities;
+    }
 }
