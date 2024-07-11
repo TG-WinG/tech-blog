@@ -34,10 +34,9 @@ public class UserController {
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, String> redisTemplate;
 
-
-    @Operation(summary = "회원 등록하기")
-    @PostMapping("/register")
-    public ResponseEntity<ApiResponse<Long>> register(@RequestBody UserDTO userDTO) {
+    @Operation(summary = "티지윙 맴버인지 확인하기")
+    @PostMapping("/register/check")
+    public ResponseEntity<ApiResponse<Long>> register1(@RequestBody UserDTO userDTO) {
         log.info("UserController Register...............");
         log.info(userDTO);
         Long userId = userService.register(userDTO);
@@ -45,20 +44,32 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.created(userId));
     }
 
-    @Operation(summary = "로그아웃하기")
-    @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Long>> logout(
-            HttpServletRequest request,
-            HttpServletResponse response) {
-        String authorization = request.getHeader("authorization");
-        String token = authorization.split(" ")[1];
-        String studentId = jwtUtil.getStudentId(token);
+    @Operation(summary = "회원 등록하기")
+    @PostMapping("/register")
+    public ResponseEntity<ApiResponse<Long>> register2(@RequestBody UserDTO userDTO) {
+        log.info("UserController Register...............");
+        log.info(userDTO);
+        Long userId = userService.register(userDTO);
 
-        Long userId = userService.logout(studentId);
-        response.setHeader("authorization", null);
-
-        return ResponseEntity.ok(ApiResponse.ok(userId));
+        return ResponseEntity.ok(ApiResponse.created(userId));
     }
+
+
+    // TODO : 로그아웃 기능 만들기. 대신 제대로 좀 알고.. 지금은 단일토큰이니까 프론트에서 때달라해야하나?
+//    @Operation(summary = "로그아웃하기")
+//    @PostMapping("/logout")
+//    public ResponseEntity<ApiResponse<Long>> logout(
+//            HttpServletRequest request,
+//            HttpServletResponse response) {
+//        String authorization = request.getHeader("authorization");
+//        String token = authorization.split(" ")[1];
+//        String studentId = jwtUtil.getStudentId(token);
+//
+//        Long userId = userService.logout(studentId);
+//        response.setHeader("authorization", null);
+//
+//        return ResponseEntity.ok(ApiResponse.ok(userId));
+//    }
 
     @Operation(summary = "비밀전호 재설정하기 전, 본인확인하기")
     @PostMapping("/password")

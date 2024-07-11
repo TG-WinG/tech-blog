@@ -2,6 +2,8 @@ package kr.tgwing.tech.user.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import kr.tgwing.tech.blog.entity.PostEntity;
+import kr.tgwing.tech.blog.repository.PostRepository;
 import kr.tgwing.tech.common.exception.CommonException;
 import kr.tgwing.tech.user.dto.*;
 import kr.tgwing.tech.user.entity.UserEntity;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -26,6 +29,7 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final JavaMailSender javaMailSender;
     private final SpringTemplateEngine templateEngine;
@@ -44,7 +48,7 @@ public class UserServiceImpl implements UserService {
         UserEntity data = UserDTO.toUserEntity(userDTO);
 
         data.setPassword(bCryptPasswordEncoder.encode(password)); // 비밀번호 암호화
-        data.setRole("ROLE_USER"); // register를 통해서 회원가입하는 유저들은 모두 USER역할
+//        data.setRole("ROLE_USER"); // register를 통해서 회원가입하는 유저들은 모두 USER역할
 
         UserEntity save = userRepository.save(data);
 
@@ -73,6 +77,18 @@ public class UserServiceImpl implements UserService {
         return id;
     };
 
+    @Override
+    public Long removeUser(String studentId){
+        userRepository.deleteByStudentId(studentId);
+        return null;
+    }
+
+    @Override
+    public UserEntity getUserEntity(String studentId) {
+        UserEntity getId = userRepository.getEntity(studentId);
+        return getId;
+    }
+
 
     @Override
     public ProfileDTO showUser(String studentId){
@@ -91,6 +107,16 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         return profileDTO;
+    }
+
+    @Override
+    public List<PostEntity> showMyBlog(String studentId){
+        UserEntity id = userRepository.getEntity(studentId);
+        Long userId = id.getId();
+        System.out.println(userId);
+        List<PostEntity> myBlog = postRepository.findByWriter(userId);
+
+        return myBlog;
     }
 
     @Override

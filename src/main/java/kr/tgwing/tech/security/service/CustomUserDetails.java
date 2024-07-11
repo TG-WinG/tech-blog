@@ -23,10 +23,8 @@ public class CustomUserDetails implements UserDetails {
         Collection<GrantedAuthority> collection = new ArrayList<>();
 
         collection.add(new GrantedAuthority() {
-
             @Override
             public String getAuthority() {
-
                 return userEntity.getRole();
             }
         });
@@ -44,6 +42,10 @@ public class CustomUserDetails implements UserDetails {
     public String getUsername() {
 
         return userEntity.getStudentId();
+    }
+
+    public String getProfilePicture() {
+        return userEntity.getProfilePicture();
     }
 
     @Override

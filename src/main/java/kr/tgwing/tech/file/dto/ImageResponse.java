@@ -5,7 +5,6 @@ import java.io.InputStream;
 import lombok.Getter;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 
 @Getter
 public class ImageResponse {
@@ -14,8 +13,10 @@ public class ImageResponse {
 
     public ImageResponse(InputStream inputStream, HttpHeaders headers) {
         this.inputStream = inputStream;
-        if (headers == null) this.headers = new HttpHeaders();
-        else this.headers = new HttpHeaders(headers);
+        if (headers == null)
+            this.headers = new HttpHeaders();
+        else
+            this.headers = new HttpHeaders(headers);
 
         this.headers.setContentDisposition(ContentDisposition.inline().build());
     }
