@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -37,13 +39,12 @@ public class ReplyController {
     @DeleteMapping("/blog/{postId}/reply/{replyId}")
     public ResponseEntity deleteReply(@PathVariable("postId") Long postId,
                                       @PathVariable("replyId") Long replyId,
-                                      @RequestHeader("authorization") String token ) {
+                                      @AuthenticationPrincipal UserDetails userDetails) {
         System.out.println("--- Delete Own Reply ---");
 
-        String jwt = token.split(" ")[1];
-        String tokenStudentId = jwtUtil.getStudentId(jwt);
+        String studentId = userDetails.getUsername();
 
-        return replyService.delete(postId, replyId, tokenStudentId);
+        return replyService.delete(postId, replyId, studentId);
     }
 
     @GetMapping("/blog/{postId}/reply/{replyId}")
