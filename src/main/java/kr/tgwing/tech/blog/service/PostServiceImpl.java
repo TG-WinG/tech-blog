@@ -5,11 +5,13 @@ import kr.tgwing.tech.blog.dto.PostCreationDto;
 import kr.tgwing.tech.blog.dto.PostDto;
 import kr.tgwing.tech.blog.entity.HashTagEntity;
 import kr.tgwing.tech.blog.entity.PostEntity;
+import kr.tgwing.tech.blog.entity.PostTagEntity;
 import kr.tgwing.tech.blog.exception.PostNotFoundException;
 import kr.tgwing.tech.blog.exception.UserIsNotPostWriterException;
 import kr.tgwing.tech.blog.exception.WrongPostRequestException;
 import kr.tgwing.tech.blog.repository.HashtagRepository;
 import kr.tgwing.tech.blog.repository.PostRepository;
+import kr.tgwing.tech.blog.repository.PostTagRepository;
 import kr.tgwing.tech.user.entity.UserEntity;
 import kr.tgwing.tech.user.exception.UserNotFoundException;
 import kr.tgwing.tech.user.repository.UserRepository;
@@ -26,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static kr.tgwing.tech.blog.dto.PostDto.toEntity;
 import static kr.tgwing.tech.blog.entity.PostEntity.toDto;
 
 @Service
@@ -38,15 +39,26 @@ public class PostServiceImpl implements PostService {
     private final UserRepository userRepository;
     @Autowired
     private HashtagRepository hashtagRepository;
+    @Autowired
+    private PostTagRepository postTagRepository;
 
     @Override
     public PostDto getPost(Long postId) // 특정 게시글 가져오기
     {
+        Set<HashTagEntity> hashtags = new HashSet<>();
         // 입력된 postId에 해당하는 글 찾기
         Optional<PostEntity> postEntityInOp = postRepository.findById(postId);
         PostEntity postEntity = postEntityInOp.orElseThrow(PostNotFoundException::new);
 
-        return toDto(postEntity);
+        List<PostTagEntity> postTags = postTagRepository.findAllByPostId(postId);
+        postTags.forEach(posttag -> {
+            Long tagId = posttag.getHashtagId();
+            HashTagEntity tagEntity = hashtagRepository.findById(tagId).orElseThrow();
+            hashtags.add(tagEntity);
+        });
+        System.out.println(postEntity.toString());
+
+        return toDto(postEntity, hashtags);
     }
 
 
@@ -72,12 +84,21 @@ public class PostServiceImpl implements PostService {
 
         // entity에 작성자 Id 설정해서 저장하기
         // 해시태그 엔티티로 바꿔와서 함께 블로그 엔티티 생성
+
+        //getHashtag - 요청으로 들어온 해시태그 집합을 데이터베이스에 블로그 연관 테이블, 해시태그 테이블에 저장 및 엔티티 집합 반환
         Set<HashTagEntity> hashtags = getHashtag(requestDto.getHashtags());
-        PostEntity postEntity = PostCreationDto.toEntity(requestDto, hashtags);
+        PostEntity postEntity = PostCreationDto.toEntity(requestDto);
         postEntity.setWriter(userEntity.getId());
         PostEntity savedEntity = postRepository.save(postEntity);
 
-        return toDto(savedEntity);
+        hashtags.forEach(tag -> {
+            PostTagEntity postTag = PostTagEntity.builder().postId(savedEntity.getId()).hashtagId(tag.getId()).build();
+            postTagRepository.save(postTag);
+        });
+
+        System.out.println(toDto(savedEntity, hashtags).toString());
+
+        return toDto(savedEntity, hashtags);
     }
 
     @Override
@@ -99,10 +120,17 @@ public class PostServiceImpl implements PostService {
         if(Objects.equals(userEntity.getStudentId(), utilStudentId)) {
             log.info("학번 일치 - 작성자 확인");
             Set<HashTagEntity> hashtags = getHashtag(postDto.getHashtags());
+            postTagRepository.deleteAllByPostId(postId);
+
             postEntity.updateContent(postDto, hashtags); // entity 정보 수정
 
             PostEntity savedEntity = postRepository.save(postEntity);
-            return toDto(savedEntity);
+
+            hashtags.forEach(tag -> {
+                PostTagEntity postTag = PostTagEntity.builder().postId(savedEntity.getId()).hashtagId(tag.getId()).build();
+                postTagRepository.save(postTag);
+            });
+            return toDto(savedEntity, hashtags);
         }
         else { // 공지 작성자가 아닌 경우 -- 수정 불가능
             log.info("학번 불일치 - 작성자가 아니므로 수정 불가능");
@@ -121,6 +149,7 @@ public class PostServiceImpl implements PostService {
         // 해당 URL을 요청한 사람이 공지 작성자인 경우에만 삭제 가능
         if(Objects.equals(userEntity.getStudentId(), utilStudentId)) {
             log.info("학번 일치 - 작성자 확인");
+            postTagRepository.deleteAllByPostId(postId);
             postRepository.deleteById(postId);
         } else {
             log.info("학번 불일치 - 작성자가 아니므로 삭제 불가능");
@@ -166,7 +195,7 @@ public class PostServiceImpl implements PostService {
 
         // Entity -> Dto 변환 - Dto 담은 page 반환
         List<PostEntity> posts = postPage.getContent();
-        List<PostDto> dtos = posts.stream().map(postEntity -> toDto(postEntity)).collect(Collectors.toList());
+        List<PostDto> dtos = posts.stream().map(postEntity -> toDto(postEntity, null)).collect(Collectors.toList());
 
         return new PageImpl<>(dtos, pageable, postPage.getTotalElements());
     }
@@ -175,16 +204,16 @@ public class PostServiceImpl implements PostService {
     // 새로운 해시태그 저장 및 해시태그 엔티티 생성
     // 해시태그 엔티티 set 반환
     private Set<HashTagEntity> getHashtag(Set<String> hashtags) {
-        Set<HashTagEntity> resultTagEntities = new HashSet<>();
+        Set<HashTagEntity> resultTagIds = new HashSet<>();
         for (String tagname : hashtags) {
             HashTagEntity hashTagEntity = hashtagRepository.findByName(tagname).orElseGet(() -> {
                 HashTagEntity newHashtag = HashTagEntity.builder()
                         .name(tagname).build();
                 return hashtagRepository.save(newHashtag);
             });
-            resultTagEntities.add(hashTagEntity);
+            resultTagIds.add(hashTagEntity);
         }
 
-        return resultTagEntities;
+        return resultTagIds;
     }
 }

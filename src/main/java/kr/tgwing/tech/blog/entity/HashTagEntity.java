@@ -20,6 +20,6 @@ public class HashTagEntity {
     private Long id;
     private String name;
 
-    @ManyToMany(mappedBy = "hashtags")
-    private Set<PostEntity> posts = new HashSet<>();
+    @OneToMany(mappedBy = "hashtag")
+    private Set<PostTagEntity> postTags = new HashSet<>();
 }

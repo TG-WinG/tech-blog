@@ -17,12 +17,11 @@ public class PostCreationDto {
     private String thumbnail;
     private Set<String> hashtags;
 
-    public static PostEntity toEntity(PostCreationDto dto, Set<HashTagEntity> hashtags) {
+    public static PostEntity toEntity(PostCreationDto dto) {
         return PostEntity.builder()
                 .title(dto.title)
                 .content(dto.content)
                 .thumbnail(dto.thumbnail)
-                .hashtags(hashtags)
                 .build();
     }
 
