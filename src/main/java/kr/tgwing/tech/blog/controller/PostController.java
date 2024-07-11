@@ -4,7 +4,6 @@ import kr.tgwing.tech.blog.dto.PostCreationDto;
 import kr.tgwing.tech.blog.dto.PostDto;
 import kr.tgwing.tech.blog.exception.PathHasNoPostIdException;
 import kr.tgwing.tech.blog.service.PostServiceImpl;
-import kr.tgwing.tech.security.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
