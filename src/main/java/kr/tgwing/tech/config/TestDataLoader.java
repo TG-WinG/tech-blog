@@ -30,7 +30,6 @@ public class TestDataLoader {
                 .name("늙은이")
                 .password("12345678")
                 .birth(Date.valueOf("1999-01-01"))
-                .role("ROLE_USER")
                 .build());
             userService.register(UserDTO.builder()
                 .studentId("2022000000")
@@ -39,7 +38,6 @@ public class TestDataLoader {
                 .name("젊은이")
                 .password("12345678")
                 .birth(Date.valueOf("2003-01-01"))
-                .role("ROLE_USER")
                 .build());
             postRepository.save(PostEntity.builder()
                 .writer(1L)
