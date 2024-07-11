@@ -11,6 +11,6 @@ public interface ReplyService {
 
     List<ReplyDto> getAll(Long postId);
     ReplyDto post(ReplyDto reqDto, Long postId);
-    ResponseEntity delete(Long postId, ReplyDto reqDto, String token);
-    Page<ReplyDto> findRepliesInPage(int page, int size, Pageable pageable, Long postId);
+    ResponseEntity delete(Long postId, Long commentId, String token);
+    Page<ReplyDto> findRepliesInPage(Pageable pageable, Long postId);
 }

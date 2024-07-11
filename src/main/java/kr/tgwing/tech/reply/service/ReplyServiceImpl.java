@@ -68,7 +68,7 @@ public class ReplyServiceImpl implements ReplyService{
         return dto;
     }
 
-    public ResponseEntity delete(Long postId, ReplyDto reqDto, String tokenStudentId) {
+    public ResponseEntity delete(Long postId, Long commentId, String tokenStudentId) {
 
         // 요청으로 들어온 post의 id = postId
 
@@ -87,18 +87,18 @@ public class ReplyServiceImpl implements ReplyService{
          * userEntity.studentId != token.studentId 이면 삭제 권한 없음
          */
 
-        Optional<ReplyEntity> replyById = replyRepository.findById(reqDto.getId());
+        Optional<ReplyEntity> replyById = replyRepository.findById(commentId);
         ReplyEntity replyEntity = replyById.orElseThrow();
 //        ReplyEntity replyEntity = replyById.orElseThrow(ReplyNotFoundException::new);
 
-        Optional<UserEntity> userById = userRepository.findById(reqDto.getWriter());
+        Optional<UserEntity> userById = userRepository.findById(commentId);
         UserEntity userEntity = userById.orElseThrow();
 //        UserEntity userEntity = userById.orElseThrow(UserNotFoundException::new);
 
 
-        if(Objects.equals(userEntity.getStudentId(), tokenStudentId)) { // 작성자, 수정자 확인
+        if(userEntity.getStudentId().equals(tokenStudentId)) { // 작성자, 수정자 확인
 
-            if(Objects.equals(replyEntity.getPost(), postId)) {
+            if(replyEntity.getPost().equals(postId)) {
                 System.out.println("-----  Delete Reply  ------");
                 replyRepository.delete(replyEntity);
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -114,10 +114,8 @@ public class ReplyServiceImpl implements ReplyService{
         }
     }
 
-    public Page<ReplyDto> findRepliesInPage(int page, int size, Pageable pageable, Long postId) {
-        PageRequest pageRequest = PageRequest.of(page, size);
-
-        Page<ReplyEntity> replyPage = replyRepository.findAllByPostOrderByModDateDesc(pageRequest, postId);
+    public Page<ReplyDto> findRepliesInPage(Pageable pageable, Long postId) {
+        Page<ReplyEntity> replyPage = replyRepository.findAllByPostOrderByModDateDesc(pageable, postId);
 
         List<ReplyEntity> replies = replyPage.getContent();
 

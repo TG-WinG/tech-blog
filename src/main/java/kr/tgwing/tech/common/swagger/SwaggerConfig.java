@@ -28,10 +28,11 @@ public class SwaggerConfig {
         Server serverDev = new Server();
         serverDev.setDescription("dev");
         serverDev.setUrl("http://ec2-43-200-221-178.ap-northeast-2.compute.amazonaws.com/api");
+        Server serverLocal = new Server();
         return new OpenAPI()
                 .components(new Components().addSecuritySchemes("bearerAuth", securityScheme))
-                .security(Arrays.asList(securityRequirement))
-                .servers(List.of(serverDev));
+                .security(Arrays.asList(securityRequirement));
+                // .servers(List.of(serverDev, serverLocal));
     }
 
 }
