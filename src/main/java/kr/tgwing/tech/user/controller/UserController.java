@@ -36,16 +36,12 @@ public class UserController {
     @Operation(summary = "티지윙 회원가입 1: 이메일 인증 요청하기")
     @PostMapping("/register/email")
     public ResponseEntity<ApiResponse<String>> register1(@RequestBody EmailDto emailDto) {
-        log.info("UserController Register1...............");
-        log.info(emailDto);
-
         EmailMessageDTO emailMessageDTO = EmailMessageDTO.builder()
                 .receiver(emailDto.getEmail())
                 .subject("[TGWING] Email 인증코드 발급")
                 .build();
 
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-
         String emailKey = UUID.randomUUID().toString();
         String code = userService.sendEmail(emailMessageDTO);
         valueOperations.set(emailKey, code);
@@ -58,9 +54,6 @@ public class UserController {
     public ResponseEntity<ApiResponse<String>> register2(
             @RequestParam("emailKey") String emailKey,
             @RequestBody CheckNumberDTO checkNumberDTO) {
-        log.info("UserController Register...............");
-        log.info(checkNumberDTO);
-
         ValueOperations valueOperations = redisTemplate.opsForValue();
         Object code = valueOperations.get(emailKey);
 
@@ -72,8 +65,6 @@ public class UserController {
     @Operation(summary = "회원 등록하기")
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<Long>> register(@RequestBody UserDTO userDTO) {
-        log.info("UserController Register...............");
-        log.info(userDTO);
         Long userId = userService.register(userDTO);
 
         return ResponseEntity.ok(ApiResponse.created(userId));
@@ -100,9 +91,6 @@ public class UserController {
     @PostMapping("/password")
     public ResponseEntity<ApiResponse<Pair<String, String>>> checkUser(
             @RequestBody CheckUserDTO checkUserDTO) {
-        log.info("UserController checkUser................");
-        log.info(checkUserDTO);
-
         Boolean isExist = userService.checkUser(checkUserDTO);
 
         EmailMessageDTO emailMessageDTO = EmailMessageDTO.builder()
@@ -115,7 +103,6 @@ public class UserController {
         String studentKey = UUID.randomUUID().toString();
         String emailKey = UUID.randomUUID().toString();
 
-        log.info(studentKey + " / " + emailKey);
         valueOperations.set(studentKey, checkUserDTO.getStudentId());
         valueOperations.set(emailKey, code);
 
@@ -133,8 +120,6 @@ public class UserController {
         ValueOperations valueOperations = redisTemplate.opsForValue();
         Object code = valueOperations.get(emailKey);
 
-        log.info(code);
-
         if(!code.equals(checkNumberDTO.getCode())) throw new EmailCodeException(); // 인증코드가 일치하지 않습니다.
 
         return ResponseEntity.ok(ApiResponse.created(studentKey));
@@ -145,11 +130,6 @@ public class UserController {
     public ResponseEntity<ApiResponse<Long>> setNewPassword(
             @RequestParam("studentKey") String studentKey,
             @RequestBody PasswordCheckDTO passwordCheckDTO) {
-
-        log.info("UserController setNewPassword................");
-        log.info(passwordCheckDTO);
-
-        //redis로 studentId를 가져와서 학번으로 사람 구분하기
         ValueOperations valueOperations = redisTemplate.opsForValue();
         Object studentId = valueOperations.get(studentKey);
         Long userId = userService.setNewPassword(studentId, passwordCheckDTO);

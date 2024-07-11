@@ -6,11 +6,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import kr.tgwing.tech.security.service.CustomUserDetails;
 import kr.tgwing.tech.security.util.JwtUtil;
-import kr.tgwing.tech.user.entity.UserEntity;
+import kr.tgwing.tech.user.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -61,7 +60,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String role = jwtUtil.getRole(token);
 
         //userEntity를 생성하여 값 set
-        UserEntity userEntity = new UserEntity();
+        User userEntity = new User();
         userEntity.setStudentId(studentId);
         userEntity.setPassword("temppassword");
         userEntity.setRole(role);

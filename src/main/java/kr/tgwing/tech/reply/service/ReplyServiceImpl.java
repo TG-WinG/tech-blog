@@ -5,8 +5,7 @@ import kr.tgwing.tech.blog.repository.PostRepository;
 import kr.tgwing.tech.reply.dto.ReplyDto;
 import kr.tgwing.tech.reply.entity.ReplyEntity;
 import kr.tgwing.tech.reply.repository.ReplyRepository;
-import kr.tgwing.tech.security.util.JwtUtil;
-import kr.tgwing.tech.user.entity.UserEntity;
+import kr.tgwing.tech.user.entity.User;
 import kr.tgwing.tech.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -91,8 +90,8 @@ public class ReplyServiceImpl implements ReplyService{
         ReplyEntity replyEntity = replyById.orElseThrow();
 //        ReplyEntity replyEntity = replyById.orElseThrow(ReplyNotFoundException::new);
 
-        Optional<UserEntity> userById = userRepository.findById(reqDto.getWriter());
-        UserEntity userEntity = userById.orElseThrow();
+        Optional<User> userById = userRepository.findById(reqDto.getWriter());
+        User userEntity = userById.orElseThrow();
 //        UserEntity userEntity = userById.orElseThrow(UserNotFoundException::new);
 
 

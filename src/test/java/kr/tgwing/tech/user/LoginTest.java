@@ -1,15 +1,8 @@
 package kr.tgwing.tech.user;
 
-import kr.tgwing.tech.user.entity.UserEntity;
 import kr.tgwing.tech.user.repository.UserRepository;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.sql.Date;
 
 @SpringBootTest
 public class LoginTest {

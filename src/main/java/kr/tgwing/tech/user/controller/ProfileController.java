@@ -46,7 +46,7 @@ public class ProfileController {
     @PutMapping("")
     public ResponseEntity<ApiResponse<Long>> changeProfile(
             @RequestBody ProfileReqDTO request,
-            Principal principal){
+            Principal principal) {
         String studentId = principal.getName();
         Long change = userService.changeUser(studentId, request);
 

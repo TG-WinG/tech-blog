@@ -1,6 +1,6 @@
 package kr.tgwing.tech.security.service;
 
-import kr.tgwing.tech.user.entity.UserEntity;
+import kr.tgwing.tech.user.entity.User;
 import kr.tgwing.tech.user.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -22,7 +22,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String studentId) throws UsernameNotFoundException {
 
         //DB에서 조회
-        Optional<UserEntity> userData = userRepository.findByStudentId(studentId);
+        Optional<User> userData = userRepository.findByStudentId(studentId);
 
         if (userData.isPresent()) {
             //UserDetails에 담아서 return하면 AutneticationManager가 검증 함

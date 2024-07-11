@@ -10,17 +10,20 @@ import kr.tgwing.tech.user.dto.checkdto.PasswordCheckDTO;
 import kr.tgwing.tech.user.dto.profiledto.ProfileDTO;
 import kr.tgwing.tech.user.dto.profiledto.ProfileReqDTO;
 import kr.tgwing.tech.user.dto.registerdto.UserDTO;
-import kr.tgwing.tech.user.entity.UserEntity;
+import kr.tgwing.tech.user.entity.TempUser;
+import kr.tgwing.tech.user.entity.User;
 import kr.tgwing.tech.user.exception.MessageException;
 import kr.tgwing.tech.user.exception.PasswordException;
 import kr.tgwing.tech.user.exception.UserDuplicatedException;
 import kr.tgwing.tech.user.exception.UserNotFoundException;
+import kr.tgwing.tech.user.repository.TempUserRepository;
 import kr.tgwing.tech.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
@@ -30,6 +33,7 @@ import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserServiceImpl implements UserService {
 
     private final PostRepository postRepository;
@@ -37,28 +41,23 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final SpringTemplateEngine templateEngine;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final TempUserRepository tempUserRepository;
 
     @Override
     public Long register(UserDTO userDTO){
-        String studentId = userDTO.getStudentId();
-        String password = userDTO.getPassword();
-
-        Optional<UserEntity> user = userRepository.findByStudentId(studentId);
-
+        Optional<User> user = userRepository.findByStudentId(userDTO.getStudentId());
         if(user.isPresent())
             throw new UserDuplicatedException();
+        TempUser tempUser = UserDTO.toTempUser(userDTO);
+        tempUser.hashPassword(bCryptPasswordEncoder);
 
-        UserEntity data = UserDTO.toUserEntity(userDTO);
-
-        UserEntity save = userRepository.save(data);
-
-        return save.getId();
+        return tempUserRepository.save(tempUser).getId();
     }
 
 
     @Override
     public Long logout(String studentId) {
-        UserEntity user = userRepository.findByStudentId(studentId).orElseThrow(UserNotFoundException::new);
+        User user = userRepository.findByStudentId(studentId).orElseThrow(UserNotFoundException::new);
 
         return user.getId();
     }
@@ -66,76 +65,52 @@ public class UserServiceImpl implements UserService {
     // user 정보 수정하기
     @Override
     public Long changeUser(String studentId, ProfileReqDTO request){
-
-        UserEntity userEntity = userRepository.findByStudentId(studentId)
+        User userEntity = userRepository.findByStudentId(studentId)
                 .orElseThrow(UserNotFoundException::new);
-
         userRepository.changeUser(studentId, request.getName(), request.getPhoneNumber(), request.getProfilePicture());
-
         Long id = userEntity.getId();
-
         return id;
     };
 
     @Override
     public Long removeUser(String studentId){
+        userRepository.findByStudentId(studentId)
+                .orElseThrow(UserNotFoundException::new); // user의 존재여부 확인
         userRepository.deleteByStudentId(studentId);
         return null;
     }
 
     @Override
-    public UserEntity getUserEntity(String studentId) {
-        UserEntity getId = userRepository.getEntity(studentId);
-        return getId;
-    }
-
-
-    @Override
     public ProfileDTO showUser(String studentId){
-
-        UserEntity user = userRepository.findByStudentId(studentId)
+        User user = userRepository.findByStudentId(studentId)
                 .orElseThrow(UserNotFoundException::new);
         // 만약 사용자 정보가 존재한다면 업데이트를 수행
-
-        ProfileDTO profileDTO = ProfileDTO.builder()
-                .studentId(user.getStudentId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .birth(user.getBirth())
-                .phoneNumber(user.getPhoneNumber())
-                .profilePicture(user.getProfilePicture())
-                .build();
+        ProfileDTO profileDTO = user.toProfileDTO(user);
 
         return profileDTO;
     }
 
     @Override
     public List<PostEntity> showMyBlog(String studentId){
-        UserEntity id = userRepository.getEntity(studentId);
-        Long userId = id.getId();
-        System.out.println(userId);
-        List<PostEntity> myBlog = postRepository.findByWriter(userId);
-
+        User user = userRepository.findByStudentId(studentId)
+                .orElseThrow(UserNotFoundException::new);
+        List<PostEntity> myBlog = postRepository.findByWriter(user.getId());
         return myBlog;
     }
 
     @Override
     public Boolean checkUser(CheckUserDTO checkUserDTO) {
-        UserEntity user = userRepository.findByStudentId(checkUserDTO.getStudentId())
+        User user = userRepository.findByStudentId(checkUserDTO.getStudentId())
                 .orElseThrow(UserNotFoundException::new);
 
         if(user.getEmail().equals(checkUserDTO.getEmail()) && user.getName().equals(checkUserDTO.getName())) return true;
-
         else throw new UserNotFoundException();
     }
 
     @Override
     public String sendEmail(EmailMessageDTO emailMessageDTO) {
-
         String authNum = createCode();
-
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-
         try {
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
             mimeMessageHelper.setTo(emailMessageDTO.getReceiver());
@@ -143,7 +118,6 @@ public class UserServiceImpl implements UserService {
             mimeMessageHelper.setText(setContext(authNum, "email"), true);
 
             javaMailSender.send(mimeMessage);
-
         } catch (MessagingException e) {
             throw new MessageException();
         }
@@ -179,12 +153,10 @@ public class UserServiceImpl implements UserService {
         String newPassword = password.getNewPassword();
 
         if(newPassword.equals(password.getCheckPassword())) {
-            UserEntity user = userRepository.findByStudentId(studentId.toString()).orElseThrow(UserNotFoundException::new);
-
+            User user = userRepository.findByStudentId(studentId.toString()).orElseThrow(UserNotFoundException::new);
             user.setPassword(bCryptPasswordEncoder.encode(newPassword));
-            UserEntity save = userRepository.save(user);
 
-            return save.getId();
+            return userRepository.save(user).getId();
         }
         else {
             throw new PasswordException();// 비밀번호가 서로 일치하지 않습니다.

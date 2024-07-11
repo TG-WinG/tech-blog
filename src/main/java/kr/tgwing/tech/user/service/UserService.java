@@ -7,9 +7,8 @@ import kr.tgwing.tech.user.dto.checkdto.CheckUserDTO;
 import kr.tgwing.tech.user.dto.checkdto.PasswordCheckDTO;
 import kr.tgwing.tech.user.dto.profiledto.ProfileDTO;
 import kr.tgwing.tech.user.dto.profiledto.ProfileReqDTO;
-import kr.tgwing.tech.user.dto.registerdto.EmailDto;
 import kr.tgwing.tech.user.dto.registerdto.UserDTO;
-import kr.tgwing.tech.user.entity.UserEntity;
+import kr.tgwing.tech.user.entity.User;
 
 import java.util.List;
 
@@ -23,7 +22,6 @@ public interface UserService{
 
     Long removeUser(String name);
 
-    UserEntity getUserEntity(String studentId);
 
     ProfileDTO showUser(String name);
 
