@@ -1,8 +1,8 @@
-package kr.tgwing.tech.reply.entity;
+package kr.tgwing.tech.blog.entity;
 
 import jakarta.persistence.*;
 import kr.tgwing.tech.common.BaseEntity;
-import kr.tgwing.tech.reply.dto.ReplyDto;
+import kr.tgwing.tech.blog.dto.ReplyDto;
 import lombok.*;
 
 import java.time.LocalDateTime;

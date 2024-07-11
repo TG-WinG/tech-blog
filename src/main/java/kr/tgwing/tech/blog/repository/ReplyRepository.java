@@ -1,6 +1,6 @@
-package kr.tgwing.tech.reply.repository;
+package kr.tgwing.tech.blog.repository;
 
-import kr.tgwing.tech.reply.entity.ReplyEntity;
+import kr.tgwing.tech.blog.entity.ReplyEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

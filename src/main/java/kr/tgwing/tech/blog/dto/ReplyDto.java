@@ -1,6 +1,6 @@
-package kr.tgwing.tech.reply.dto;
+package kr.tgwing.tech.blog.dto;
 
-import kr.tgwing.tech.reply.entity.ReplyEntity;
+import kr.tgwing.tech.blog.entity.ReplyEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
