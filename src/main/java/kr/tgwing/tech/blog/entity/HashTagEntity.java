@@ -21,5 +21,6 @@ public class HashTagEntity {
     private String name;
 
     @OneToMany(mappedBy = "hashtag")
+    @Builder.Default
     private Set<PostTagEntity> postTags = new HashSet<>();
 }

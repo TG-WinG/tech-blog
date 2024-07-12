@@ -12,7 +12,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Builder
-@ToString(exclude = "hashtags")
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name="post")
@@ -29,6 +29,7 @@ public class PostEntity extends BaseEntity {
     private String thumbnail;
 
     @OneToMany(mappedBy = "post")
+    @Builder.Default
     private Set<PostTagEntity> postTags = new HashSet<>();
 
 
@@ -51,9 +52,11 @@ public class PostEntity extends BaseEntity {
     public static PostDto toDto(PostEntity postEntity, Set<HashTagEntity> hashtags) {
         Set<String> tags = new HashSet<>();
 
-        for (HashTagEntity hashtag : hashtags) {
-            System.out.println(hashtag.getName());
-            tags.add(hashtag.getName());
+        if (hashtags != null) {
+            for (HashTagEntity hashtag : hashtags) {
+                System.out.println(hashtag.getName());
+                tags.add(hashtag.getName());
+            }
         }
 
         return PostDto.builder()

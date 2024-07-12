@@ -16,6 +16,8 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
     @Override
     List<PostEntity> findAll();
 
+    List<PostEntity> findByWriter(Long writer);
+
     Page<PostEntity> findAllByOrderByIdDesc(Pageable pageable);
 
     Page<PostEntity> findByTitleContains(String search, Pageable pageable);
