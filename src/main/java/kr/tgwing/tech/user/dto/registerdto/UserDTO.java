@@ -1,6 +1,7 @@
-package kr.tgwing.tech.user.dto;
+package kr.tgwing.tech.user.dto.registerdto;
 
-import kr.tgwing.tech.user.entity.UserEntity;
+import kr.tgwing.tech.user.entity.TempUser;
+import kr.tgwing.tech.user.entity.User;
 import lombok.*;
 
 import java.sql.Date;
@@ -17,15 +18,19 @@ public class UserDTO {
     private Date birth;
     private String phoneNumber;
 
-    public static UserEntity toUserEntity(UserDTO userDTO) {
-
-        return UserEntity.builder()
+    public static TempUser toTempUser(UserDTO userDTO) {
+        return TempUser.builder()
                 .studentId(userDTO.getStudentId())
                 .password(userDTO.getPassword())
-                .email(userDTO.getEmail())
                 .name(userDTO.getName())
+                .email(userDTO.getEmail())
                 .birth(userDTO.getBirth())
                 .phoneNumber(userDTO.getPhoneNumber())
                 .build();
+
+
     }
+
+
+
 }

@@ -1,4 +1,4 @@
-package kr.tgwing.tech.user.dto;
+package kr.tgwing.tech.user.dto.checkdto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

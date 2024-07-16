@@ -2,19 +2,17 @@ package kr.tgwing.tech.config;
 
 import java.sql.Date;
 
+import kr.tgwing.tech.user.dto.registerdto.UserDTO;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
-import kr.tgwing.tech.blog.entity.HashTagEntity;
 import kr.tgwing.tech.blog.entity.PostEntity;
-import kr.tgwing.tech.blog.entity.PostTagEntity;
 import kr.tgwing.tech.blog.entity.ReplyEntity;
 import kr.tgwing.tech.blog.repository.HashtagRepository;
 import kr.tgwing.tech.blog.repository.PostRepository;
 import kr.tgwing.tech.blog.repository.ReplyRepository;
-import kr.tgwing.tech.user.dto.UserDTO;
 import kr.tgwing.tech.user.service.UserService;
 
 @Configuration

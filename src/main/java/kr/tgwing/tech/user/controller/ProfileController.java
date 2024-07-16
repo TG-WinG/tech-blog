@@ -4,12 +4,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.tgwing.tech.blog.entity.PostEntity;
 import kr.tgwing.tech.common.ApiResponse;
-import kr.tgwing.tech.user.dto.ProfileDTO;
-import kr.tgwing.tech.user.dto.ProfileReqDTO;
+import kr.tgwing.tech.user.dto.profiledto.ProfileDTO;
+import kr.tgwing.tech.user.dto.profiledto.ProfileReqDTO;
 import kr.tgwing.tech.user.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.repository.config.RepositoryNameSpaceHandler;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,7 +46,7 @@ public class ProfileController {
     @PutMapping("")
     public ResponseEntity<ApiResponse<Long>> changeProfile(
             @RequestBody ProfileReqDTO request,
-            Principal principal){
+            Principal principal) {
         String studentId = principal.getName();
         Long change = userService.changeUser(studentId, request);
 

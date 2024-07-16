@@ -5,13 +5,12 @@ import kr.tgwing.tech.blog.repository.PostRepository;
 import kr.tgwing.tech.blog.dto.ReplyDto;
 import kr.tgwing.tech.blog.entity.ReplyEntity;
 import kr.tgwing.tech.blog.repository.ReplyRepository;
-import kr.tgwing.tech.security.util.JwtUtil;
-import kr.tgwing.tech.user.entity.UserEntity;
+
+import kr.tgwing.tech.user.entity.User;
 import kr.tgwing.tech.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -91,8 +90,9 @@ public class ReplyServiceImpl implements ReplyService{
         ReplyEntity replyEntity = replyById.orElseThrow();
 //        ReplyEntity replyEntity = replyById.orElseThrow(ReplyNotFoundException::new);
 
-        Optional<UserEntity> userById = userRepository.findById(commentId);
-        UserEntity userEntity = userById.orElseThrow();
+
+        Optional<User> userById = userRepository.findById(replyEntity.getWriter());
+        User userEntity = userById.orElseThrow();
 //        UserEntity userEntity = userById.orElseThrow(UserNotFoundException::new);
 
 

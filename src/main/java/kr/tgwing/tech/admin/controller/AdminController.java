@@ -8,10 +8,7 @@ import kr.tgwing.tech.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -25,7 +22,7 @@ public class AdminController {
     private final AdminServiceImpl adminService;
 
     @Operation(summary = "회원 요청 목록 확인하기")
-    @GetMapping("/user")
+    @GetMapping("")
     public ResponseEntity<ApiResponse<List<AdminCheckUserDto>>> checkUsers() {
         List<AdminCheckUserDto> dtoList = adminService.checkUser();
 
@@ -33,10 +30,18 @@ public class AdminController {
     }
 
     @Operation(summary = "회원 요청 수락하기")
-    @PostMapping("/user")
-    public ResponseEntity<ApiResponse<Long>> registerUsers() {
-        List<AdminCheckUserDto> dtoList = adminService.checkUser();
+    @PostMapping("/{id}")
+    public ResponseEntity<ApiResponse<Long>> registerUsers(@PathVariable("id") Long id) {
+        Long registerId = adminService.registerUsers(id);
 
-        return ResponseEntity.ok(ApiResponse.ok(4L));
+        return ResponseEntity.ok(ApiResponse.updated(registerId));
+    }
+
+    @Operation(summary = "회원 요청 거부하기")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Long>> refuseUsers(@PathVariable("id") Long id) {
+        Long refusedId = adminService.refuseUsers(id);
+
+        return ResponseEntity.ok(ApiResponse.delete(refusedId));
     }
 }

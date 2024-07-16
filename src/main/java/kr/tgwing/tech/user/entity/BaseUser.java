@@ -8,13 +8,12 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.io.Serializable;
 import java.sql.Date;
 
-@Entity
+
+@NoArgsConstructor
+@MappedSuperclass
 @Getter
-@Builder
-@Setter
-@NoArgsConstructor @AllArgsConstructor
-@Table(name = "users")
-public class UserEntity extends BaseEntity implements Serializable {
+public abstract class BaseUser extends BaseEntity implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -38,9 +37,20 @@ public class UserEntity extends BaseEntity implements Serializable {
     @Column(nullable = false, length = 13)
     private String phoneNumber;
 
-    @Column
-    private String role;
+    public BaseUser(String studentId, String password, String email, String name, Date birth, String phoneNumber) {
+        this.studentId = studentId;
+        this.password = password;
+        this.email = email;
+        this.name = name;
+        this.birth = birth;
+        this.phoneNumber = phoneNumber;
+    }
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-    @Column
-    private String profilePicture;
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
+    }
+
 }

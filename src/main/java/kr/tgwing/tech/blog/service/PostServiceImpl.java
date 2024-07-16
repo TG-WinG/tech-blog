@@ -12,7 +12,7 @@ import kr.tgwing.tech.blog.exception.WrongPostRequestException;
 import kr.tgwing.tech.blog.repository.HashtagRepository;
 import kr.tgwing.tech.blog.repository.PostRepository;
 import kr.tgwing.tech.blog.repository.PostTagRepository;
-import kr.tgwing.tech.user.entity.UserEntity;
+import kr.tgwing.tech.user.entity.User;
 import kr.tgwing.tech.user.exception.UserNotFoundException;
 import kr.tgwing.tech.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -74,8 +74,8 @@ public class PostServiceImpl implements PostService {
     public PostDto createPost(PostCreationDto requestDto, String utilStudentId)  // 공지 생성하기
     {
         // 글을 작성할 user 조회
-        Optional<UserEntity> byStudentId = userRepository.findByStudentId(utilStudentId);
-        UserEntity userEntity = byStudentId.orElseThrow(UserNotFoundException::new);
+        Optional<User> byStudentId = userRepository.findByStudentId(utilStudentId);
+        User userEntity = byStudentId.orElseThrow(UserNotFoundException::new);
 
         // 현재 사용자와 요청 시 들어온 writer가 같은지 확인
         if (!Objects.equals(userEntity.getStudentId(), utilStudentId)) {
@@ -110,8 +110,8 @@ public class PostServiceImpl implements PostService {
         // 해당 URL을 요청자 ==  공지 작성자 일 때에만 수정 가능
         // 수정 목록 : title, content, thumbnail
 
-        Optional<UserEntity> userById = userRepository.findById(postEntity.getWriter());
-        UserEntity userEntity = userById.orElseThrow(UserNotFoundException::new); // 유저 notfound 예외처리
+        Optional<User> userById = userRepository.findById(postEntity.getWriter());
+        User userEntity = userById.orElseThrow(UserNotFoundException::new); // 유저 notfound 예외처리
 
         log.info("util학번 = {}", utilStudentId);
         log.info("user학번 = {}", userEntity.getStudentId());
@@ -143,8 +143,8 @@ public class PostServiceImpl implements PostService {
         Optional<PostEntity> postById = postRepository.findById(postId);
         PostEntity postEntity = postById.orElseThrow(PostNotFoundException::new);
 
-        Optional<UserEntity> userById = userRepository.findById(postEntity.getWriter());
-        UserEntity userEntity = userById.orElseThrow(UserNotFoundException::new);
+        Optional<User> userById = userRepository.findById(postEntity.getWriter());
+        User userEntity = userById.orElseThrow(UserNotFoundException::new);
 
         // 해당 URL을 요청한 사람이 공지 작성자인 경우에만 삭제 가능
         if(Objects.equals(userEntity.getStudentId(), utilStudentId)) {
