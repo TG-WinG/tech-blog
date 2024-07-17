@@ -27,6 +27,7 @@ public class PostEntity extends BaseEntity {
     @Column(nullable = false)
     private String content;
     private String thumbnail;
+    private int replyCount;
 
     @OneToMany(mappedBy = "post")
     @Builder.Default
