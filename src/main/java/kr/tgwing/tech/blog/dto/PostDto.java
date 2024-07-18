@@ -18,6 +18,7 @@ public class PostDto {
     private String title;
     private String content;
     private String thumbnail;
+    private int replyCount;
     private Set<String> hashtags;
 
     public static PostEntity toEntity(PostDto postRequestDto) {
