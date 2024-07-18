@@ -1,4 +1,4 @@
-package kr.tgwing.tech.blog.exception;
+package kr.tgwing.tech.blog.exception.post;
 
 import kr.tgwing.tech.common.exception.CommonException;
 

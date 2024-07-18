@@ -6,9 +6,9 @@ import kr.tgwing.tech.blog.dto.PostDto;
 import kr.tgwing.tech.blog.entity.HashTagEntity;
 import kr.tgwing.tech.blog.entity.PostEntity;
 import kr.tgwing.tech.blog.entity.PostTagEntity;
-import kr.tgwing.tech.blog.exception.PostNotFoundException;
-import kr.tgwing.tech.blog.exception.UserIsNotPostWriterException;
-import kr.tgwing.tech.blog.exception.WrongPostRequestException;
+import kr.tgwing.tech.blog.exception.post.PostNotFoundException;
+import kr.tgwing.tech.blog.exception.post.UserIsNotPostWriterException;
+import kr.tgwing.tech.blog.exception.post.WrongPostRequestException;
 import kr.tgwing.tech.blog.repository.HashtagRepository;
 import kr.tgwing.tech.blog.repository.PostRepository;
 import kr.tgwing.tech.blog.repository.PostTagRepository;
@@ -37,6 +37,7 @@ import static kr.tgwing.tech.blog.entity.PostEntity.toDto;
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+
     @Autowired
     private HashtagRepository hashtagRepository;
     @Autowired

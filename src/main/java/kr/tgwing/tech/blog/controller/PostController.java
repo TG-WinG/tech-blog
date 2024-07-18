@@ -2,7 +2,7 @@ package kr.tgwing.tech.blog.controller;
 
 import kr.tgwing.tech.blog.dto.PostCreationDto;
 import kr.tgwing.tech.blog.dto.PostDto;
-import kr.tgwing.tech.blog.exception.PathHasNoPostIdException;
+import kr.tgwing.tech.blog.exception.post.PathHasNoPostIdException;
 import kr.tgwing.tech.blog.service.PostServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

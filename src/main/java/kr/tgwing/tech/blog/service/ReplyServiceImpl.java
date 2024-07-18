@@ -1,12 +1,17 @@
 package kr.tgwing.tech.blog.service;
 
 import kr.tgwing.tech.blog.entity.PostEntity;
+import kr.tgwing.tech.blog.exception.post.PostNotFoundException;
+import kr.tgwing.tech.blog.exception.reply.ReplyBadRequestException;
+import kr.tgwing.tech.blog.exception.reply.ReplyForbiddenException;
+import kr.tgwing.tech.blog.exception.reply.ReplyNotFoundException;
 import kr.tgwing.tech.blog.repository.PostRepository;
 import kr.tgwing.tech.blog.dto.ReplyDto;
 import kr.tgwing.tech.blog.entity.ReplyEntity;
 import kr.tgwing.tech.blog.repository.ReplyRepository;
 
 import kr.tgwing.tech.user.entity.User;
+import kr.tgwing.tech.user.exception.UserNotFoundException;
 import kr.tgwing.tech.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -56,8 +61,8 @@ public class ReplyServiceImpl implements ReplyService{
 
     public ReplyDto post(ReplyDto reqDto, Long postId) {
 
-        PostEntity post = postRepository.findById(postId).orElseThrow();
-//        PostEntity post = postRepository.findById(postId).orElseThrow(PostNotFoundException::new);
+        PostEntity post = postRepository.findById(postId)
+                .orElseThrow(PostNotFoundException::new);
 
         ReplyEntity replyEntity = ReplyDto.toEntity(reqDto, postId);
 
@@ -86,13 +91,11 @@ public class ReplyServiceImpl implements ReplyService{
          * userEntity.studentId != token.studentId 이면 삭제 권한 없음
          */
 
-        Optional<ReplyEntity> replyById = replyRepository.findById(commentId);
-        ReplyEntity replyEntity = replyById.orElseThrow();
-//        ReplyEntity replyEntity = replyById.orElseThrow(ReplyNotFoundException::new);
+        ReplyEntity replyEntity = replyRepository.findById(commentId)
+                .orElseThrow(ReplyNotFoundException::new);
 
-
-        Optional<User> userById = userRepository.findById(replyEntity.getWriter());
-        User userEntity = userById.orElseThrow();
+        User userEntity = userRepository.findById(replyEntity.getWriter())
+                .orElseThrow(UserNotFoundException::new);
 //        UserEntity userEntity = userById.orElseThrow(UserNotFoundException::new);
 
 
@@ -105,12 +108,12 @@ public class ReplyServiceImpl implements ReplyService{
             }
             else {
                 System.out.println("요청된 게시글 ID와 삭제를 원하는 댓글이 속한 게시글 ID이 서로 다름");
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+                throw new ReplyBadRequestException();
             }
         }
         else {
             System.out.println("URL 요청자와 공지 작성자가 다름");
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+            throw new ReplyForbiddenException();
         }
     }
 

@@ -1,6 +1,9 @@
 package kr.tgwing.tech.common.exception;
 
-import kr.tgwing.tech.blog.exception.*;
+import kr.tgwing.tech.blog.exception.post.*;
+import kr.tgwing.tech.blog.exception.reply.ReplyBadRequestException;
+import kr.tgwing.tech.blog.exception.reply.ReplyForbiddenException;
+import kr.tgwing.tech.blog.exception.reply.ReplyNotFoundException;
 import kr.tgwing.tech.user.exception.*;
 import org.springframework.http.HttpStatus;
 
@@ -14,6 +17,7 @@ public class ExceptionMapper { // 예외 객체 -> 예외 상태로 바꿔주는
     static {
         setUpUserException();
         setUpPostException();
+        setUpReplyException();
 //        setUpReplyException();
     }
 
@@ -43,6 +47,15 @@ public class ExceptionMapper { // 예외 객체 -> 예외 상태로 바꿔주는
                 ExceptionSituation.of("블로그 수정(삭제) 권한이 존재하지 않습니다", HttpStatus.FORBIDDEN, 4404));
         mapper.put(WrongPostRequestException.class,
                 ExceptionSituation.of("요청에 잘못된 정보가 포함되어 있습니다", HttpStatus.BAD_REQUEST, 4406));
+    }
+
+    private static void setUpReplyException() {
+        mapper.put(ReplyNotFoundException.class,
+                ExceptionSituation.of("현재 댓글이 존재하지 않습니다.", HttpStatus.NOT_FOUND, 5500));
+        mapper.put(ReplyBadRequestException.class,
+                ExceptionSituation.of("요청한 댓글의 ID와 게시글의 ID가 일치하지 않습니다.", HttpStatus.BAD_REQUEST, 5501));
+        mapper.put(ReplyForbiddenException.class,
+                ExceptionSituation.of("요청한 사용자에게 권한이 없습니다.", HttpStatus.FORBIDDEN, 5502));
     }
 
 
