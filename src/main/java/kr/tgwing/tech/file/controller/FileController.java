@@ -8,24 +8,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.UUID;
 
 @Profile("dev")
-@Controller
+@RestController
 @RequiredArgsConstructor
 @Slf4j
 public class FileController {
@@ -40,21 +33,19 @@ public class FileController {
     private String domain;
 
     @PostMapping(path = "/file/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadImage(
+    public String uploadImage(
             @RequestPart(value = "image") MultipartFile image
     ){
         String uuid = fileServiceImpl.uploadImage(image);
-        String url = "http://" + domain + contextPath + "/file/image?uuid=" + uuid;
-        return ResponseEntity.ok(url);
+        return "http://" + domain + contextPath + "/file/image?uuid=" + uuid;
     }
 
     @PostMapping(path = "/file/attachment", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadAttachment(
+    public String uploadAttachment(
             @RequestPart(value = "file") MultipartFile file
     ){
         String filename = fileServiceImpl.uploadFile(file);
-        String url = "http://" + domain + contextPath + "/file/attachment?filename=" + filename;
-        return ResponseEntity.ok(url);
+        return "http://" + domain + contextPath + "/file/attachment?filename=" + filename;
     }
 
     @GetMapping("/file/image")
