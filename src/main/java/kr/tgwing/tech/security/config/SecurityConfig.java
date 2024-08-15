@@ -1,6 +1,8 @@
 package kr.tgwing.tech.security.config;
 
+import jakarta.servlet.http.HttpSession;
 import kr.tgwing.tech.security.filter.JwtFilter;
+import kr.tgwing.tech.security.service.JwtBlackListService;
 import kr.tgwing.tech.security.util.JwtUtil;
 import kr.tgwing.tech.security.filter.LoginFilter;
 import lombok.extern.log4j.Log4j2;
@@ -9,21 +11,27 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AndRequestMatcher;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @EnableWebSecurity
 @Log4j2
 @Configuration
 public class SecurityConfig {
-
+    private final AuthenticationConfiguration authenticationConfiguration;
+    private final JwtUtil jwtUtil;
+    private final JwtBlackListService jwtBlackListService;
     private static final String[] PERMIT_URL_ARRAY = {
             /* swagger v2 */
             "/v2/api-docs",
@@ -46,7 +54,12 @@ public class SecurityConfig {
             "/api-docs/json/swagger-config",
             "/api-docs/json"
     };
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JwtUtil jwtUtil, JwtBlackListService jwtBlackListService) {
 
+        this.authenticationConfiguration = authenticationConfiguration;
+        this.jwtUtil = jwtUtil;
+        this.jwtBlackListService = jwtBlackListService;
+    }
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         log.info("WebSecurity......................");
@@ -55,21 +68,15 @@ public class SecurityConfig {
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 
-    private final AuthenticationConfiguration authenticationConfiguration;
-
-    private final JwtUtil jwtUtil;
-
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JwtUtil jwtUtil) {
-
-        this.authenticationConfiguration = authenticationConfiguration;
-        this.jwtUtil = jwtUtil;
-    }
-
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
 
         return configuration.getAuthenticationManager();
     }
+    @Bean
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
+        return new BCryptPasswordEncoder();
+    } // 생성자 선언해둬야함... 해야되나?
 
     @Bean // 요청이 들어오면 SecurityFilterChain이 가로채서 인증, 인가를 체크함.
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -80,28 +87,45 @@ public class SecurityConfig {
                 .cors(AbstractHttpConfigurer::disable)
 
                 // .formLogin(Customizer.withDefaults())// -> 로그인 화면 구성되면 사용해야함.
-                // .logout((logout) -> logout
-                // .clearAuthentication(true))
-
+                 .logout((logout) -> logout
+                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                         .clearAuthentication(true)
+                         .invalidateHttpSession(true)
+                         .logoutSuccessUrl("/user/login") // 로그아웃 후 리디렉션할 URL 지정
+                         .deleteCookies("JSESSIONID")) // 세션 쿠키 삭제
+//                .logout((logout) -> )
+//                .logoutUrl("/logout")
+//                .addLogoutHandler((request, response, authentication) -> {
+//                    HttpSession session = request.getSession();
+//                    if (session != null) {
+//                        session.invalidate();
+//                    }
+//                })
+//                .logoutSuccessHandler((request, response, authentication) -> {
+//                    response.sendRedirect("/login");
+//                })
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(PERMIT_URL_ARRAY)
                         .permitAll()
 //                        .requestMatchers("/user/**", "/login", "/admin/**")
 //                        .permitAll()
-////                        .requestMatchers("/admin/**")
-////                        .hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.GET, "/file/**")
-//                        .permitAll()
+//                        .requestMatchers("/admin/**")
+//                        .hasRole("ADMIN")
                         .requestMatchers("/**")
                         .permitAll()
                         .anyRequest().authenticated())
-                        .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)
+                        .addFilterBefore(new JwtFilter(jwtUtil, jwtBlackListService), LoginFilter.class)
                         .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
                                 UsernamePasswordAuthenticationFilter.class)
                         .sessionManagement((session) -> session
                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                         .build();
     }
+
+//    public HttpSecurity logout(Customizer<LogoutConfigurer<HttpSecurity>> logoutCustomizer) throws Exception {
+//        logoutCustomizer.customize(getOrApply(new LogoutConfigurer<>()));
+//        return HttpSecurity.this;
+//    }
 
     // @Bean
     // @ConditionalOnMissingBean(UserDetailsService.class)
@@ -115,8 +139,4 @@ public class SecurityConfig {
     // return new InMemoryUserDetailsManager(admin);
     // }
 
-    @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
-    } // 생성자 선언해둬야함... 해야되나?
 }

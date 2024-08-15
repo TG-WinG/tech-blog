@@ -5,6 +5,7 @@ import jakarta.mail.internet.MimeMessage;
 import kr.tgwing.tech.blog.entity.PostEntity;
 import kr.tgwing.tech.blog.repository.PostRepository;
 import kr.tgwing.tech.user.dto.*;
+import kr.tgwing.tech.user.dto.checkdto.CheckNumberDTO;
 import kr.tgwing.tech.user.dto.checkdto.CheckUserDTO;
 import kr.tgwing.tech.user.dto.checkdto.PasswordCheckDTO;
 import kr.tgwing.tech.user.dto.profiledto.ProfileDTO;
@@ -12,10 +13,7 @@ import kr.tgwing.tech.user.dto.profiledto.ProfileReqDTO;
 import kr.tgwing.tech.user.dto.registerdto.UserDTO;
 import kr.tgwing.tech.user.entity.TempUser;
 import kr.tgwing.tech.user.entity.User;
-import kr.tgwing.tech.user.exception.MessageException;
-import kr.tgwing.tech.user.exception.PasswordException;
-import kr.tgwing.tech.user.exception.UserDuplicatedException;
-import kr.tgwing.tech.user.exception.UserNotFoundException;
+import kr.tgwing.tech.user.exception.*;
 import kr.tgwing.tech.user.repository.TempUserRepository;
 import kr.tgwing.tech.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -99,12 +97,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Boolean checkUser(CheckUserDTO checkUserDTO) {
+    public void checkUser(CheckUserDTO checkUserDTO) {
         User user = userRepository.findByStudentId(checkUserDTO.getStudentId())
                 .orElseThrow(UserNotFoundException::new);
 
-        if(user.getEmail().equals(checkUserDTO.getEmail()) && user.getName().equals(checkUserDTO.getName())) return true;
-        else throw new UserNotFoundException();
+        if(!user.getEmail().equals(checkUserDTO.getEmail()) || !user.getName().equals(checkUserDTO.getName()))
+            throw new UserNotFoundException();
     }
 
     @Override
@@ -149,7 +147,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Long setNewPassword(Object studentId, PasswordCheckDTO password) {
+    public Long setNewPassword(String studentId, PasswordCheckDTO password) {
         String newPassword = password.getNewPassword();
 
         if(newPassword.equals(password.getCheckPassword())) {
@@ -163,4 +161,8 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public void checkCode(String code, CheckNumberDTO checkNumberDTO) {
+        if(!code.equals(checkNumberDTO.getCode())) throw new EmailCodeException(); // 인증코드가 일치하지 않습니다.
+    }
 }

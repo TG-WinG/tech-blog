@@ -3,6 +3,7 @@ package kr.tgwing.tech.user.service;
 
 import kr.tgwing.tech.blog.entity.PostEntity;
 import kr.tgwing.tech.user.dto.*;
+import kr.tgwing.tech.user.dto.checkdto.CheckNumberDTO;
 import kr.tgwing.tech.user.dto.checkdto.CheckUserDTO;
 import kr.tgwing.tech.user.dto.checkdto.PasswordCheckDTO;
 import kr.tgwing.tech.user.dto.profiledto.ProfileDTO;
@@ -27,9 +28,11 @@ public interface UserService{
 
     List<PostEntity> showMyBlog(String studentId);
 
-    Boolean checkUser(CheckUserDTO checkUserDTO); // 본인 확인하기
+    void checkUser(CheckUserDTO checkUserDTO); // 본인 확인하기
 
     String sendEmail(EmailMessageDTO emailMessage); // 메일로 인증번호 전송하기
 
-    Long setNewPassword(Object studentId, PasswordCheckDTO password);
+    Long setNewPassword(String studentId, PasswordCheckDTO password);
+
+    void checkCode(String code, CheckNumberDTO checkNumberDTO);
 }
