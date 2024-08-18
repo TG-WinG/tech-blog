@@ -80,7 +80,7 @@ public class UserController {
         String studentKey = UUID.randomUUID().toString();
         String emailKey = UUID.randomUUID().toString();
 
-        valueOperations.set(studentKey, checkUserDTO.getStudentId());
+        valueOperations.set(studentKey, checkUserDTO.getStudentNumber());
         valueOperations.set(emailKey, code);
 
         return ResponseEntity.ok(ApiResponse.created(new Pair<>(studentKey, emailKey)));
@@ -111,6 +111,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.updated(userId));
     }
 
+    @Operation(summary = "로그아웃")
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Void>> logout(
             @RequestHeader(name = "Authorization") String authorization) {
@@ -120,6 +121,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.ok());
     }
 
+    @Operation(summary = "로그아웃 시, 리다이렉트(임시용)")
     @GetMapping("/login")
     public String login() {
         return "login";

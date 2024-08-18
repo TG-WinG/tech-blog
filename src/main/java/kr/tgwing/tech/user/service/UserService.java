@@ -17,7 +17,7 @@ public interface UserService{
 
     Long register(UserDTO userDTO);
 
-    Long logout(String studentId);
+    Long logout(String studentNumber);
 
     Long changeUser(String name, ProfileReqDTO request);
 
@@ -26,13 +26,13 @@ public interface UserService{
 
     ProfileDTO showUser(String name);
 
-    List<PostEntity> showMyBlog(String studentId);
+    List<PostEntity> showMyBlog(String studentNumber);
 
     void checkUser(CheckUserDTO checkUserDTO); // 본인 확인하기
 
     String sendEmail(EmailMessageDTO emailMessage); // 메일로 인증번호 전송하기
 
-    Long setNewPassword(String studentId, PasswordCheckDTO password);
+    Long setNewPassword(String studentNumber, PasswordCheckDTO password);
 
     void checkCode(String code, CheckNumberDTO checkNumberDTO);
 }

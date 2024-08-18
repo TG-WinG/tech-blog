@@ -41,7 +41,7 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public String getUsername() {
 
-        return userEntity.getStudentId();
+        return userEntity.getStudentNumber();
     }
 
     public String getProfilePicture() {

@@ -11,7 +11,7 @@ import java.sql.Date;
 @Getter
 @DiscriminatorValue("M")
 @NoArgsConstructor
-@Table(name = "user")
+@Table(name = "student")
 public class User extends BaseUser {
 
     @Column
@@ -21,8 +21,8 @@ public class User extends BaseUser {
     private String profilePicture;
 
     @Builder
-    public User(String studentId, String password, String email, String name, Date birth, String phoneNumber, String role, String profilePicture) {
-        super(studentId, password, email, name, birth, phoneNumber);
+    public User(String studentNumber, String password, String email, String name, Date birth, String phoneNumber, String role, String profilePicture) {
+        super(studentNumber, password, email, name, birth, phoneNumber);
         this.role = role;
         this.profilePicture = profilePicture;
     }
@@ -33,7 +33,7 @@ public class User extends BaseUser {
 
     public ProfileDTO toProfileDTO(User user) {
         return ProfileDTO.builder()
-                .studentId(user.getStudentId())
+                .studentNumber(user.getStudentNumber())
                 .email(user.getEmail())
                 .name(user.getName())
                 .birth(user.getBirth())

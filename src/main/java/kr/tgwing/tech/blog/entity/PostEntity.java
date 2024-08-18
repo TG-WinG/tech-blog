@@ -15,17 +15,19 @@ import java.util.Set;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name="post")
+@Table(name="blog")
 public class PostEntity extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @JoinColumn(referencedColumnName = "id", table = "user")
+    @JoinColumn(referencedColumnName = "student_id", table = "student")
     private Long writer;
     @Column(nullable = false)
     private String title;
     @Column(nullable = false)
     private String content;
+
+    @Column(name = "thumbnail_url")
     private String thumbnail;
     private int replyCount;
 

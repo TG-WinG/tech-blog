@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @ToString
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "reply")
+@Table(name = "blog_comment_reply")
 public class ReplyEntity extends BaseEntity {
 
     @Id

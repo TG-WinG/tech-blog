@@ -11,7 +11,7 @@ import java.sql.Date;
 @NoArgsConstructor @AllArgsConstructor
 public class UserDTO {
 
-    private String studentId;
+    private String studentNumber;
     private String password;
     private String email;
     private String name; // 이름
@@ -20,7 +20,7 @@ public class UserDTO {
 
     public static TempUser toTempUser(UserDTO userDTO) {
         return TempUser.builder()
-                .studentId(userDTO.getStudentId())
+                .studentNumber(userDTO.getStudentNumber())
                 .password(userDTO.getPassword())
                 .name(userDTO.getName())
                 .email(userDTO.getEmail())

@@ -13,7 +13,7 @@ import java.sql.Date;
 @AllArgsConstructor
 public class ProfileDTO {
 
-    private String studentId;
+    private String studentNumber;
     private String email;
     private String name; // 이름
     private Date birth;

@@ -18,8 +18,8 @@ public class ProjectCreateDTO {
     private LocalDateTime start;
     private LocalDateTime end;
     private String thumbnail;
-    private String devStatus;
-    private String devType;
+    private String devStatus; // ?
+    private String devType; // ?
     private List<ParticipantDTO> participants = new ArrayList<>();
     private List<LinkDTO> links = new ArrayList<>();
 

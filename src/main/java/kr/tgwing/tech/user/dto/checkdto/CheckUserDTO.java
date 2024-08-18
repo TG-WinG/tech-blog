@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor @AllArgsConstructor
 public class CheckUserDTO {
-    private String studentId;
+    private String studentNumber;
     private String name;
     private String email;
 

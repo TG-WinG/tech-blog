@@ -14,29 +14,29 @@ import java.sql.Date;
 
 @Entity
 @Getter
-@Table(name = "temp_user")
+@Table(name = "assignment_request")
 @DiscriminatorValue("F")
 @NoArgsConstructor
 public class TempUser extends BaseUser{
 
     @Builder
-    public TempUser(String studentId, String password, String email, String name, Date birth, String phoneNumber) {
-        super(studentId, password, email, name, birth, phoneNumber);
+    public TempUser(String studentNumber, String password, String email, String name, Date birth, String phoneNumber) {
+        super(studentNumber, password, email, name, birth, phoneNumber);
     }
 
     public AdminCheckUserDto toAdminCheckUserDto(TempUser user) {
         return AdminCheckUserDto.builder()
-                .id(user.getId())
+                .studentId(user.getStudentId())
                 .name(user.getName())
                 .email(user.getEmail())
-                .studentId(user.getStudentId())
+                .studentNumber(user.getStudentNumber())
                 .phoneNumber(user.getPhoneNumber())
                 .build();
     }
 
     public User toUser(TempUser user) {
         return User.builder()
-                .studentId(user.getStudentId())
+                .studentNumber(user.getStudentNumber())
                 .password(user.getPassword())
                 .email(user.getEmail())
                 .name(user.getName())

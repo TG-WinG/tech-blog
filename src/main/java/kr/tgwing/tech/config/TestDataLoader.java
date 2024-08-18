@@ -26,7 +26,7 @@ public class TestDataLoader {
                                           ReplyRepository replyRepository) {
         return args -> {
             userService.register(UserDTO.builder()
-                .studentId("2018000000")
+                .studentNumber("2018000000")
                 .phoneNumber("01000000000")
                 .email("oldman@khu.ac.kr")
                 .name("늙은이")
@@ -34,7 +34,7 @@ public class TestDataLoader {
                 .birth(Date.valueOf("1999-01-01"))
                 .build());
             userService.register(UserDTO.builder()
-                .studentId("2022000000")
+                .studentNumber("2022000000")
                 .phoneNumber("01011111111")
                 .email("youngman@khu.ac.kr")
                 .name("젊은이")

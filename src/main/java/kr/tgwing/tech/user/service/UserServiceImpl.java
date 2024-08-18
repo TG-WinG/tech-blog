@@ -43,44 +43,44 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Long register(UserDTO userDTO){
-        Optional<User> user = userRepository.findByStudentId(userDTO.getStudentId());
+        Optional<User> user = userRepository.findByStudentNumber(userDTO.getStudentNumber());
         if(user.isPresent())
             throw new UserDuplicatedException();
         TempUser tempUser = UserDTO.toTempUser(userDTO);
         tempUser.hashPassword(bCryptPasswordEncoder);
 
-        return tempUserRepository.save(tempUser).getId();
+        return tempUserRepository.save(tempUser).getStudentId();
     }
 
 
     @Override
-    public Long logout(String studentId) {
-        User user = userRepository.findByStudentId(studentId).orElseThrow(UserNotFoundException::new);
+    public Long logout(String studentNumber) {
+        User user = userRepository.findByStudentNumber(studentNumber).orElseThrow(UserNotFoundException::new);
 
-        return user.getId();
+        return user.getStudentId();
     }
 
     // user 정보 수정하기
     @Override
-    public Long changeUser(String studentId, ProfileReqDTO request){
-        User userEntity = userRepository.findByStudentId(studentId)
+    public Long changeUser(String studentNumber, ProfileReqDTO request){
+        User userEntity = userRepository.findByStudentNumber(studentNumber)
                 .orElseThrow(UserNotFoundException::new);
-        userRepository.changeUser(studentId, request.getName(), request.getPhoneNumber(), request.getProfilePicture());
-        Long id = userEntity.getId();
+        userRepository.changeUser(studentNumber, request.getName(), request.getPhoneNumber(), request.getProfilePicture());
+        Long id = userEntity.getStudentId();
         return id;
     };
 
     @Override
-    public Long removeUser(String studentId){
-        userRepository.findByStudentId(studentId)
+    public Long removeUser(String studentNumber){
+        userRepository.findByStudentNumber(studentNumber)
                 .orElseThrow(UserNotFoundException::new); // user의 존재여부 확인
-        userRepository.deleteByStudentId(studentId);
+        userRepository.deleteByStudentId(studentNumber);
         return null;
     }
 
     @Override
-    public ProfileDTO showUser(String studentId){
-        User user = userRepository.findByStudentId(studentId)
+    public ProfileDTO showUser(String studentNumber){
+        User user = userRepository.findByStudentNumber(studentNumber)
                 .orElseThrow(UserNotFoundException::new);
         // 만약 사용자 정보가 존재한다면 업데이트를 수행
         ProfileDTO profileDTO = user.toProfileDTO(user);
@@ -89,16 +89,16 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<PostEntity> showMyBlog(String studentId){
-        User user = userRepository.findByStudentId(studentId)
+    public List<PostEntity> showMyBlog(String studentNumber){
+        User user = userRepository.findByStudentNumber(studentNumber)
                 .orElseThrow(UserNotFoundException::new);
-        List<PostEntity> myBlog = postRepository.findByWriter(user.getId());
+        List<PostEntity> myBlog = postRepository.findByWriter(user.getStudentId());
         return myBlog;
     }
 
     @Override
     public void checkUser(CheckUserDTO checkUserDTO) {
-        User user = userRepository.findByStudentId(checkUserDTO.getStudentId())
+        User user = userRepository.findByStudentNumber(checkUserDTO.getStudentNumber())
                 .orElseThrow(UserNotFoundException::new);
 
         if(!user.getEmail().equals(checkUserDTO.getEmail()) || !user.getName().equals(checkUserDTO.getName()))
@@ -147,14 +147,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Long setNewPassword(String studentId, PasswordCheckDTO password) {
+    public Long setNewPassword(String studentNumber, PasswordCheckDTO password) {
         String newPassword = password.getNewPassword();
 
         if(newPassword.equals(password.getCheckPassword())) {
-            User user = userRepository.findByStudentId(studentId.toString()).orElseThrow(UserNotFoundException::new);
+            User user = userRepository.findByStudentNumber(studentNumber.toString()).orElseThrow(UserNotFoundException::new);
             user.setPassword(bCryptPasswordEncoder.encode(newPassword));
 
-            return userRepository.save(user).getId();
+            return userRepository.save(user).getStudentId();
         }
         else {
             throw new PasswordException();// 비밀번호가 서로 일치하지 않습니다.

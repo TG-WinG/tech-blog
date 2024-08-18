@@ -16,10 +16,10 @@ public abstract class BaseUser extends BaseEntity implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long studentId;
 
     @Column(length = 10, unique = true, nullable = false)
-    private String studentId;
+    private String studentNumber;
 
     @Column(nullable = false)
     private String password;
@@ -37,8 +37,8 @@ public abstract class BaseUser extends BaseEntity implements Serializable {
     @Column(nullable = false, length = 13)
     private String phoneNumber;
 
-    public BaseUser(String studentId, String password, String email, String name, Date birth, String phoneNumber) {
-        this.studentId = studentId;
+    public BaseUser(String studentNumber, String password, String email, String name, Date birth, String phoneNumber) {
+        this.studentNumber = studentNumber;
         this.password = password;
         this.email = email;
         this.name = name;
@@ -49,8 +49,8 @@ public abstract class BaseUser extends BaseEntity implements Serializable {
         this.password = password;
     }
 
-    public void setStudentId(String studentId) {
-        this.studentId = studentId;
+    public void setStudentNumber(String studentNumber) {
+        this.studentNumber = studentNumber;
     }
 
 }

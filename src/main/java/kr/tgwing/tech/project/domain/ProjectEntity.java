@@ -26,6 +26,8 @@ public class ProjectEntity extends BaseEntity {
     private String description;
     private LocalDateTime start;
     private LocalDateTime end;
+
+    @Column(name = "thumbnail_url")
     private String thumbnail;
     private String devStatus;
     private String devType;
