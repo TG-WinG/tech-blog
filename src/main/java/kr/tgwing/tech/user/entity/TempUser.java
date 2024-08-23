@@ -1,6 +1,5 @@
 package kr.tgwing.tech.user.entity;
 
-import jakarta.persistence.DiscriminatorColumn;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -11,6 +10,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -20,7 +20,7 @@ import java.sql.Date;
 public class TempUser extends BaseUser{
 
     @Builder
-    public TempUser(String studentNumber, String password, String email, String name, Date birth, String phoneNumber) {
+    public TempUser(String studentNumber, String password, String email, String name, LocalDate birth, String phoneNumber) {
         super(studentNumber, password, email, name, birth, phoneNumber);
     }
 

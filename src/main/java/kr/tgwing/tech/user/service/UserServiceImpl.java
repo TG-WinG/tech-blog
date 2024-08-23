@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserService {
     public Long removeUser(String studentNumber){
         userRepository.findByStudentNumber(studentNumber)
                 .orElseThrow(UserNotFoundException::new); // user의 존재여부 확인
-        userRepository.deleteByStudentId(studentNumber);
+        userRepository.deleteByStudentNumber(studentNumber);
         return null;
     }
 

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 @Getter
 @Builder
@@ -16,7 +17,7 @@ public class ProfileDTO {
     private String studentNumber;
     private String email;
     private String name; // 이름
-    private Date birth;
+    private LocalDate birth;
     private String phoneNumber;
     private String profilePicture;
 

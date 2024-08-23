@@ -5,6 +5,7 @@ import kr.tgwing.tech.user.entity.User;
 import lombok.*;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -15,7 +16,7 @@ public class UserDTO {
     private String password;
     private String email;
     private String name; // 이름
-    private Date birth;
+    private LocalDate birth;
     private String phoneNumber;
 
     public static TempUser toTempUser(UserDTO userDTO) {

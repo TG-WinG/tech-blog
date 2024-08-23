@@ -15,7 +15,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByStudentNumber(String studentNumber);
 
     @Transactional
-    void deleteByStudentId(String studentId);
+    void deleteByStudentNumber(String studentNumber);
 
 
     @Transactional

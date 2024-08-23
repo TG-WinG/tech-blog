@@ -1,12 +1,11 @@
 package kr.tgwing.tech.project.controller;
 
 import jakarta.validation.Valid;
+import kr.tgwing.tech.common.ApiResponse;
 import kr.tgwing.tech.project.dto.ProjectBriefDTO;
 import kr.tgwing.tech.project.dto.ProjectCreateDTO;
 import kr.tgwing.tech.project.dto.ProjectDetailDTO;
 import kr.tgwing.tech.project.dto.ProjectUpdateDTO;
-import kr.tgwing.tech.project.exception.BadRequestException;
-import kr.tgwing.tech.project.exception.NotFoundException;
 import kr.tgwing.tech.project.service.ProjectServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,45 +17,40 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/project")
 @Slf4j
 public class ProjectController {
     private final ProjectServiceImpl projectServiceImpl;
 
-    @GetMapping("/projects")
+    @GetMapping("")
     public ResponseEntity<?> getProjects(){
         List<ProjectBriefDTO> projects = projectServiceImpl.getProjects();
-        return ResponseEntity.ok(projects);
+        return ResponseEntity.ok(ApiResponse.ok(projects));
     }
 
-    @GetMapping("/projects/{project_id}")
-    public ResponseEntity<?> getOneProject(@PathVariable("project_id") Long project_id) throws NotFoundException{
+    @GetMapping("/{project_id}")
+    public ResponseEntity<?> getOneProject(@PathVariable("project_id") Long project_id){
         ProjectDetailDTO project = projectServiceImpl.getOneProject(project_id);
-        if(project == null){
-            throw new NotFoundException("개별 프로젝트 가져오기 - 찾을 수 없음");
-        }
-        return ResponseEntity.ok(project);
+
+        return ResponseEntity.ok(ApiResponse.ok(project));
     }
 
-
-    @PostMapping("/projects")
-    public ResponseEntity<?> postProject(@Valid @RequestBody ProjectCreateDTO projectCreateDTO, BindingResult bindingResult) throws BadRequestException {
-        if(bindingResult.hasErrors()){
-            throw new BadRequestException("프로젝트 생성 - 잘못된 정보 입력");
-        }
+    @PostMapping("")
+    public ResponseEntity<?> postProject(
+            @Valid @RequestBody ProjectCreateDTO projectCreateDTO) {
         Long projectId = projectServiceImpl.createProjects(projectCreateDTO);
-        return ResponseEntity.ok(projectId);
+        return ResponseEntity.ok(ApiResponse.created(projectId));
     }
 
-    @PutMapping("/projects/{project_id}")
-    public ResponseEntity<?> updateProject(@PathVariable("project_id") Long project_id, @Valid @RequestBody ProjectUpdateDTO projectUpdateDTO, BindingResult bindingResult) throws NotFoundException, BadRequestException{
-        if(bindingResult.hasErrors()){
-            throw new BadRequestException("프로젝트 수정 - 잘못된 정보 입력");
-        }
+    @PutMapping("/{project_id}")
+    public ResponseEntity<?> updateProject(
+            @PathVariable("project_id") Long project_id,
+            @Valid @RequestBody ProjectUpdateDTO projectUpdateDTO){
         Long projectId = projectServiceImpl.updateProject(projectUpdateDTO, project_id);
-        return ResponseEntity.ok(projectId);
+        return ResponseEntity.ok(ApiResponse.updated(projectId));
     }
 
-    @DeleteMapping("/projects/{project_id}")
+    @DeleteMapping("/{project_id}")
     public ResponseEntity<?> deleteProject(@PathVariable("project_id") Long project_id){
         projectServiceImpl.deleteProject(project_id);
         return ResponseEntity.ok("delete ok");

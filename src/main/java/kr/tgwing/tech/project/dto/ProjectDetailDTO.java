@@ -1,13 +1,14 @@
 package kr.tgwing.tech.project.dto;
 
-import kr.tgwing.tech.project.domain.LinkEntity;
-import kr.tgwing.tech.project.domain.ParticipantEntity;
-import kr.tgwing.tech.project.domain.ProjectEntity;
+import kr.tgwing.tech.project.domain.Link;
+import kr.tgwing.tech.project.domain.Participant;
+import kr.tgwing.tech.project.domain.Project;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,19 +19,19 @@ public class ProjectDetailDTO {
     private Long id;
     private String title;
     private String description;
-    private LocalDateTime start;
-    private LocalDateTime end;
+    private LocalDate start;
+    private LocalDate end;
     private String thumbnail;
     private String devStatus;
     private String devType;
 
     // 참여인원에 대해 ParticipateEntity;
-    private List<ParticipantEntity> participants = new ArrayList<>();
+    private List<ParticipantDTO> participants = new ArrayList<>();
     // link
-    private List<LinkEntity> links = new ArrayList<>();
+    private List<LinkDTO> links = new ArrayList<>();
 
     @Builder
-    public ProjectDetailDTO(Long id, String title, String description, LocalDateTime start, LocalDateTime end, String thumbnail, String devStatus, String devType, List<ParticipantEntity> participants, List<LinkEntity> links) {
+    public ProjectDetailDTO(Long id, String title, String description, LocalDate start, LocalDate end, String thumbnail, String devStatus, String devType, List<ParticipantDTO> participants, List<LinkDTO> links) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -43,8 +44,8 @@ public class ProjectDetailDTO {
         this.links = links;
     }
 
-    public static ProjectEntity toEntity(ProjectDetailDTO projectDetailDTO){
-        return ProjectEntity.builder()
+    public static Project toEntity(ProjectDetailDTO projectDetailDTO){
+        return Project.builder()
                 .id(projectDetailDTO.getId())
                 .title(projectDetailDTO.getTitle())
                 .description(projectDetailDTO.getDescription())
@@ -52,8 +53,12 @@ public class ProjectDetailDTO {
                 .end(projectDetailDTO.getEnd())
                 .devStatus(projectDetailDTO.getDevStatus())
                 .devType(projectDetailDTO.getDevType())
-                .participants(projectDetailDTO.getParticipants())
-                .links(projectDetailDTO.getLinks())
+                .participants(projectDetailDTO.getParticipants().stream()
+                        .map(ParticipantDTO::toParticipantEntity)
+                        .toList())
+                .links(projectDetailDTO.getLinks().stream()
+                        .map(LinkDTO::toLinkEntity)
+                        .toList())
                 .build();
     }
 }
