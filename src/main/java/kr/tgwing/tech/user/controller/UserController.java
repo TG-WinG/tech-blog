@@ -48,7 +48,7 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.ok(emailKey));
     }
 
-    @Operation(summary = "회원가입 2단계: 인증코드 확인하기")
+    @Operation(summary = "회원가입 2단계: 인증코드 확인")
     @PostMapping("/register/check")
     public ResponseEntity<ApiResponse<String>> register2(
             @RequestParam("emailKey") String emailKey,
@@ -60,14 +60,14 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.ok("이메일이 인증되었습니다."));
     }
 
-    @Operation(summary = "회원가입 3단계 :등록하기(임시회원)")
+    @Operation(summary = "회원가입 3단계 :회원 등록(임시회원)")
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<Long>> register(@RequestBody UserDTO userDTO) {
         Long userId = userService.register(userDTO);
         return ResponseEntity.ok(ApiResponse.created(userId));
     }
 
-    @Operation(summary = "비밀번호 확인 1단계: 본인확인")
+    @Operation(summary = "비밀번호 확인 1단계: 본인 확인")
     @PostMapping("/password")
     public ResponseEntity<ApiResponse<Pair<String, String>>> checkUser(
             @RequestBody CheckUserDTO checkUserDTO) {
