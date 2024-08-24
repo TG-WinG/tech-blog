@@ -4,9 +4,9 @@ import jakarta.persistence.*;
 import kr.tgwing.tech.common.BaseEntity;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import java.io.Serializable;
 import java.sql.Date;
+import java.time.LocalDate;
 
 
 @NoArgsConstructor
@@ -14,12 +14,12 @@ import java.sql.Date;
 @Getter
 public abstract class BaseUser extends BaseEntity implements Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "student_id")
+    private Long studentId;
 
-    @Column(length = 10, unique = true, nullable = false)
-    private String studentId;
+    @Column(name = "student_number", length = 10, unique = true, nullable = false)
+    private String studentNumber;
 
     @Column(nullable = false)
     private String password;
@@ -32,13 +32,13 @@ public abstract class BaseUser extends BaseEntity implements Serializable {
 
     @Column(nullable = false)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private Date birth;
+    private LocalDate birth;
 
-    @Column(nullable = false, length = 13)
+    @Column(name = "phone_number", nullable = false, length = 13)
     private String phoneNumber;
 
-    public BaseUser(String studentId, String password, String email, String name, Date birth, String phoneNumber) {
-        this.studentId = studentId;
+    public BaseUser(String studentNumber, String password, String email, String name, LocalDate birth, String phoneNumber) {
+        this.studentNumber = studentNumber;
         this.password = password;
         this.email = email;
         this.name = name;
@@ -49,8 +49,8 @@ public abstract class BaseUser extends BaseEntity implements Serializable {
         this.password = password;
     }
 
-    public void setStudentId(String studentId) {
-        this.studentId = studentId;
+    public void setStudentNumber(String studentNumber) {
+        this.studentNumber = studentNumber;
     }
 
 }

@@ -5,22 +5,23 @@ import kr.tgwing.tech.user.entity.User;
 import lombok.*;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 @Data
 @Builder
 @NoArgsConstructor @AllArgsConstructor
 public class UserDTO {
 
-    private String studentId;
+    private String studentNumber;
     private String password;
     private String email;
     private String name; // 이름
-    private Date birth;
+    private LocalDate birth;
     private String phoneNumber;
 
     public static TempUser toTempUser(UserDTO userDTO) {
         return TempUser.builder()
-                .studentId(userDTO.getStudentId())
+                .studentNumber(userDTO.getStudentNumber())
                 .password(userDTO.getPassword())
                 .name(userDTO.getName())
                 .email(userDTO.getEmail())
@@ -30,7 +31,5 @@ public class UserDTO {
 
 
     }
-
-
 
 }

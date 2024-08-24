@@ -1,6 +1,7 @@
 package kr.tgwing.tech.config;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 import kr.tgwing.tech.user.dto.registerdto.UserDTO;
 import org.springframework.boot.CommandLineRunner;
@@ -26,20 +27,20 @@ public class TestDataLoader {
                                           ReplyRepository replyRepository) {
         return args -> {
             userService.register(UserDTO.builder()
-                .studentId("2018000000")
+                .studentNumber("2018000000")
                 .phoneNumber("01000000000")
                 .email("oldman@khu.ac.kr")
                 .name("늙은이")
                 .password("12345678")
-                .birth(Date.valueOf("1999-01-01"))
+                .birth(LocalDate.parse("1999-01-01"))
                 .build());
             userService.register(UserDTO.builder()
-                .studentId("2022000000")
+                .studentNumber("2022000000")
                 .phoneNumber("01011111111")
                 .email("youngman@khu.ac.kr")
                 .name("젊은이")
                 .password("12345678")
-                .birth(Date.valueOf("2003-01-01"))
+                .birth(LocalDate.parse("2003-01-01"))
                 .build());
             postRepository.save(PostEntity.builder()
                 .writer(1L)

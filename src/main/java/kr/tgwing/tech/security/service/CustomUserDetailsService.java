@@ -14,15 +14,14 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     public CustomUserDetailsService(UserRepository userRepository) {
-
         this.userRepository = userRepository;
     }
 
     @Override
-    public UserDetails loadUserByUsername(String studentId) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String studentNumber) throws UsernameNotFoundException {
 
         //DB에서 조회
-        Optional<User> userData = userRepository.findByStudentId(studentId);
+        Optional<User> userData = userRepository.findByStudentNumber(studentNumber);
 
         if (userData.isPresent()) {
             //UserDetails에 담아서 return하면 AutneticationManager가 검증 함

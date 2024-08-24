@@ -72,14 +72,14 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public PostDto createPost(PostCreationDto requestDto, String utilStudentId)  // 공지 생성하기
+    public PostDto createPost(PostCreationDto requestDto, String studentNumber)  // 공지 생성하기
     {
         // 글을 작성할 user 조회
-        Optional<User> byStudentId = userRepository.findByStudentId(utilStudentId);
+        Optional<User> byStudentId = userRepository.findByStudentNumber(studentNumber);
         User userEntity = byStudentId.orElseThrow(UserNotFoundException::new);
 
         // 현재 사용자와 요청 시 들어온 writer가 같은지 확인
-        if (!Objects.equals(userEntity.getStudentId(), utilStudentId)) {
+        if (!Objects.equals(userEntity.getStudentId(), studentNumber)) {
             throw new WrongPostRequestException();
         }
 
@@ -89,7 +89,7 @@ public class PostServiceImpl implements PostService {
         //getHashtag - 요청으로 들어온 해시태그 집합을 데이터베이스에 블로그 연관 테이블, 해시태그 테이블에 저장 및 엔티티 집합 반환
         Set<HashTagEntity> hashtags = getHashtag(requestDto.getHashtags());
         PostEntity postEntity = PostCreationDto.toEntity(requestDto);
-        postEntity.setWriter(userEntity.getId());
+        postEntity.setWriter(userEntity.getStudentId());
         PostEntity savedEntity = postRepository.save(postEntity);
 
         hashtags.forEach(tag -> {

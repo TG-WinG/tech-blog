@@ -3,26 +3,26 @@ package kr.tgwing.tech.user.entity;
 import jakarta.persistence.*;
 import kr.tgwing.tech.user.dto.profiledto.ProfileDTO;
 import lombok.*;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.sql.Date;
+import java.time.LocalDate;
 
 @Entity
 @Getter
 @DiscriminatorValue("M")
 @NoArgsConstructor
-@Table(name = "user")
+@Table(name = "student")
 public class User extends BaseUser {
 
     @Column
     private String role;
 
-    @Column
+    @Column(name = "profile_picture")
     private String profilePicture;
 
     @Builder
-    public User(String studentId, String password, String email, String name, Date birth, String phoneNumber, String role, String profilePicture) {
-        super(studentId, password, email, name, birth, phoneNumber);
+    public User(String studentNumber, String password, String email, String name, LocalDate birth, String phoneNumber, String role, String profilePicture) {
+        super(studentNumber, password, email, name, birth, phoneNumber);
         this.role = role;
         this.profilePicture = profilePicture;
     }
@@ -33,7 +33,7 @@ public class User extends BaseUser {
 
     public ProfileDTO toProfileDTO(User user) {
         return ProfileDTO.builder()
-                .studentId(user.getStudentId())
+                .studentNumber(user.getStudentNumber())
                 .email(user.getEmail())
                 .name(user.getName())
                 .birth(user.getBirth())

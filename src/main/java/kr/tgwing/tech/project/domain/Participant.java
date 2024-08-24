@@ -2,19 +2,21 @@ package kr.tgwing.tech.project.domain;
 
 import jakarta.persistence.*;
 import kr.tgwing.tech.common.BaseEntity;
-import kr.tgwing.tech.project.domain.Enum.DevRole;
+import kr.tgwing.tech.project.domain.Enum.Part;
+import kr.tgwing.tech.project.dto.ParticipantDTO;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 
+import java.util.List;
+
 @Entity
 @Getter
-@Builder
 @DynamicInsert
 @NoArgsConstructor
 @Table(name= "participant")
-public class ParticipantEntity extends BaseEntity {
+public class Participant extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="participant_id")
@@ -22,26 +24,34 @@ public class ParticipantEntity extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name="project_id")
-    private ProjectEntity project;
+    private Project project;
 
     @Enumerated(EnumType.STRING)
-    private DevRole devRole;
+    private Part part;
 
-    private String username;
+    private String name;
 
     private String major;
 
     // project create 할 떄 한번 썻읍니다..허허
-    public void setProject(ProjectEntity project) {
+    public void setProject(Project project) {
         this.project = project;
     }
 
+    public static ParticipantDTO toDTO(Participant participant) {
+        return ParticipantDTO.builder()
+                .username(participant.getName())
+                .major(participant.getMajor())
+                .part(participant.getPart())
+                .build();
+    }
+
     @Builder
-    public ParticipantEntity(Long id, ProjectEntity project, DevRole devRole, String username, String major) {
+    public Participant(Long id, Project project, Part part, String name, String major) {
         this.id = id;
         this.project = project;
-        this.devRole = devRole;
-        this.username = username;
+        this.part = part;
+        this.name = name;
         this.major = major;
     }
 }

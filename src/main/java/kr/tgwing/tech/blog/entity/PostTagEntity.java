@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @IdClass(PostTagId.class)
-@Table(name = "post_hashtag")
+@Table(name = "blog_hashtag")
 public class PostTagEntity extends BaseEntity {
 
     @Id

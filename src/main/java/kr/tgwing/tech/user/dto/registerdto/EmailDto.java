@@ -1,9 +1,7 @@
 package kr.tgwing.tech.user.dto.registerdto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import kr.tgwing.tech.user.dto.EmailMessageDTO;
+import lombok.*;
 
 @Getter
 @Setter
@@ -11,4 +9,11 @@ import lombok.Setter;
 @AllArgsConstructor
 public class EmailDto {
     private String email;
+
+    public EmailMessageDTO toRegister1(EmailDto emailDto) {
+        return EmailMessageDTO.builder()
+                .receiver(emailDto.getEmail())
+                .subject("[TGWING} 인증코드")
+                .build();
+    }
 }

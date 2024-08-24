@@ -1,6 +1,6 @@
 package kr.tgwing.tech.project.domain.Enum;
 
-public enum DevRole {
+public enum Part {
     LEADER("LEADER"),
     PM("PM"),
     FRONT("FRONT"),
@@ -9,7 +9,7 @@ public enum DevRole {
 
     private String value;
 
-    DevRole(String value) {
+    Part(String value) {
         this.value = value;
     }
 }

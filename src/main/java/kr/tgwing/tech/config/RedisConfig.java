@@ -1,4 +1,4 @@
-package kr.tgwing.tech.common;
+package kr.tgwing.tech.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.EnableCaching;

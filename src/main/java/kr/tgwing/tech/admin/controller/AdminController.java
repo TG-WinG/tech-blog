@@ -16,12 +16,12 @@ import java.util.List;
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "관리자 기능")
+@Tag(name = "관리자")
 public class AdminController {
 
     private final AdminServiceImpl adminService;
 
-    @Operation(summary = "회원 요청 목록 확인하기")
+    @Operation(summary = "요청 목록 확인")
     @GetMapping("")
     public ResponseEntity<ApiResponse<List<AdminCheckUserDto>>> checkUsers() {
         List<AdminCheckUserDto> dtoList = adminService.checkUser();
@@ -29,7 +29,7 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.ok(dtoList));
     }
 
-    @Operation(summary = "회원 요청 수락하기")
+    @Operation(summary = "회원요청 수락")
     @PostMapping("/{id}")
     public ResponseEntity<ApiResponse<Long>> registerUsers(@PathVariable("id") Long id) {
         Long registerId = adminService.registerUsers(id);
@@ -37,7 +37,7 @@ public class AdminController {
         return ResponseEntity.ok(ApiResponse.updated(registerId));
     }
 
-    @Operation(summary = "회원 요청 거부하기")
+    @Operation(summary = "회원요청 거부")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Long>> refuseUsers(@PathVariable("id") Long id) {
         Long refusedId = adminService.refuseUsers(id);

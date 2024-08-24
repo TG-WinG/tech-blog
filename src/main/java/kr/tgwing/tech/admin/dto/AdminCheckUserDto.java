@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdminCheckUserDto {
-    private Long id;
-    private String studentId;
+    private Long studentId;
+    private String studentNumber;
     private String email;
     private String name;
     private String phoneNumber;

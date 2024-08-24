@@ -1,13 +1,14 @@
 package kr.tgwing.tech.project.dto;
 
-import kr.tgwing.tech.project.domain.LinkEntity;
-import kr.tgwing.tech.project.domain.ParticipantEntity;
-import kr.tgwing.tech.project.domain.ProjectEntity;
+import kr.tgwing.tech.project.domain.Link;
+import kr.tgwing.tech.project.domain.Participant;
+import kr.tgwing.tech.project.domain.Project;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,16 +18,16 @@ import java.util.List;
 public class ProjectUpdateDTO {
     private String title;
     private String description;
-    private LocalDateTime start;
-    private LocalDateTime end;
+    private LocalDate start;
+    private LocalDate end;
     private String thumbnail;
     private String devStatus;
     private String devType;
-    private List<ParticipantEntity> participants = new ArrayList<>();
-    private List<LinkEntity> links = new ArrayList<>();
+    private List<ParticipantDTO> participants = new ArrayList<>();
+    private List<LinkDTO> links = new ArrayList<>();
 
     @Builder
-    public ProjectUpdateDTO(String title, String description, LocalDateTime start, LocalDateTime end, String thumbnail, String devStatus, String devType, List<ParticipantEntity> participants, List<LinkEntity> links) {
+    public ProjectUpdateDTO(String title, String description, LocalDate start, LocalDate end, String thumbnail, String devStatus, String devType, List<ParticipantDTO> participants, List<LinkDTO> links) {
         this.title = title;
         this.description = description;
         this.start = start;
@@ -38,16 +39,18 @@ public class ProjectUpdateDTO {
         this.links = links;
     }
 
-    public static ProjectEntity toEntity(ProjectUpdateDTO projectUpdateDTO){
-        return ProjectEntity.builder()
+    public static Project toEntity(ProjectUpdateDTO projectUpdateDTO){
+        return Project.builder()
                 .title(projectUpdateDTO.getTitle())
                 .description(projectUpdateDTO.getDescription())
                 .start(projectUpdateDTO.getStart())
                 .end(projectUpdateDTO.getEnd())
                 .devStatus(projectUpdateDTO.getDevStatus())
                 .devType(projectUpdateDTO.getDevType())
-                .participants(projectUpdateDTO.getParticipants())
-                .links(projectUpdateDTO.getLinks())
+                .participants(projectUpdateDTO.getParticipants().stream()
+                        .map(ParticipantDTO::toParticipantEntity).toList())
+                .links(projectUpdateDTO.getLinks().stream()
+                        .map(LinkDTO::toLinkEntity).toList())
                 .build();
     }
 }

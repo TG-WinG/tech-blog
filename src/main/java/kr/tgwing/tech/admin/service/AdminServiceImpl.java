@@ -35,21 +35,21 @@ public class AdminServiceImpl {
     }
 
     @Transactional
-    public Long registerUsers(Long id) {
-        TempUser notUser = tempUserRepository.findById(id).orElseThrow(UserNotFoundException::new);
+    public Long registerUsers(Long studentId) {
+        TempUser notUser = tempUserRepository.findById(studentId).orElseThrow(UserNotFoundException::new);
         User user = notUser.toUser(notUser);
-        tempUserRepository.deleteById(id);
+        tempUserRepository.deleteById(studentId);
 
         user.setRole("ROLE_USER");
         userRepository.save(user);
 
-        return user.getId();
+        return user.getStudentId();
     }
 
-    public Long refuseUsers(Long id) {
-        TempUser user = tempUserRepository.findById(id).orElseThrow(UserNotFoundException::new);
-        userRepository.deleteById(user.getId());
+    public Long refuseUsers(Long studentId) {
+        TempUser user = tempUserRepository.findById(studentId).orElseThrow(UserNotFoundException::new);
+        userRepository.deleteById(user.getStudentId());
 
-        return user.getId();
+        return user.getStudentId();
     }
 }

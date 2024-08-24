@@ -4,6 +4,7 @@ import kr.tgwing.tech.blog.exception.post.*;
 import kr.tgwing.tech.blog.exception.reply.ReplyBadRequestException;
 import kr.tgwing.tech.blog.exception.reply.ReplyForbiddenException;
 import kr.tgwing.tech.blog.exception.reply.ReplyNotFoundException;
+import kr.tgwing.tech.project.exception.ProjectNotFoundException;
 import kr.tgwing.tech.user.exception.*;
 import org.springframework.http.HttpStatus;
 
@@ -18,6 +19,7 @@ public class ExceptionMapper { // 예외 객체 -> 예외 상태로 바꿔주는
         setUpUserException();
         setUpPostException();
         setUpReplyException();
+        setUpProjectException();
 //        setUpReplyException();
     }
 
@@ -56,6 +58,11 @@ public class ExceptionMapper { // 예외 객체 -> 예외 상태로 바꿔주는
                 ExceptionSituation.of("요청한 댓글의 ID와 게시글의 ID가 일치하지 않습니다.", HttpStatus.BAD_REQUEST, 5501));
         mapper.put(ReplyForbiddenException.class,
                 ExceptionSituation.of("요청한 사용자에게 권한이 없습니다.", HttpStatus.FORBIDDEN, 5502));
+    }
+
+    private static void setUpProjectException() {
+        mapper.put(ProjectNotFoundException.class,
+                ExceptionSituation.of("찾고자 하는 프로젝트가 존재하지 않습니다.", HttpStatus.NOT_FOUND, 6600));
     }
 
 
