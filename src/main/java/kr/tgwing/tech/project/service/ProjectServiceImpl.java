@@ -37,31 +37,16 @@ public class ProjectServiceImpl{
     }
 
     public Long createProjects(ProjectCreateDTO projectCreateDTO) {
-        List<Participant> participantList = projectCreateDTO.getParticipants().stream()
-                .map(ParticipantDTO::toParticipantEntity)
-                .toList();
-        for(Participant participant: participantList){
-            participantRepository.save(participant);
-        }
+        Project project = projectCreateDTO.toEntity(projectCreateDTO);
+        project.getParticipants().stream().forEach(
+                participant -> participant.setProject(project)
+        );
+        project.getLinks().stream().forEach(
+                link -> link.setProject(project)
+        );
 
-        List<Link> linkList = projectCreateDTO.getLinks().stream()
-                .map(LinkDTO::toLinkEntity)
-                .toList();
-        for(Link link: linkList){
-            linkRepository.save(link);
-        }
+        Project saveProject = projectRepository.save(project);
 
-        Project saveProject = projectRepository
-                .save(ProjectCreateDTO.toEntity(projectCreateDTO));
-
-        for(Participant participant: participantList){
-            participant.setProject(saveProject);
-            participantRepository.save(participant);
-        }
-        for(Link link: linkList){
-            link.setProject(saveProject);
-            linkRepository.save(link);
-        }
         return saveProject.getId();
     }
 
@@ -80,11 +65,17 @@ public class ProjectServiceImpl{
         List<Participant> findParticipants = participantRepository.findAllByProjectId(project_id);
         List<Link> findLinks = linkRepository.findAllByProjectId(project_id);
 
-        findProject.updateProject(projectUpdateDTO);
-        findParticipants.updateParticipants(projectUpdateDTO.getParticipants());
-        findLinks.updateLinks(projectUpdateDTO.getLinks());
+        List<Participant> participants = projectUpdateDTO.getParticipants().stream()
+                .map(ParticipantDTO::toParticipantEntity)
+                .toList();
+        updateParticipants(findProject, findParticipants, participants);
 
-        System.out.println("findProject = " + findProject.getParticipants().toString());
+        List<Link> links = projectUpdateDTO.getLinks().stream()
+                .map(LinkDTO::toLinkEntity)
+                .toList();
+        updateLinks(findProject, findLinks, links);
+
+        findProject.updateProject(projectUpdateDTO);
 
         return findProject.getId();
     }
@@ -92,10 +83,46 @@ public class ProjectServiceImpl{
     public void deleteProject(Long project_id) {
         Project findProject = projectRepository.findById(project_id)
                 .orElseThrow(ProjectNotFoundException::new);
+        linkRepository.deleteAllIfProjectIdIsNull();
+        participantRepository.deleteAllIfProjectIdIsNull();
+
         projectRepository.deleteById(project_id);
     }
 
     //--------------------------------------
+
+    @Transactional
+    public void updateParticipants(Project project, List<Participant> findParticipants, List<Participant> newParticipants) {
+        for (Participant participant : findParticipants) {
+            if (!newParticipants.contains(participant)) {
+                participantRepository.delete(participant);
+            }
+        }
+
+        for (Participant newParticipant : newParticipants) {
+            if (!findParticipants.contains(newParticipant)) {
+                newParticipant.setProject(project);
+                participantRepository.save(newParticipant);
+            }
+        }
+    }
+
+    @Transactional
+    public void updateLinks(Project project, List<Link> findLinks, List<Link> newLinks) {
+        for (Link link : findLinks) {
+            if (!newLinks.contains(link)) {
+                linkRepository.delete(link);
+            }
+        }
+
+        for (Link newLink : newLinks) {
+            if (!findLinks.contains(newLink)) {
+                newLink.setProject(project);
+                linkRepository.save(newLink);
+            }
+        }
+    }
+
     public static ProjectBriefDTO entity2ProjectBriefDTO(Project project){
         return ProjectBriefDTO.builder()
                 .id(project.getId())

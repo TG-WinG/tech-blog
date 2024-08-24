@@ -37,7 +37,7 @@ public class ProjectCreateDTO {
         this.participants = participants;
     }
 
-    public static Project toEntity(ProjectCreateDTO projectCreateDTO){
+    public Project toEntity(ProjectCreateDTO projectCreateDTO){
 
         return Project.builder()
                 .title(projectCreateDTO.getTitle())

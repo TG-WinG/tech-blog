@@ -54,12 +54,4 @@ public class Participant extends BaseEntity {
         this.name = name;
         this.major = major;
     }
-
-    public void updateParticipant(List<ParticipantDTO> participantDTOs) {
-        this.part = participantDTO.getPart();
-        this.name = participantDTO.getUsername();
-        this.major = participantDTO.getMajor();
-    }
-
-
 }
