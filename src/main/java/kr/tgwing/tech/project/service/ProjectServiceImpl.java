@@ -77,9 +77,15 @@ public class ProjectServiceImpl{
     public Long updateProject(ProjectUpdateDTO projectUpdateDTO, Long project_id) {
         Project findProject = projectRepository.findById(project_id)
                 .orElseThrow(ProjectNotFoundException::new);
+        List<Participant> findParticipants = participantRepository.findAllByProjectId(project_id);
+        List<Link> findLinks = linkRepository.findAllByProjectId(project_id);
+
         findProject.updateProject(projectUpdateDTO);
-        findProject.setParticipants(projectUpdateDTO.getParticipants());
-        findProject.setLinks(projectUpdateDTO.getLinks());
+        findParticipants.updateParticipants(projectUpdateDTO.getParticipants());
+        findLinks.updateLinks(projectUpdateDTO.getLinks());
+
+        System.out.println("findProject = " + findProject.getParticipants().toString());
+
         return findProject.getId();
     }
 

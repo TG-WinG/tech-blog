@@ -69,6 +69,9 @@ public class Project extends BaseEntity {
         List<Participant> update = participants.stream()
                 .map(ParticipantDTO::toParticipantEntity)
                 .toList();
+        update.stream().forEach(
+                participant -> participant.setProject(Project.this)
+        );
         this.participants = update;
     }
 
@@ -87,4 +90,5 @@ public class Project extends BaseEntity {
         this.devStatus = projectUpdateDTO.getDevStatus();
         this.devType = projectUpdateDTO.getDevType();
     }
+
 }
