@@ -1,17 +1,16 @@
 package kr.tgwing.tech.user.service;
 
 
-import kr.tgwing.tech.blog.entity.PostEntity;
-import kr.tgwing.tech.user.dto.*;
+import java.util.List;
+
+import kr.tgwing.tech.blog.entity.Post;
+import kr.tgwing.tech.user.dto.EmailMessageDTO;
 import kr.tgwing.tech.user.dto.checkdto.CheckNumberDTO;
 import kr.tgwing.tech.user.dto.checkdto.CheckUserDTO;
 import kr.tgwing.tech.user.dto.checkdto.PasswordCheckDTO;
 import kr.tgwing.tech.user.dto.profiledto.ProfileDTO;
 import kr.tgwing.tech.user.dto.profiledto.ProfileReqDTO;
 import kr.tgwing.tech.user.dto.registerdto.UserDTO;
-import kr.tgwing.tech.user.entity.User;
-
-import java.util.List;
 
 public interface UserService{
 
@@ -26,7 +25,7 @@ public interface UserService{
 
     ProfileDTO showUser(String name);
 
-    List<PostEntity> showMyBlog(String studentNumber);
+    List<Post> showMyBlog(String studentNumber);
 
     void checkUser(CheckUserDTO checkUserDTO); // 본인 확인하기
 

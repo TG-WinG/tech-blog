@@ -1,7 +1,6 @@
 package kr.tgwing.tech.user.dto.checkdto;
 
 import kr.tgwing.tech.user.dto.EmailMessageDTO;
-import kr.tgwing.tech.user.dto.registerdto.EmailDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

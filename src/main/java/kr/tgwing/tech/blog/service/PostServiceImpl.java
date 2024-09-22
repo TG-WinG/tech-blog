@@ -1,220 +1,239 @@
 package kr.tgwing.tech.blog.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
 
-import kr.tgwing.tech.blog.dto.PostCreationDto;
-import kr.tgwing.tech.blog.dto.PostDto;
-import kr.tgwing.tech.blog.entity.HashTagEntity;
-import kr.tgwing.tech.blog.entity.PostEntity;
-import kr.tgwing.tech.blog.entity.PostTagEntity;
-import kr.tgwing.tech.blog.exception.post.PostNotFoundException;
-import kr.tgwing.tech.blog.exception.post.UserIsNotPostWriterException;
-import kr.tgwing.tech.blog.exception.post.WrongPostRequestException;
-import kr.tgwing.tech.blog.repository.HashtagRepository;
-import kr.tgwing.tech.blog.repository.PostRepository;
-import kr.tgwing.tech.blog.repository.PostTagRepository;
-import kr.tgwing.tech.user.entity.User;
-import kr.tgwing.tech.user.exception.UserNotFoundException;
-import kr.tgwing.tech.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-import static kr.tgwing.tech.blog.entity.PostEntity.toDto;
+import kr.tgwing.tech.blog.dto.CommentForm;
+import kr.tgwing.tech.blog.dto.CommentView;
+import kr.tgwing.tech.blog.dto.PostDetail;
+import kr.tgwing.tech.blog.dto.PostForm;
+import kr.tgwing.tech.blog.dto.PostOverview;
+import kr.tgwing.tech.blog.dto.PostQuery;
+import kr.tgwing.tech.blog.dto.ReplyForm;
+import kr.tgwing.tech.blog.dto.ReplyView;
+import kr.tgwing.tech.blog.entity.Comment;
+import kr.tgwing.tech.blog.entity.Hashtag;
+import kr.tgwing.tech.blog.entity.Post;
+import kr.tgwing.tech.blog.entity.PostSpecifications;
+import kr.tgwing.tech.blog.exception.post.PostNotFoundException;
+import kr.tgwing.tech.blog.exception.post.UserIsNotPostWriterException;
+import kr.tgwing.tech.blog.repository.PostRepository;
+import kr.tgwing.tech.user.entity.User;
+import kr.tgwing.tech.user.exception.UserNotFoundException;
+import kr.tgwing.tech.user.repository.UserRepository;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class PostServiceImpl implements PostService {
+
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
-    @Autowired
-    private HashtagRepository hashtagRepository;
-    @Autowired
-    private PostTagRepository postTagRepository;
-
     @Override
-    public PostDto getPost(Long postId) // 특정 게시글 가져오기
-    {
-        Set<HashTagEntity> hashtags = new HashSet<>();
-        // 입력된 postId에 해당하는 글 찾기
-        Optional<PostEntity> postEntityInOp = postRepository.findById(postId);
-        PostEntity postEntity = postEntityInOp.orElseThrow(PostNotFoundException::new);
+    public PostDetail getPost(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(PostNotFoundException::new);
 
-        List<PostTagEntity> postTags = postTagRepository.findAllByPostId(postId);
-        postTags.forEach(posttag -> {
-            Long tagId = posttag.getHashtagId();
-            HashTagEntity tagEntity = hashtagRepository.findById(tagId).orElseThrow();
-            hashtags.add(tagEntity);
-        });
-        System.out.println(postEntity.toString());
-
-        return toDto(postEntity, hashtags);
-    }
-
-
-
-    private Page<PostEntity> searchPosts(String search, PageRequest pageRequest) { // 공지 내용으로 검색하기
-        return postRepository.findByTitleContains(search, pageRequest);
-    }
-    private Page<PostEntity> getAllPosts(PageRequest pageRequest) { // 모든 공지 가져오기
-        return postRepository.findAllByOrderByIdDesc(pageRequest);
+        return PostDetail.of(post);
     }
 
     @Override
-    public PostDto createPost(PostCreationDto requestDto, String studentNumber)  // 공지 생성하기
-    {
+    public PostDetail createPost(PostForm form, String writerStudentNumber) {
         // 글을 작성할 user 조회
-        Optional<User> byStudentId = userRepository.findByStudentNumber(studentNumber);
-        User userEntity = byStudentId.orElseThrow(UserNotFoundException::new);
+        User writer = userRepository.findByStudentNumber(writerStudentNumber)
+                .orElseThrow(UserNotFoundException::new);
 
-        // 현재 사용자와 요청 시 들어온 writer가 같은지 확인
-        if (!Objects.equals(userEntity.getStudentId(), studentNumber)) {
-            throw new WrongPostRequestException();
-        }
-
-        // entity에 작성자 Id 설정해서 저장하기
-        // 해시태그 엔티티로 바꿔와서 함께 블로그 엔티티 생성
-
-        //getHashtag - 요청으로 들어온 해시태그 집합을 데이터베이스에 블로그 연관 테이블, 해시태그 테이블에 저장 및 엔티티 집합 반환
-        Set<HashTagEntity> hashtags = getHashtag(requestDto.getHashtags());
-        PostEntity postEntity = PostCreationDto.toEntity(requestDto);
-        postEntity.setWriter(userEntity.getStudentId());
-        PostEntity savedEntity = postRepository.save(postEntity);
-
-        hashtags.forEach(tag -> {
-            PostTagEntity postTag = PostTagEntity.builder().postId(savedEntity.getId()).hashtagId(tag.getId()).build();
-            postTagRepository.save(postTag);
+        Post newPost = Post.builder()
+                .title(form.getTitle())
+                .content(form.getContent())
+                .writer(writer)
+                .build();
+        form.getHashtags().forEach(hashtag -> {
+            newPost.getHashtags().add(Hashtag.builder()
+                    .post(newPost)
+                    .name(hashtag)
+                    .build());
         });
+        Post savedPost = postRepository.save(newPost);
 
-        System.out.println(toDto(savedEntity, hashtags).toString());
-
-        return toDto(savedEntity, hashtags);
+        return PostDetail.of(savedPost);
     }
 
     @Override
-    public PostDto updatePost(PostDto postDto, Long postId, String utilStudentId) // 게시글 수정하기
-    {
-        Optional<PostEntity> postById = postRepository.findById(postId);
-        PostEntity postEntity = postById.orElseThrow(PostNotFoundException::new);
+    public PostDetail updatePost(Long postId, PostForm form, String writerStudentNumber) {
+        Post post = postRepository.findById(postId)
+               .orElseThrow(PostNotFoundException::new);
 
-        // 해당 URL을 요청자 ==  공지 작성자 일 때에만 수정 가능
-        // 수정 목록 : title, content, thumbnail
+        User postWriter = userRepository.findById(post.getWriter().getStudentId())
+               .orElseThrow(UserNotFoundException::new); // 유저 notfound 예외처리 
 
-        Optional<User> userById = userRepository.findById(postEntity.getWriter());
-        User userEntity = userById.orElseThrow(UserNotFoundException::new); // 유저 notfound 예외처리
+        if(post.getWriter().equals(postWriter)) {
+            post.setTitle(form.getTitle());
+            post.setContent(form.getContent());
+            post.setThumbnail(form.getThumbnail());
+            post.setHashtags(form.getHashtags().stream().map(hashtag -> {
+                return Hashtag.builder()
+                        .post(post)
+                        .name(hashtag)
+                        .build();
+            }).collect(Collectors.toSet()));
 
-        log.info("util학번 = {}", utilStudentId);
-        log.info("user학번 = {}", userEntity.getStudentId());
+            Post updatedPost = postRepository.save(post);
 
-        // DB 내 게시글 작성자 - 요청된 유저 ID 동일 & DB 내 게시글 작성자 - 요청된 게시글 작성자 동일
-        if(Objects.equals(userEntity.getStudentId(), utilStudentId)) {
-            log.info("학번 일치 - 작성자 확인");
-            Set<HashTagEntity> hashtags = getHashtag(postDto.getHashtags());
-            postTagRepository.deleteAllByPostId(postId);
-
-            postEntity.updateContent(postDto, hashtags); // entity 정보 수정
-
-            PostEntity savedEntity = postRepository.save(postEntity);
-
-            hashtags.forEach(tag -> {
-                PostTagEntity postTag = PostTagEntity.builder().postId(savedEntity.getId()).hashtagId(tag.getId()).build();
-                postTagRepository.save(postTag);
-            });
-            return toDto(savedEntity, hashtags);
+            return PostDetail.of(updatedPost);
         }
         else { // 공지 작성자가 아닌 경우 -- 수정 불가능
             log.info("학번 불일치 - 작성자가 아니므로 수정 불가능");
             throw new UserIsNotPostWriterException();
         }
     }
-    @Override
-    public void deletePost(Long postId, String utilStudentId) // 게시글 삭제하기
-    {
-        Optional<PostEntity> postById = postRepository.findById(postId);
-        PostEntity postEntity = postById.orElseThrow(PostNotFoundException::new);
 
-        Optional<User> userById = userRepository.findById(postEntity.getWriter());
-        User userEntity = userById.orElseThrow(UserNotFoundException::new);
+    @Override
+    public void deletePost(Long postId, String writerStudentNumber) {
+        Post post = postRepository.findById(postId)
+               .orElseThrow(PostNotFoundException::new);
+
+        User postWriter = userRepository.findByStudentNumber(writerStudentNumber)
+                .orElseThrow(UserNotFoundException::new);
 
         // 해당 URL을 요청한 사람이 공지 작성자인 경우에만 삭제 가능
-        if(Objects.equals(userEntity.getStudentId(), utilStudentId)) {
-            log.info("학번 일치 - 작성자 확인");
-            postTagRepository.deleteAllByPostId(postId);
+        if(post.getWriter().equals(postWriter)) {
             postRepository.deleteById(postId);
         } else {
-            log.info("학번 불일치 - 작성자가 아니므로 삭제 불가능");
             throw new UserIsNotPostWriterException(); }
     }
 
     @Override
-    public Page<PostDto> getPostsInPage(String text, Pageable pageable) {
-        int size = pageable.getPageSize();
-        int page = pageable.getPageNumber();
-        long total = 0L;
-        Page<PostEntity> postPage = null;
+    public Page<PostOverview> getPostOverviews(PostQuery query, Pageable pageable) {
+        Specification<Post> spec = PostSpecifications.hasTitleLike(query.getKeyword())
+                .or(PostSpecifications.hasContentLike(query.getKeyword()));
 
-                // Post DB에서 Page 단위로 가져오기
-        PageRequest pageRequest = PageRequest.of(page, size);
-
-        // 파라미터 없이 get 요청된 경우 - 그냥 전체 반환
-        if(text == null) {
-            postPage = getAllPosts(pageRequest);
-            total = postRepository.count();
-            log.info("total = " + total);
-        }
-        else { // - 파라미터로 검색된 블로그만 걸러서 반환
-            postPage = searchPosts(text, pageRequest);
-            total = postRepository.countByTitleContains(text);
-            log.info("total = " + total);
+        if (query.getHashtag() != null && query.getHashtag().size() > 0) {
+            spec = spec.and(PostSpecifications.hasHashtagIn(query.getHashtag()));
         }
 
-        if(!(total > page * size)) {throw new WrongPostRequestException(); }
-        // 이후 ExceptionHandler 정의 필요
+        Page<Post> posts = postRepository.findAll(spec, pageable);
+        List<PostOverview> overviews = posts.stream().map(PostOverview::of).collect(Collectors.toList());
 
-        if (postPage.isEmpty()) {
-            log.info("page 조회 불가");
-        }
-
-        // stream이 비어있는 경우
-        postPage.stream().findFirst().orElseThrow(()-> new PostNotFoundException());
-
-        // page가 총 데이터 건수를 초과하는 경우
-        long totalCount = postPage.getTotalElements();
-        long requestCount = (postPage.getTotalPages() - 1) * postPage.getSize();
-        if(!(totalCount > requestCount)) { throw new WrongPostRequestException(); }
-
-        // Entity -> Dto 변환 - Dto 담은 page 반환
-        List<PostEntity> posts = postPage.getContent();
-        List<PostDto> dtos = posts.stream().map(postEntity -> toDto(postEntity, null)).collect(Collectors.toList());
-
-        return new PageImpl<>(dtos, pageable, postPage.getTotalElements());
+        return new PageImpl<>(overviews, pageable, posts.getTotalElements());
     }
 
-    // 해시태그 이름 set 가져와서
-    // 새로운 해시태그 저장 및 해시태그 엔티티 생성
-    // 해시태그 엔티티 set 반환
-    private Set<HashTagEntity> getHashtag(Set<String> hashtags) {
-        Set<HashTagEntity> resultTagIds = new HashSet<>();
-        for (String tagname : hashtags) {
-            HashTagEntity hashTagEntity = hashtagRepository.findByName(tagname).orElseGet(() -> {
-                HashTagEntity newHashtag = HashTagEntity.builder()
-                        .name(tagname).build();
-                return hashtagRepository.save(newHashtag);
-            });
-            resultTagIds.add(hashTagEntity);
+    @Override
+    public PostOverview getPostOverview(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(PostNotFoundException::new);
+
+        return PostOverview.of(post);
+    }
+
+    @Override
+    public CommentView createComment(Long postId, CommentForm form, String writerStudentNumber) {
+        User writer = userRepository.findByStudentNumber(writerStudentNumber)
+                .orElseThrow(UserNotFoundException::new);
+        Post post = postRepository.findById(postId)
+                .orElseThrow(PostNotFoundException::new);
+        Comment newComment = Comment.builder()
+                .post(post)
+                .content(form.getContent())
+                .writer(writer)
+                .build();
+        post.getComments().add(newComment);
+
+        postRepository.save(post);
+
+        return CommentView.of(newComment);
+    }
+
+    @Override
+    public CommentView updateComment(Long postId, Long commentId, CommentForm form, String writerStudentNumber) {
+        User writer = userRepository.findByStudentNumber(writerStudentNumber)
+                .orElseThrow(UserNotFoundException::new);
+        Post post = postRepository.findById(postId)
+                .orElseThrow(PostNotFoundException::new);
+
+        Comment updatedComment = null;
+        for (Comment comment : post.getComments()) {
+            if (comment.getId().equals(commentId)) {
+                if (!comment.getWriter().equals(writer)) throw new RuntimeException();
+
+                comment.setContent(form.getContent());
+                updatedComment = comment;
+                break;
+            }
         }
 
-        return resultTagIds;
+        if (updatedComment == null) throw new RuntimeException();
+
+        return CommentView.of(updatedComment);
     }
+
+    @Override
+    public void deleteComment(Long postId, Long commentId, String writerStudentNumber) {
+        User writer = userRepository.findByStudentNumber(writerStudentNumber)
+                .orElseThrow(UserNotFoundException::new);
+        Post post = postRepository.findById(postId)
+                .orElseThrow(PostNotFoundException::new);
+
+        Comment deletedComment = null;
+        for (Comment comment : post.getComments()) {
+            if (comment.getId().equals(commentId)) {
+                if (!comment.getWriter().equals(writer)) throw new RuntimeException();
+
+                deletedComment = comment;
+                break;
+            }
+        }
+
+        if (deletedComment == null) throw new RuntimeException();
+        post.getComments().remove(deletedComment);
+    }
+
+    @Override
+    public Page<CommentView> getComments(Long postId, Pageable pageable) {
+        // TODO: Comment, Reply도 각각 Repository를 가지도록 리팩토링 후 수정해야 함. 
+        Post post = postRepository.findById(postId)
+                .orElseThrow(PostNotFoundException::new);
+
+        List<CommentView> commentViews = post.getComments().stream()
+                .map(CommentView::of)
+                .toList();
+        return new PageImpl<>(commentViews, pageable, commentViews.size());
+    }
+
+    @Override
+    public ReplyView createReply(Long postId, Long commentId, ReplyForm form, String writerStudentNumber) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'createReply'");
+    }
+
+    @Override
+    public ReplyView updateReply(Long postId, Long commentId, Long replyId, ReplyForm form, String writerStudentNumber) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'updateReply'");
+    }
+
+    @Override
+    public void deleteReply(Long postId, Long commentId, Long replyId, String writerStudentNumber) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'deleteReply'");
+    }
+
+    @Override
+    public Page<ReplyView> getReplies(Long postId, Long commentId, Pageable pageable) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getReplies'");
+    }
+
 }
