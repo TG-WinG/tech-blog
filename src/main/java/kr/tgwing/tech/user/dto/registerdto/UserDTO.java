@@ -1,10 +1,8 @@
 package kr.tgwing.tech.user.dto.registerdto;
 
 import kr.tgwing.tech.user.entity.TempUser;
-import kr.tgwing.tech.user.entity.User;
 import lombok.*;
 
-import java.sql.Date;
 import java.time.LocalDate;
 
 @Data

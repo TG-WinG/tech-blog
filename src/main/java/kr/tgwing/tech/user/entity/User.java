@@ -1,11 +1,17 @@
 package kr.tgwing.tech.user.entity;
 
-import jakarta.persistence.*;
-import kr.tgwing.tech.user.dto.profiledto.ProfileDTO;
-import lombok.*;
-
-import java.sql.Date;
 import java.time.LocalDate;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import kr.tgwing.tech.user.dto.profiledto.ProfileDTO;
 
 @Entity
 @Getter
@@ -26,6 +32,16 @@ public class User extends BaseUser {
         this.role = role;
         this.profilePicture = profilePicture;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof User) {
+            var other = (User)obj;
+            return this.getStudentNumber().equals(other.getStudentNumber());
+        }
+        return false;
+    }
+
 
     public void setRole(String role) {
         this.role = role;

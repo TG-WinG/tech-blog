@@ -1,22 +1,9 @@
 package kr.tgwing.tech.user.service;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import kr.tgwing.tech.blog.entity.PostEntity;
-import kr.tgwing.tech.blog.repository.PostRepository;
-import kr.tgwing.tech.user.dto.*;
-import kr.tgwing.tech.user.dto.checkdto.CheckNumberDTO;
-import kr.tgwing.tech.user.dto.checkdto.CheckUserDTO;
-import kr.tgwing.tech.user.dto.checkdto.PasswordCheckDTO;
-import kr.tgwing.tech.user.dto.profiledto.ProfileDTO;
-import kr.tgwing.tech.user.dto.profiledto.ProfileReqDTO;
-import kr.tgwing.tech.user.dto.registerdto.UserDTO;
-import kr.tgwing.tech.user.entity.TempUser;
-import kr.tgwing.tech.user.entity.User;
-import kr.tgwing.tech.user.exception.*;
-import kr.tgwing.tech.user.repository.TempUserRepository;
-import kr.tgwing.tech.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
+
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -25,9 +12,27 @@ import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import kr.tgwing.tech.blog.entity.Post;
+import kr.tgwing.tech.blog.repository.PostRepository;
+import kr.tgwing.tech.user.dto.EmailMessageDTO;
+import kr.tgwing.tech.user.dto.checkdto.CheckNumberDTO;
+import kr.tgwing.tech.user.dto.checkdto.CheckUserDTO;
+import kr.tgwing.tech.user.dto.checkdto.PasswordCheckDTO;
+import kr.tgwing.tech.user.dto.profiledto.ProfileDTO;
+import kr.tgwing.tech.user.dto.profiledto.ProfileReqDTO;
+import kr.tgwing.tech.user.dto.registerdto.UserDTO;
+import kr.tgwing.tech.user.entity.TempUser;
+import kr.tgwing.tech.user.entity.User;
+import kr.tgwing.tech.user.exception.EmailCodeException;
+import kr.tgwing.tech.user.exception.MessageException;
+import kr.tgwing.tech.user.exception.PasswordException;
+import kr.tgwing.tech.user.exception.UserDuplicatedException;
+import kr.tgwing.tech.user.exception.UserNotFoundException;
+import kr.tgwing.tech.user.repository.TempUserRepository;
+import kr.tgwing.tech.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -89,10 +94,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<PostEntity> showMyBlog(String studentNumber){
+    public List<Post> showMyBlog(String studentNumber){
         User user = userRepository.findByStudentNumber(studentNumber)
                 .orElseThrow(UserNotFoundException::new);
-        List<PostEntity> myBlog = postRepository.findByWriter(user.getStudentId());
+        List<Post> myBlog = postRepository.findByWriter(user);
         return myBlog;
     }
 

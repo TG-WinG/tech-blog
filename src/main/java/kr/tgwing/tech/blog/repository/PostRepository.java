@@ -1,31 +1,29 @@
 package kr.tgwing.tech.blog.repository;
 
-
-import kr.tgwing.tech.blog.entity.PostEntity;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.util.List;
 import java.util.Optional;
 
-@Repository
-public interface PostRepository extends JpaRepository<PostEntity, Long> {
-    Optional<PostEntity> findById(Long id);
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+
+import kr.tgwing.tech.blog.entity.Post;
+import kr.tgwing.tech.user.entity.User;
+
+public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificationExecutor<Post> {
+    Optional<Post> findById(Long id);
     @Override
-    List<PostEntity> findAll();
+    List<Post> findAll();
 
-    List<PostEntity> findByWriter(Long writer);
+    List<Post> findByWriter(User writer);
 
-    Page<PostEntity> findAllByOrderByIdDesc(Pageable pageable);
+    Page<Post> findAllByOrderByIdDesc(Pageable pageable);
 
-    Page<PostEntity> findByTitleContains(String search, Pageable pageable);
+    Page<Post> findByTitleContains(String search, Pageable pageable);
 
     long countByTitleContains(String search);
     @Override
     long count();
-
-
 
 }
