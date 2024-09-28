@@ -1,15 +1,25 @@
 package kr.tgwing.tech.common.exception;
 
-import kr.tgwing.tech.blog.exception.post.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
+
+import kr.tgwing.tech.blog.exception.post.InappropriateUserPostRelationException;
+import kr.tgwing.tech.blog.exception.post.PageExceededDataException;
+import kr.tgwing.tech.blog.exception.post.PathHasNoPostIdException;
+import kr.tgwing.tech.blog.exception.post.PostNotFoundException;
+import kr.tgwing.tech.blog.exception.post.UserIsNotPostWriterException;
+import kr.tgwing.tech.blog.exception.post.WrongPostRequestException;
 import kr.tgwing.tech.blog.exception.reply.ReplyBadRequestException;
 import kr.tgwing.tech.blog.exception.reply.ReplyForbiddenException;
 import kr.tgwing.tech.blog.exception.reply.ReplyNotFoundException;
 import kr.tgwing.tech.project.exception.ProjectNotFoundException;
-import kr.tgwing.tech.user.exception.*;
-import org.springframework.http.HttpStatus;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
+import kr.tgwing.tech.user.exception.EmailCodeException;
+import kr.tgwing.tech.user.exception.MessageException;
+import kr.tgwing.tech.user.exception.PasswordException;
+import kr.tgwing.tech.user.exception.UserDuplicatedException;
+import kr.tgwing.tech.user.exception.UserNotFoundException;
 
 public class ExceptionMapper { // 예외 객체 -> 예외 상태로 바꿔주는 mapper
 
@@ -65,10 +75,8 @@ public class ExceptionMapper { // 예외 객체 -> 예외 상태로 바꿔주는
                 ExceptionSituation.of("찾고자 하는 프로젝트가 존재하지 않습니다.", HttpStatus.NOT_FOUND, 6600));
     }
 
-
     public static ExceptionSituation getSituationOf(Exception exception) {
         return mapper.get(exception.getClass());
     }
-
 
 }
