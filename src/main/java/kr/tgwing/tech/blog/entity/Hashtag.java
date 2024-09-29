@@ -21,7 +21,6 @@ import kr.tgwing.tech.common.BaseEntity;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ToString
 @Table(name = "hashtag")
 public class Hashtag extends BaseEntity {
 

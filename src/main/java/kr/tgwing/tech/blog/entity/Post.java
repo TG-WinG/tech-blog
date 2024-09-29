@@ -30,7 +30,6 @@ import kr.tgwing.tech.user.entity.User;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
 @Table(name = "post")
 public class Post extends BaseEntity {
 

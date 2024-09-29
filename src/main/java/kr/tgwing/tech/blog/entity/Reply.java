@@ -21,7 +21,6 @@ import kr.tgwing.tech.user.entity.User;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
 public class Reply extends BaseEntity {
 
     @Id @GeneratedValue

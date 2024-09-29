@@ -26,7 +26,6 @@ import kr.tgwing.tech.user.entity.User;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
 public class Comment extends BaseEntity {
 
     @Id @GeneratedValue
