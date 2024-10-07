@@ -2,6 +2,8 @@ package kr.tgwing.tech.config;
 
 import java.time.LocalDate;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,31 +15,40 @@ import kr.tgwing.tech.blog.entity.Post;
 import kr.tgwing.tech.blog.repository.PostRepository;
 import kr.tgwing.tech.user.entity.User;
 import kr.tgwing.tech.user.repository.UserRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
+@RequiredArgsConstructor
 public class TestDataLoader {
+
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Bean
     @Profile("default")
     public CommandLineRunner loadTestData(PostRepository postRepository,
                                           UserRepository userRepository) {
         return args -> {
-            User writer1 = userRepository.save(User.builder()
-                .studentNumber("2018000000")
-                .phoneNumber("01000000000")
-                .email("oldman@khu.ac.kr")
-                .name("늙은이")
-                .password("12345678")
-                .birth(LocalDate.parse("1999-01-01"))
-                .build());
-            User writer2 = userRepository.save(User.builder()
-                .studentNumber("2022000000")
-                .phoneNumber("01011111111")
-                .email("youngman@khu.ac.kr")
-                .name("젊은이")
-                .password("12345678")
-                .birth(LocalDate.parse("2003-01-01"))
-                .build());
+            User writer1 = User.builder()
+                    .studentNumber("2018000000")
+                    .phoneNumber("01000000000")
+                    .email("oldman@khu.ac.kr")
+                    .name("늙은이")
+                    .password("12345678")
+                    .birth(LocalDate.parse("1999-01-01"))
+                    .build();
+            User writer2 = User.builder()
+                    .studentNumber("2022000000")
+                    .phoneNumber("01011111111")
+                    .email("youngman@khu.ac.kr")
+                    .name("젊은이")
+                    .password("12345678")
+                    .birth(LocalDate.parse("2003-01-01"))
+                    .build();
+            writer1.hashPassword(bCryptPasswordEncoder);
+            writer2.hashPassword(bCryptPasswordEncoder);
+
+            userRepository.save(writer1);
+            userRepository.save(writer2);
 
             Post post1 = Post.builder()
                     .title("sample blog 1")

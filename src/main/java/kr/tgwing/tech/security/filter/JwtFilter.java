@@ -18,11 +18,9 @@ import java.io.IOException;
 @Slf4j
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
-    private final JwtBlackListService jwtBlackListService;
 
-    public JwtFilter(JwtUtil jwtUtil, JwtBlackListService jwtBlackListService) {
+    public JwtFilter(JwtUtil jwtUtil) {
         this.jwtUtil = jwtUtil;
-        this.jwtBlackListService = jwtBlackListService;
     }
 
 
@@ -48,7 +46,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
 
         //토큰 소멸 시간 검증
-        if (jwtUtil.isExpired(token) || jwtBlackListService.isBlacklisted(token)) {
+        if (jwtUtil.isExpired(token)) {
             log.info("token is useless...");
             filterChain.doFilter(request, response);
 

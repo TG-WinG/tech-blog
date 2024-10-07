@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import kr.tgwing.tech.user.dto.profiledto.ProfileDTO;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Entity
 @Getter
@@ -57,4 +58,9 @@ public class User extends BaseUser {
                 .profilePicture(user.getProfilePicture())
                 .build();
     }
+
+    public void hashPassword(PasswordEncoder passwordEncoder) {
+        setPassword(passwordEncoder.encode(getPassword()));
+    }
+
 }

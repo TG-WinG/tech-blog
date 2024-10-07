@@ -1,5 +1,6 @@
 package kr.tgwing.tech.security.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import kr.tgwing.tech.security.filter.JwtFilter;
 import kr.tgwing.tech.security.service.JwtBlackListService;
@@ -31,7 +32,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtUtil jwtUtil;
-    private final JwtBlackListService jwtBlackListService;
     private static final String[] PERMIT_URL_ARRAY = {
             /* swagger v2 */
             "/v2/api-docs",
@@ -58,7 +58,6 @@ public class SecurityConfig {
 
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
-        this.jwtBlackListService = jwtBlackListService;
     }
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
@@ -87,12 +86,14 @@ public class SecurityConfig {
                 .cors(AbstractHttpConfigurer::disable)
 
                 // .formLogin(Customizer.withDefaults())// -> 로그인 화면 구성되면 사용해야함.
-                 .logout((logout) -> logout
-                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                         .clearAuthentication(true)
-                         .invalidateHttpSession(true)
-                         .logoutSuccessUrl("/user/login") // 로그아웃 후 리디렉션할 URL 지정
-                         .deleteCookies("JSESSIONID")) // 세션 쿠키 삭제
+                .logout((logout) -> logout
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                        .clearAuthentication(true)
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .logoutSuccessHandler(((request, response, authentication) -> {
+                            response.setStatus(HttpServletResponse.SC_OK);
+                        }))) // 세션 쿠키 삭제
 //                .logout((logout) -> )
 //                .logoutUrl("/logout")
 //                .addLogoutHandler((request, response, authentication) -> {
@@ -114,12 +115,12 @@ public class SecurityConfig {
                         .requestMatchers("/**")
                         .permitAll()
                         .anyRequest().authenticated())
-                        .addFilterBefore(new JwtFilter(jwtUtil, jwtBlackListService), LoginFilter.class)
-                        .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
-                                UsernamePasswordAuthenticationFilter.class)
-                        .sessionManagement((session) -> session
-                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                        .build();
+                .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
+                        UsernamePasswordAuthenticationFilter.class)
+                .sessionManagement((session) -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .build();
     }
 
 //    public HttpSecurity logout(Customizer<LogoutConfigurer<HttpSecurity>> logoutCustomizer) throws Exception {
