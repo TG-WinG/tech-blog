@@ -1,6 +1,8 @@
 package kr.tgwing.tech.blog.repository;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 import java.util.HashSet;
 import java.util.List;
@@ -33,6 +35,11 @@ public class PostRepositoryTest {
         List<Post> all = postRepository.findAll(spec);
 
         System.out.println(all.size());
-        assertTrue(all.size() == 1);
+        assertThat(all).hasSize(1);
+
+        assertThatThrownBy(() -> { throw new RuntimeException("Boom!"); }).hasMessage("Boom!");
+
+        Throwable throwable = catchThrowable(() -> { throw new RuntimeException("Boom!"); });
+        assertThat(throwable).hasMessageFindingMatch("Boo");
     }
 }

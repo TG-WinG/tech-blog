@@ -16,7 +16,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import kr.tgwing.tech.common.BaseEntity;
 import kr.tgwing.tech.user.entity.User;
