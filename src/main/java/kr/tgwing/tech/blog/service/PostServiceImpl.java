@@ -58,6 +58,7 @@ public class PostServiceImpl implements PostService {
         Post newPost = Post.builder()
                 .title(form.getTitle())
                 .content(form.getContent())
+                .thumbnail(form.getThumbnail())
                 .writer(writer)
                 .build();
         form.getHashtags().forEach(hashtag -> {
