@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class PostQuery {
 
-    private String keyword;
+    private String keyword = "";
     private Set<String> hashtag;
 
 }
