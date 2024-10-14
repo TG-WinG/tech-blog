@@ -12,7 +12,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import kr.tgwing.tech.common.BaseEntity;
 
@@ -21,7 +20,6 @@ import kr.tgwing.tech.common.BaseEntity;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@ToString
 @Table(name = "hashtag")
 public class Hashtag extends BaseEntity {
 

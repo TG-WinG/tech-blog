@@ -16,7 +16,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import kr.tgwing.tech.common.BaseEntity;
 import kr.tgwing.tech.user.entity.User;
@@ -26,7 +25,6 @@ import kr.tgwing.tech.user.entity.User;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString
 public class Comment extends BaseEntity {
 
     @Id @GeneratedValue
