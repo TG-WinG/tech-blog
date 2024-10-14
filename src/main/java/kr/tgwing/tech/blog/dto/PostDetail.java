@@ -27,6 +27,7 @@ public class PostDetail {
                 .id(post.getId())
                 .title(post.getTitle())
                 .writer(ProfileDTO.of(post.getWriter()))
+                .thumbnail(post.getThumbnail())
                 .content(post.getContent())
                 .commnetCount(post.getComments().size());
 
