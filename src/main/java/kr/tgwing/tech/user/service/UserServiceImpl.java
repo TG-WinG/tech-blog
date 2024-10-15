@@ -3,7 +3,13 @@ package kr.tgwing.tech.user.service;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 
+import kr.tgwing.tech.blog.dto.PostOverview;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -94,11 +100,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<Post> showMyBlog(String studentNumber){
+    public Page<PostOverview> showMyBlog(String studentNumber,Pageable pageable){
         User user = userRepository.findByStudentNumber(studentNumber)
                 .orElseThrow(UserNotFoundException::new);
-        List<Post> myBlog = postRepository.findByWriter(user);
-        return myBlog;
+
+        Page<Post> myBlog = postRepository.findByWriter(user, pageable);
+        List<PostOverview> overviews = myBlog.stream().map(PostOverview::of).collect(Collectors.toList());
+
+        return new PageImpl<>(overviews, pageable, myBlog.getTotalElements());
     }
 
     @Override

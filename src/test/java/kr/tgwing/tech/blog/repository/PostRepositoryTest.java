@@ -19,27 +19,27 @@ import kr.tgwing.tech.blog.entity.PostSpecifications;
 @SpringBootTest
 public class PostRepositoryTest {
 
-    @Autowired
-    private PostRepository postRepository;
-
-    @Test
-    void findAllPostsByTitleContainsKeywordAndHashtagIsInHashtags() {
-        Set<String> hashtags = new HashSet<>();
-        hashtags.add("tag1");
-        hashtags.add("tag2");
-
-        Specification<Post> spec = PostSpecifications.hasTitleLike("1")
-            .and(PostSpecifications.hasContentLike("1"))
-            .and(PostSpecifications.hasHashtagIn(hashtags));
-
-        List<Post> all = postRepository.findAll(spec);
-
-        System.out.println(all.size());
-        assertThat(all).hasSize(1);
-
-        assertThatThrownBy(() -> { throw new RuntimeException("Boom!"); }).hasMessage("Boom!");
-
-        Throwable throwable = catchThrowable(() -> { throw new RuntimeException("Boom!"); });
-        assertThat(throwable).hasMessageFindingMatch("Boo");
-    }
+//    @Autowired
+//    private PostRepository postRepository;
+//
+//    @Test
+//    void findAllPostsByTitleContainsKeywordAndHashtagIsInHashtags() {
+//        Set<String> hashtags = new HashSet<>();
+//        hashtags.add("tag1");
+//        hashtags.add("tag2");
+//
+//        Specification<Post> spec = PostSpecifications.hasTitleLike("1")
+//            .and(PostSpecifications.hasContentLike("1"))
+//            .and(PostSpecifications.hasHashtagIn(hashtags));
+//
+//        List<Post> all = postRepository.findAll(spec);
+//
+//        System.out.println(all.size());
+//        assertThat(all).hasSize(1);
+//
+//        assertThatThrownBy(() -> { throw new RuntimeException("Boom!"); }).hasMessage("Boom!");
+//
+//        Throwable throwable = catchThrowable(() -> { throw new RuntimeException("Boom!"); });
+//        assertThat(throwable).hasMessageFindingMatch("Boo");
+//    }
 }

@@ -23,7 +23,8 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
     Page<Post> findByTitleContains(String search, Pageable pageable);
 
     long countByTitleContains(String search);
+
+    Page<Post> findByWriter(User writer, Pageable pageable);
     @Override
     long count();
-
 }

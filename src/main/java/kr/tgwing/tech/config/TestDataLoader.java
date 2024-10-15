@@ -24,7 +24,7 @@ public class TestDataLoader {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Bean
-    @Profile("dev")
+    @Profile("default")
     public CommandLineRunner loadTestData(PostRepository postRepository,
                                           UserRepository userRepository) {
         return args -> {
@@ -79,6 +79,31 @@ public class TestDataLoader {
                     .post(post1)
                     .writer(writer2)
                     .build();
+
+            for(int i=4; i<50; i++) {
+                Post post = Post.builder()
+                        .title("sample blog" + i)
+                        .content("sample content" + i)
+                        .thumbnail("sample thumbnail" + i)
+                        .writer(writer1)
+                        .build();
+
+                Hashtag tag = Hashtag.builder()
+                        .name("tag" + i)
+                        .post(post)
+                        .build();
+
+                Comment comment = Comment.builder()
+                        .content("sample comment" + i)
+                        .post(post)
+                        .writer(writer2)
+                        .build();
+
+                post.getComments().add(comment);
+                post.getHashtags().add(tag);
+
+                postRepository.save(post);
+            }
 
             post1.getHashtags().add(tag1);
             post1.getHashtags().add(tag3);

@@ -3,6 +3,10 @@ package kr.tgwing.tech.user.controller;
 import java.security.Principal;
 import java.util.List;
 
+import kr.tgwing.tech.blog.dto.PostOverview;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,11 +43,11 @@ public class ProfileController {
 
     @Operation(summary = "내 글 가져오기" )
     @GetMapping("/blog")
-    public ResponseEntity<ApiResponse<List<Post>>> showMyPost(Principal principal){
-        List<Post> blog = userService.showMyBlog(principal.getName());
-
+    public ResponseEntity<ApiResponse<Page<PostOverview>>> showMyPost(
+            Principal principal,
+            @PageableDefault Pageable pageable){
+        Page<PostOverview> blog = userService.showMyBlog(principal.getName(), pageable);
         return ResponseEntity.ok(ApiResponse.ok(blog));
-
     }
 
     @Operation(summary = "회원정보 수정" )
