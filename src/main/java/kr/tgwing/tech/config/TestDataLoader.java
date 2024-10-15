@@ -24,7 +24,7 @@ public class TestDataLoader {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Bean
-    @Profile("default")
+    @Profile("dev")
     public CommandLineRunner loadTestData(PostRepository postRepository,
                                           UserRepository userRepository) {
         return args -> {
