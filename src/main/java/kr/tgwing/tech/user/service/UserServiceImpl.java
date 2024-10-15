@@ -105,7 +105,8 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(UserNotFoundException::new);
 
         Page<Post> myBlog = postRepository.findByWriter(user, pageable);
-        List<PostOverview> overviews = myBlog.stream().map(PostOverview::of).collect(Collectors.toList());
+        List<PostOverview> overviews = myBlog.stream().map(PostOverview::of)
+                .collect(Collectors.toList());
 
         return new PageImpl<>(overviews, pageable, myBlog.getTotalElements());
     }
