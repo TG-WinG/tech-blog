@@ -133,9 +133,7 @@ public class PostServiceImpl implements PostService {
         }
 
         Page<Post> posts = postRepository.findAll(spec, pageable);
-        List<PostOverview> overviews = posts.stream().map(PostOverview::of).collect(Collectors.toList());
-
-        return new PageImpl<>(overviews, pageable, posts.getTotalElements());
+        return posts.map(PostOverview::of);
     }
 
     @Override
