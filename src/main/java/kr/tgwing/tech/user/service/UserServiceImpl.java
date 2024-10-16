@@ -5,11 +5,12 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import kr.tgwing.tech.blog.dto.PostOverview;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,8 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import lombok.RequiredArgsConstructor;
+
+import kr.tgwing.tech.blog.dto.PostOverview;
 import kr.tgwing.tech.blog.entity.Post;
 import kr.tgwing.tech.blog.repository.PostRepository;
 import kr.tgwing.tech.user.dto.EmailMessageDTO;
@@ -38,7 +40,6 @@ import kr.tgwing.tech.user.exception.UserDuplicatedException;
 import kr.tgwing.tech.user.exception.UserNotFoundException;
 import kr.tgwing.tech.user.repository.TempUserRepository;
 import kr.tgwing.tech.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

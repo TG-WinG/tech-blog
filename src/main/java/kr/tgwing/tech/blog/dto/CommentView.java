@@ -16,12 +16,15 @@ public class CommentView {
     private String content;
     private ProfileDTO writer;
     private LocalDateTime modDate;
+    private int replyCount;
 
     public static CommentView of(Comment comment) {
         return CommentView.builder()
+                .id(comment.getId())
                 .content(comment.getContent())
                 .writer(ProfileDTO.of(comment.getWriter()))
                 .modDate(comment.getModDate())
+                .replyCount(comment.getReplies().size())
                 .build();
     }
 }

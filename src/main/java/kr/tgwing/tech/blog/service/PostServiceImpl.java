@@ -25,9 +25,14 @@ import kr.tgwing.tech.blog.entity.Comment;
 import kr.tgwing.tech.blog.entity.Hashtag;
 import kr.tgwing.tech.blog.entity.Post;
 import kr.tgwing.tech.blog.entity.PostSpecifications;
+import kr.tgwing.tech.blog.entity.Reply;
+import kr.tgwing.tech.blog.exception.comment.CommentNotFoundException;
 import kr.tgwing.tech.blog.exception.post.PostNotFoundException;
 import kr.tgwing.tech.blog.exception.post.UserIsNotPostWriterException;
+import kr.tgwing.tech.blog.exception.reply.ReplyNotFoundException;
+import kr.tgwing.tech.blog.repository.CommentRepository;
 import kr.tgwing.tech.blog.repository.PostRepository;
+import kr.tgwing.tech.blog.repository.ReplyRepository;
 import kr.tgwing.tech.user.entity.User;
 import kr.tgwing.tech.user.exception.UserNotFoundException;
 import kr.tgwing.tech.user.repository.UserRepository;
@@ -40,6 +45,8 @@ public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final CommentRepository commentRepository;
+    private final ReplyRepository replyRepository;
 
     @Override
     public PostDetail getPost(Long postId) {
@@ -150,9 +157,10 @@ public class PostServiceImpl implements PostService {
                 .content(form.getContent())
                 .writer(writer)
                 .build();
-        post.getComments().add(newComment);
+        post.increaseCommentCount();
 
         postRepository.save(post);
+        commentRepository.save(newComment);
 
         return CommentView.of(newComment);
     }
@@ -161,21 +169,12 @@ public class PostServiceImpl implements PostService {
     public CommentView updateComment(Long postId, Long commentId, CommentForm form, String writerStudentNumber) {
         User writer = userRepository.findByStudentNumber(writerStudentNumber)
                 .orElseThrow(UserNotFoundException::new);
-        Post post = postRepository.findById(postId)
-                .orElseThrow(PostNotFoundException::new);
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(CommentNotFoundException::new);
 
-        Comment updatedComment = null;
-        for (Comment comment : post.getComments()) {
-            if (comment.getId().equals(commentId)) {
-                if (!comment.getWriter().equals(writer)) throw new RuntimeException();
-
-                comment.setContent(form.getContent());
-                updatedComment = comment;
-                break;
-            }
-        }
-
-        if (updatedComment == null) throw new RuntimeException();
+        if (!comment.getWriter().equals(writer)) throw new RuntimeException();
+        comment.setContent(form.getContent());
+        Comment updatedComment = commentRepository.save(comment);
 
         return CommentView.of(updatedComment);
     }
@@ -186,55 +185,83 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(UserNotFoundException::new);
         Post post = postRepository.findById(postId)
                 .orElseThrow(PostNotFoundException::new);
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(CommentNotFoundException::new);
 
-        Comment deletedComment = null;
-        for (Comment comment : post.getComments()) {
-            if (comment.getId().equals(commentId)) {
-                if (!comment.getWriter().equals(writer)) throw new RuntimeException();
-
-                deletedComment = comment;
-                break;
-            }
-        }
-
-        if (deletedComment == null) throw new RuntimeException();
-        post.getComments().remove(deletedComment);
+        if (!comment.getWriter().equals(writer)) throw new RuntimeException();
+        commentRepository.delete(comment);
+        post.decreaseCommentCount();
+        postRepository.save(post);
     }
 
     @Override
     public Page<CommentView> getComments(Long postId, Pageable pageable) {
-        // TODO: Comment, Reply도 각각 Repository를 가지도록 리팩토링 후 수정해야 함. 
         Post post = postRepository.findById(postId)
                 .orElseThrow(PostNotFoundException::new);
 
-        List<CommentView> commentViews = post.getComments().stream()
-                .map(CommentView::of)
-                .toList();
-        return new PageImpl<>(commentViews, pageable, commentViews.size());
+        Page<Comment> comments = commentRepository.findAllByPost(post, pageable);
+        return comments.map(CommentView::of);
     }
 
     @Override
     public ReplyView createReply(Long postId, Long commentId, ReplyForm form, String writerStudentNumber) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'createReply'");
+        User writer = userRepository.findByStudentNumber(writerStudentNumber)
+                .orElseThrow(UserNotFoundException::new);
+        Post post = postRepository.findById(postId)
+                .orElseThrow(PostNotFoundException::new);
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(CommentNotFoundException::new);
+        Reply newReply = Reply.builder()
+                .post(post)
+                .comment(comment)
+                .content(form.getContent())
+                .writer(writer)
+                .build();
+        post.increaseCommentCount();
+
+        replyRepository.save(newReply);
+
+        return ReplyView.of(newReply);
     }
 
     @Override
     public ReplyView updateReply(Long postId, Long commentId, Long replyId, ReplyForm form, String writerStudentNumber) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'updateReply'");
+        User writer = userRepository.findByStudentNumber(writerStudentNumber)
+                .orElseThrow(UserNotFoundException::new);
+
+        Reply reply = replyRepository.findById(replyId)
+                .orElseThrow(ReplyNotFoundException::new);
+
+        if (!reply.getWriter().equals(writer)) throw new RuntimeException();
+
+        reply.setContent(form.getContent());
+        Reply updatedReply = replyRepository.save(reply);
+
+        return ReplyView.of(updatedReply);
     }
 
     @Override
     public void deleteReply(Long postId, Long commentId, Long replyId, String writerStudentNumber) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'deleteReply'");
+        User writer = userRepository.findByStudentNumber(writerStudentNumber)
+                .orElseThrow(UserNotFoundException::new);
+        Post post = postRepository.findById(postId)
+                .orElseThrow(PostNotFoundException::new);
+        Reply reply = replyRepository.findById(replyId)
+                .orElseThrow(ReplyNotFoundException::new);
+
+        if (!reply.getWriter().equals(writer)) throw new RuntimeException();
+        replyRepository.delete(reply);
+        post.decreaseCommentCount();
+        postRepository.save(post);
     }
 
     @Override
     public Page<ReplyView> getReplies(Long postId, Long commentId, Pageable pageable) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getReplies'");
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(CommentNotFoundException::new);
+
+        Page<Reply> replies = replyRepository.findAllByComment(comment, pageable);
+        return replies.map(ReplyView::of);
     }
 
 }

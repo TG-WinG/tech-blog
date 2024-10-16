@@ -33,7 +33,7 @@ public class PostDetail {
                 .thumbnail(post.getThumbnail())
                 .modDate(post.getModDate().format(formatter))
                 .content(post.getContent())
-                .commentCount(post.getComments().size());
+                .commentCount(post.getCommentCount());
 
         post.getHashtags().forEach( hashtag -> builder.hashtag(hashtag.getName()) );
 
