@@ -21,7 +21,7 @@ public class PostDetail {
     private String thumbnail;
     private String modDate;
     private int likeCount;
-    private int commnetCount;
+    private int commentCount;
     @Singular private Set<String> hashtags;
 
     public static PostDetail of(Post post) {
@@ -33,7 +33,7 @@ public class PostDetail {
                 .thumbnail(post.getThumbnail())
                 .modDate(post.getModDate().format(formatter))
                 .content(post.getContent())
-                .commnetCount(post.getComments().size());
+                .commentCount(post.getComments().size());
 
         post.getHashtags().forEach( hashtag -> builder.hashtag(hashtag.getName()) );
 
