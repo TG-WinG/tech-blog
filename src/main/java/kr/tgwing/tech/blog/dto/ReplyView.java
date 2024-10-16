@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.Data;
 
+import kr.tgwing.tech.blog.entity.Reply;
 import kr.tgwing.tech.user.dto.profiledto.ProfileDTO;
 
 @Data
@@ -16,4 +17,12 @@ public class ReplyView {
     private String content;
     private LocalDateTime modDate;
 
+    public static ReplyView of(Reply reply) {
+        return ReplyView.builder()
+                .id(reply.getId())
+                .writer(ProfileDTO.of(reply.getWriter()))
+                .content(reply.getContent())
+                .modDate(reply.getModDate())
+                .build();
+    }
 }

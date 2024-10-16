@@ -48,6 +48,9 @@ public class Post extends BaseEntity {
     @Column(name = "thumbnail_url")
     private String thumbnail;
 
+    @Column(name = "comment_count")
+    private int commentCount;
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Comment> comments = new ArrayList<>();
@@ -76,5 +79,9 @@ public class Post extends BaseEntity {
     public void setHashtags(Set<Hashtag> hashtags) {
         this.hashtags = hashtags;
     }
+
+    public void increaseCommentCount() { commentCount++; }
+
+    public void decreaseCommentCount() { commentCount--; }
 
 }

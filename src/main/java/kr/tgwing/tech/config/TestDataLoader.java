@@ -2,20 +2,23 @@ package kr.tgwing.tech.config;
 
 import java.time.LocalDate;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import lombok.RequiredArgsConstructor;
 
 import kr.tgwing.tech.blog.entity.Comment;
 import kr.tgwing.tech.blog.entity.Hashtag;
 import kr.tgwing.tech.blog.entity.Post;
+import kr.tgwing.tech.blog.entity.Reply;
+import kr.tgwing.tech.blog.repository.CommentRepository;
 import kr.tgwing.tech.blog.repository.PostRepository;
+import kr.tgwing.tech.blog.repository.ReplyRepository;
 import kr.tgwing.tech.user.entity.User;
 import kr.tgwing.tech.user.repository.UserRepository;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
 @RequiredArgsConstructor
@@ -24,9 +27,12 @@ public class TestDataLoader {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Bean
-    @Profile("dev")
+    @Profile({"dev", "default"})
     public CommandLineRunner loadTestData(PostRepository postRepository,
-                                          UserRepository userRepository) {
+                                          UserRepository userRepository,
+                                          CommentRepository CommentRepository,
+                                          ReplyRepository replyRepository
+    ) {
         return args -> {
             User writer1 = User.builder()
                     .studentNumber("2018000000")
@@ -79,6 +85,12 @@ public class TestDataLoader {
                     .post(post1)
                     .writer(writer2)
                     .build();
+            Reply reply1 = Reply.builder()
+                    .content("sample reply 1")
+                    .post(post1)
+                    .comment(comment1)
+                    .writer(writer1)
+                    .build();
 
             for(int i=4; i<50; i++) {
                 Post post = Post.builder()
@@ -101,8 +113,10 @@ public class TestDataLoader {
 
                 post.getComments().add(comment);
                 post.getHashtags().add(tag);
+                post.increaseCommentCount();
 
                 postRepository.save(post);
+                CommentRepository.save(comment);
             }
 
             post1.getHashtags().add(tag1);
@@ -110,9 +124,14 @@ public class TestDataLoader {
             post2.getHashtags().add(tag2);
 
             post1.getComments().add(comment1);
+            post1.increaseCommentCount();
+            comment1.getReplies().add(reply1);
+            post1.increaseCommentCount();
 
             postRepository.save(post1);
             postRepository.save(post2);
+            CommentRepository.save(comment1);
+            replyRepository.save(reply1);
         };
     }
 }

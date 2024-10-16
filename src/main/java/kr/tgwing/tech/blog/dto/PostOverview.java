@@ -36,7 +36,7 @@ public class PostOverview {
                 .summary((content.length() < SUMMARY_LENGTH) ? content : content.substring(0, SUMMARY_LENGTH))
                 .thumbnail(post.getThumbnail())
                 .modDate(post.getModDate().format(formatter))
-                .commentCount(post.getComments().size())
+                .commentCount(post.getCommentCount())
                 .hashtags(post.getHashtags().stream().map(hashtag -> hashtag.getName()).toList())
                 .build(); 
     }
