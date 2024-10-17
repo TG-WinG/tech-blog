@@ -23,7 +23,9 @@ import lombok.RequiredArgsConstructor;
 
 import kr.tgwing.tech.blog.dto.PostOverview;
 import kr.tgwing.tech.blog.entity.Post;
+import kr.tgwing.tech.blog.repository.CommentRepository;
 import kr.tgwing.tech.blog.repository.PostRepository;
+import kr.tgwing.tech.blog.repository.ReplyRepository;
 import kr.tgwing.tech.user.dto.EmailMessageDTO;
 import kr.tgwing.tech.user.dto.checkdto.CheckNumberDTO;
 import kr.tgwing.tech.user.dto.checkdto.CheckUserDTO;
@@ -101,15 +103,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<PostOverview> showMyBlog(String studentNumber,Pageable pageable){
+    public Page<PostOverview> showMyBlog(String studentNumber, Pageable pageable){
         User user = userRepository.findByStudentNumber(studentNumber)
                 .orElseThrow(UserNotFoundException::new);
 
         Page<Post> myBlog = postRepository.findByWriter(user, pageable);
-        List<PostOverview> overviews = myBlog.stream().map(PostOverview::of)
-                .collect(Collectors.toList());
-
-        return new PageImpl<>(overviews, pageable, myBlog.getTotalElements());
+        return myBlog.map(PostOverview::of);
     }
 
     @Override
