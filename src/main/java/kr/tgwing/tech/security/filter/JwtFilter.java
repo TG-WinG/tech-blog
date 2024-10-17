@@ -9,6 +9,7 @@ import kr.tgwing.tech.security.service.JwtBlackListService;
 import kr.tgwing.tech.security.util.JwtUtil;
 import kr.tgwing.tech.user.entity.User;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -35,7 +36,6 @@ public class JwtFilter extends OncePerRequestFilter {
         if (authorization == null || !authorization.startsWith("Bearer ")) {
             log.info("token is null");
             filterChain.doFilter(request, response);
-
             return;
         }
 
@@ -44,12 +44,17 @@ public class JwtFilter extends OncePerRequestFilter {
         //Bearer 부분 제거 후 순수 토큰만 획득
         String token = authorization.split(" ")[1];
 
+        if ("/api/validate".equals(request.getRequestURI()) && "POST".equalsIgnoreCase(request.getMethod())) {
+            log.info("유효성 검사 토큰 요청 확인");
+            response.setStatus(HttpServletResponse.SC_OK);
+            response.getWriter().write("token validation result: success!");
+            return;
+        }
 
         //토큰 소멸 시간 검증
         if (jwtUtil.isExpired(token)) {
             log.info("token is useless...");
             filterChain.doFilter(request, response);
-
             return;
         }
 
