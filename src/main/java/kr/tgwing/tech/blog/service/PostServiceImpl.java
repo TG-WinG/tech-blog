@@ -1,10 +1,8 @@
 package kr.tgwing.tech.blog.service;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -15,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import kr.tgwing.tech.blog.dto.CommentForm;
 import kr.tgwing.tech.blog.dto.CommentView;
+import kr.tgwing.tech.blog.dto.LikeHistoryView;
 import kr.tgwing.tech.blog.dto.PostDetail;
 import kr.tgwing.tech.blog.dto.PostForm;
 import kr.tgwing.tech.blog.dto.PostOverview;
@@ -23,6 +22,7 @@ import kr.tgwing.tech.blog.dto.ReplyForm;
 import kr.tgwing.tech.blog.dto.ReplyView;
 import kr.tgwing.tech.blog.entity.Comment;
 import kr.tgwing.tech.blog.entity.Hashtag;
+import kr.tgwing.tech.blog.entity.LikeHistory;
 import kr.tgwing.tech.blog.entity.Post;
 import kr.tgwing.tech.blog.entity.PostSpecifications;
 import kr.tgwing.tech.blog.entity.Reply;
@@ -31,6 +31,7 @@ import kr.tgwing.tech.blog.exception.post.PostNotFoundException;
 import kr.tgwing.tech.blog.exception.post.UserIsNotPostWriterException;
 import kr.tgwing.tech.blog.exception.reply.ReplyNotFoundException;
 import kr.tgwing.tech.blog.repository.CommentRepository;
+import kr.tgwing.tech.blog.repository.LikeHistoryRepository;
 import kr.tgwing.tech.blog.repository.PostRepository;
 import kr.tgwing.tech.blog.repository.ReplyRepository;
 import kr.tgwing.tech.user.entity.User;
@@ -47,6 +48,7 @@ public class PostServiceImpl implements PostService {
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final ReplyRepository replyRepository;
+    private final LikeHistoryRepository likeHistoryRepository;
 
     @Override
     public PostDetail getPost(Long postId) {
@@ -260,6 +262,35 @@ public class PostServiceImpl implements PostService {
 
         Page<Reply> replies = replyRepository.findAllByComment(comment, pageable);
         return replies.map(ReplyView::of);
+    }
+
+    @Override
+    public LikeHistoryView toggleLike(Long postId, String userStudentNumber) {
+        User user = userRepository.findByStudentNumber(userStudentNumber)
+                .orElseThrow(UserNotFoundException::new);
+        Post post = postRepository.findById(postId)
+                .orElseThrow(PostNotFoundException::new);
+        LikeHistory.Key key = new LikeHistory.Key(user.getStudentId(), postId);
+        LikeHistory likeHistory = likeHistoryRepository.findById(key).orElse(null);
+
+        if (likeHistory == null) {
+            likeHistory = LikeHistory.builder()
+                        .user(user)
+                        .post(post)
+                        .canceled(false)
+                        .build();
+            post.increaseLikeCount();
+        } else {
+            likeHistory.toggle();
+            if (likeHistory.isCanceled())
+                post.decreaseLikeCount();
+            else
+                post.increaseLikeCount();
+        }
+        likeHistoryRepository.save(likeHistory);
+        postRepository.save(post);
+
+        return LikeHistoryView.of(likeHistory);
     }
 
 }

@@ -51,6 +51,9 @@ public class Post extends BaseEntity {
     @Column(name = "comment_count")
     private int commentCount;
 
+    @Column(name = "like_count")
+    private int likeCount;
+
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<Comment> comments = new ArrayList<>();
@@ -83,5 +86,9 @@ public class Post extends BaseEntity {
     public void increaseCommentCount() { commentCount++; }
 
     public void decreaseCommentCount() { commentCount--; }
+
+    public void increaseLikeCount() { likeCount++; }
+
+    public void decreaseLikeCount() { likeCount--; }
 
 }

@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import kr.tgwing.tech.blog.dto.CommentForm;
 import kr.tgwing.tech.blog.dto.CommentView;
+import kr.tgwing.tech.blog.dto.LikeHistoryView;
 import kr.tgwing.tech.blog.dto.PostDetail;
 import kr.tgwing.tech.blog.dto.PostForm;
 import kr.tgwing.tech.blog.dto.PostOverview;
@@ -54,8 +55,8 @@ public class PostController {
         @RequestBody PostForm form,
         Principal principal
     ) {
-        String studentId = principal.getName();
-        return postService.createPost(form, studentId);
+        String studentNumber = principal.getName();
+        return postService.createPost(form, studentNumber);
     }
 
     //    @CrossOrigin
@@ -65,8 +66,8 @@ public class PostController {
         @RequestBody PostForm form,
         Principal principal
     ) {
-        String studentId = principal.getName();
-        return postService.updatePost(postId, form, studentId);
+        String studentNumber = principal.getName();
+        return postService.updatePost(postId, form, studentNumber);
     }
 
     @DeleteMapping("{postId}") // 블로그 삭제 - DELETE, /api/blog/{postid}
@@ -74,8 +75,8 @@ public class PostController {
         @PathVariable Long postId,
         Principal principal
     ) {
-        String studentId = principal.getName();
-        postService.deletePost(postId, studentId);
+        String studentNumber = principal.getName();
+        postService.deletePost(postId, studentNumber);
     }
 
     @GetMapping("{postId}/comment")
@@ -92,8 +93,8 @@ public class PostController {
         @RequestBody CommentForm form,
         Principal principal
     ) {
-        String studentId = principal.getName();
-        return postService.createComment(postId, form, studentId);
+        String studentNumber = principal.getName();
+        return postService.createComment(postId, form, studentNumber);
     }
 
     @PutMapping("{postId}/comment/{commentId}")
@@ -103,8 +104,8 @@ public class PostController {
         @RequestBody CommentForm form,
         Principal principal
     ) {
-        String studentId = principal.getName();
-        return postService.updateComment(postId, commentId, form, studentId);
+        String studentNumber = principal.getName();
+        return postService.updateComment(postId, commentId, form, studentNumber);
     }
 
     @DeleteMapping("{postId}/comment/{commentId}")
@@ -113,8 +114,8 @@ public class PostController {
         @PathVariable Long commentId,
         Principal principal
     ) {
-        String studentId = principal.getName();
-        postService.deleteComment(postId, commentId, studentId);
+        String studentNumber = principal.getName();
+        postService.deleteComment(postId, commentId, studentNumber);
     }
 
     @GetMapping("{postId}/comment/{commentId}/reply")
@@ -133,8 +134,8 @@ public class PostController {
         @RequestBody ReplyForm form,
         Principal principal
     ) {
-        String studentId = principal.getName();
-        return postService.createReply(postId, commentId, form, studentId);
+        String studentNumber = principal.getName();
+        return postService.createReply(postId, commentId, form, studentNumber);
     }
 
     @PutMapping("{postId}/comment/{commentId}/reply/{replyId}")
@@ -145,8 +146,8 @@ public class PostController {
         @RequestBody ReplyForm form,
         Principal principal
     ) {
-        String studentId = principal.getName();
-        return postService.updateReply(postId, commentId, replyId, form, studentId);
+        String studentNumber = principal.getName();
+        return postService.updateReply(postId, commentId, replyId, form, studentNumber);
     }
 
     @DeleteMapping("{postId}/comment/{commentId}/reply/{replyId}")
@@ -156,8 +157,18 @@ public class PostController {
         @PathVariable Long replyId,
         Principal principal
     ) {
-        String studentId = principal.getName();
-        postService.deleteReply(postId, commentId, replyId, studentId);
+        String studentNumber = principal.getName();
+        postService.deleteReply(postId, commentId, replyId, studentNumber);
     }
+
+    @PostMapping("{postId}/like")
+    public LikeHistoryView toggleLike(
+        @PathVariable Long postId,
+        Principal principal
+    ) {
+        String studentNumber = principal.getName();
+        return postService.toggleLike(postId, studentNumber);
+    }
+
 }
 

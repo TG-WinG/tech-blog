@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 
 import kr.tgwing.tech.blog.dto.CommentForm;
 import kr.tgwing.tech.blog.dto.CommentView;
+import kr.tgwing.tech.blog.dto.LikeHistoryView;
 import kr.tgwing.tech.blog.dto.PostDetail;
 import kr.tgwing.tech.blog.dto.PostForm;
 import kr.tgwing.tech.blog.dto.PostOverview;
@@ -36,4 +37,5 @@ public interface PostService {
     public void deleteReply(Long postId, Long commentId, Long replyId, String writerStudentNumber);
     public Page<ReplyView> getReplies(Long postId, Long commentId, Pageable pageable);
 
+    public LikeHistoryView toggleLike(Long postId, String userStudentNumber);
 }

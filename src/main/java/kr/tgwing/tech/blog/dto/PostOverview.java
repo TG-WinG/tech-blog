@@ -37,6 +37,7 @@ public class PostOverview {
                 .thumbnail(post.getThumbnail())
                 .modDate(post.getModDate().format(formatter))
                 .commentCount(post.getCommentCount())
+                .likeCount(post.getLikeCount())
                 .hashtags(post.getHashtags().stream().map(hashtag -> hashtag.getName()).toList())
                 .build(); 
     }
