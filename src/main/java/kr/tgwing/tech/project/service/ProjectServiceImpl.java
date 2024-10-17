@@ -129,6 +129,7 @@ public class ProjectServiceImpl{
                 .title(project.getTitle())
                 .start(project.getStartDate())
                 .end(project.getEndDate())
+                .description(project.getDescription())
                 .thumbnail(project.getThumbnail())
                 .devStatus(project.getDevStatus())
                 .devType(project.getDevType())
