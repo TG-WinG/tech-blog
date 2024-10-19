@@ -1,7 +1,16 @@
 package kr.tgwing.tech.config;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 
+import kr.tgwing.tech.project.domain.Enum.Part;
+import kr.tgwing.tech.project.domain.Image;
+import kr.tgwing.tech.project.domain.Link;
+import kr.tgwing.tech.project.domain.Participant;
+import kr.tgwing.tech.project.domain.Project;
+import kr.tgwing.tech.project.repository.LinkRepository;
+import kr.tgwing.tech.project.repository.ParticipantRepository;
+import kr.tgwing.tech.project.repository.ProjectRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +40,10 @@ public class TestDataLoader {
     public CommandLineRunner loadTestData(PostRepository postRepository,
                                           UserRepository userRepository,
                                           CommentRepository CommentRepository,
-                                          ReplyRepository replyRepository
+                                          ReplyRepository replyRepository,
+                                          ProjectRepository projectRepository,
+                                          ParticipantRepository participantRepository,
+                                          LinkRepository linkRepository
     ) {
         return args -> {
             User writer1 = User.builder()
@@ -132,6 +144,75 @@ public class TestDataLoader {
             postRepository.save(post2);
             CommentRepository.save(comment1);
             replyRepository.save(reply1);
+
+            Project project = Project.builder()
+                    .title("프로젝트")
+                    .description("아오 힘들어라")
+                    .start(LocalDate.parse("2024-05-01"))
+                    .end(LocalDate.parse("2024-10-31"))
+                    .devStatus("진행중")
+                    .devType("웹")
+                    .imageUrls(new ArrayList<>())
+                    .links(new ArrayList<>())
+                    .participants(new ArrayList<>())
+                    .build();
+
+            Image image1 = Image.builder()
+                    .imageUrl("img1")
+                    .project(project)
+                    .build();
+            Image image2 = Image.builder()
+                    .imageUrl("img2")
+                    .project(project)
+                    .build();
+            Image image3 = Image.builder()
+                    .imageUrl("img3")
+                    .project(project)
+                    .build();
+
+            Link github = Link.builder()
+                    .description("github")
+                    .url("singsangssong.github.com")
+                    .project(project)
+                    .build();
+            Link notion = Link.builder()
+                    .description("notion")
+                    .url("notion.no")
+                    .project(project)
+                    .build();
+
+            Participant participant1 = Participant.builder()
+                    .part(Part.DESIGNER)
+                    .name("design")
+                    .major("디자인과")
+                    .project(project)
+                    .build();
+            Participant participant2 = Participant.builder()
+                    .part(Part.BACK)
+                    .name("song")
+                    .major("컴공")
+                    .project(project)
+                    .build();
+            Participant participant3 = Participant.builder()
+                    .part(Part.FRONT)
+                    .name("jin")
+                    .project(project)
+                    .major("컴공")
+                    .build();
+
+            project.getParticipants().add(participant1);
+            project.getParticipants().add(participant2);
+            project.getParticipants().add(participant3);
+
+            project.getLinks().add(github);
+            project.getLinks().add(notion);
+
+            project.getImageUrls().add(image1);
+            project.getImageUrls().add(image2);
+            project.getImageUrls().add(image3);
+
+            projectRepository.save(project);
+
         };
     }
 }

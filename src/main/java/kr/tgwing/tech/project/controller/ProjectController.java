@@ -36,7 +36,6 @@ public class ProjectController {
     @GetMapping("/{project_id}")
     public ResponseEntity<?> getOneProject(@PathVariable("project_id") Long project_id){
         ProjectDetailDTO project = projectServiceImpl.getOneProject(project_id);
-
         return ResponseEntity.ok(ApiResponse.ok(project));
     }
 

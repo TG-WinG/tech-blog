@@ -36,14 +36,14 @@ public class Project extends BaseEntity {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Column(name = "thumbnail_url")
-    private String thumbnail;
-
     @Column(name = "dev_status")
     private String devStatus;
 
     @Column(name = "dev_type")
     private String devType;
+
+    @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Image> imageUrls = new ArrayList<>();
 
     @OneToMany(mappedBy = "project", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Participant> participants = new ArrayList<>();
@@ -52,13 +52,13 @@ public class Project extends BaseEntity {
     private List<Link> links = new ArrayList<>();
 
     @Builder
-    public Project(Long id, String title, String description, LocalDate start, LocalDate end, String thumbnail, String devStatus, String devType, List<Participant> participants, List<Link> links) {
+    public Project(Long id, String title, String description, LocalDate start, LocalDate end, List<Image> imageUrls, String devStatus, String devType, List<Participant> participants, List<Link> links) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.startDate = start;
         this.endDate = end;
-        this.thumbnail = thumbnail;
+        this.imageUrls = imageUrls;
         this.devStatus = devStatus;
         this.devType = devType;
         this.participants = participants;
@@ -69,10 +69,14 @@ public class Project extends BaseEntity {
         List<Participant> update = participants.stream()
                 .map(ParticipantDTO::toParticipantEntity)
                 .toList();
-        update.stream().forEach(
-                participant -> participant.setProject(Project.this)
-        );
         this.participants = update;
+    }
+
+    public List<Participant> updateParticipants(List<ParticipantDTO> participants) {
+        List<Participant> update = participants.stream()
+                .map(ParticipantDTO::toParticipantEntity)
+                .toList();
+        return update;
     }
 
     public void setLinks(List<LinkDTO> links) {
@@ -81,14 +85,22 @@ public class Project extends BaseEntity {
                 .toList();
         this.links = update;
     }
+
+    public void setImageUrls(List<String> imageUrls) {
+        List<Image> update = imageUrls.stream()
+                .map( url -> Image.builder().imageUrl(url).build())
+                .toList();
+        this.imageUrls = update;
+    }
+
     public void updateProject(ProjectUpdateDTO projectUpdateDTO) {
         this.title = projectUpdateDTO.getTitle();
         this.description = projectUpdateDTO.getDescription();
         this.startDate = projectUpdateDTO.getStart();
         this.endDate = projectUpdateDTO.getEnd();
-        this.thumbnail = projectUpdateDTO.getThumbnail();
         this.devStatus = projectUpdateDTO.getDevStatus();
         this.devType = projectUpdateDTO.getDevType();
+//        this.participants = updateParticipants(projectUpdateDTO.getParticipants());
     }
 
 }

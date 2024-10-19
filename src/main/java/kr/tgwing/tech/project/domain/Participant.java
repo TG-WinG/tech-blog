@@ -33,7 +33,6 @@ public class Participant extends BaseEntity {
 
     private String major;
 
-    // project create 할 떄 한번 썻읍니다..허허
     public void setProject(Project project) {
         this.project = project;
     }
