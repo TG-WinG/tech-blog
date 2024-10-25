@@ -27,6 +27,9 @@ public class Project extends BaseEntity {
     private Long id;
 
     private String title;
+
+    @Lob
+    @Column(columnDefinition = "TEXT")
     private String description;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "start_date")

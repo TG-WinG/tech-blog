@@ -147,7 +147,8 @@ public class TestDataLoader {
 
             Project project = Project.builder()
                     .title("프로젝트")
-                    .description("아오 힘들어라")
+                    .description("아오 " +
+                            "js아오 ㄹ먼에ㅐ래")
                     .start(LocalDate.parse("2024-05-01"))
                     .end(LocalDate.parse("2024-10-31"))
                     .devStatus("진행중")
