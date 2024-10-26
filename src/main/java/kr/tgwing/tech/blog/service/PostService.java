@@ -5,6 +5,7 @@ import org.springframework.data.domain.Pageable;
 
 import kr.tgwing.tech.blog.dto.CommentForm;
 import kr.tgwing.tech.blog.dto.CommentView;
+import kr.tgwing.tech.blog.dto.LikeHistoryView;
 import kr.tgwing.tech.blog.dto.PostDetail;
 import kr.tgwing.tech.blog.dto.PostForm;
 import kr.tgwing.tech.blog.dto.PostOverview;
@@ -19,12 +20,12 @@ import kr.tgwing.tech.blog.dto.ReplyView;
  */
 public interface PostService {
 
-    public PostDetail getPost(Long postId);
-    public PostOverview getPostOverview(Long postId);
+    public PostDetail getPost(Long postId, String userStudentNumber);
+    public PostOverview getPostOverview(Long postId, String userStudentNumber);
     public PostDetail createPost(PostForm form, String writerStudentNumber);
     public PostDetail updatePost(Long postId, PostForm form, String writerStudentNumber);
     public void deletePost(Long postId, String writerStudentNumber);
-    public Page<PostOverview> getPostOverviews(PostQuery query, Pageable pageable);
+    public Page<PostOverview> getPostOverviews(PostQuery query, String userStudentNumber, Pageable pageable);
 
     public CommentView createComment(Long postId, CommentForm form, String writerStudentNumber);
     public CommentView updateComment(Long postId, Long commentId, CommentForm form, String writerStudentNumber);
@@ -36,4 +37,5 @@ public interface PostService {
     public void deleteReply(Long postId, Long commentId, Long replyId, String writerStudentNumber);
     public Page<ReplyView> getReplies(Long postId, Long commentId, Pageable pageable);
 
+    public LikeHistoryView toggleLike(Long postId, String userStudentNumber);
 }

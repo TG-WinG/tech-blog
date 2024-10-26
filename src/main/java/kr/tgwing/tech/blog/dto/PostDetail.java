@@ -23,8 +23,9 @@ public class PostDetail {
     private int likeCount;
     private int commentCount;
     @Singular private Set<String> hashtags;
+    private boolean iLikeIt;
 
-    public static PostDetail of(Post post) {
+    public static PostDetail of(Post post, boolean iLikeIt) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         var builder = PostDetail.builder()
                 .id(post.getId())
@@ -33,7 +34,9 @@ public class PostDetail {
                 .thumbnail(post.getThumbnail())
                 .modDate(post.getModDate().format(formatter))
                 .content(post.getContent())
-                .commentCount(post.getCommentCount());
+                .commentCount(post.getCommentCount())
+                .likeCount(post.getLikeCount())
+                .iLikeIt(iLikeIt);
 
         post.getHashtags().forEach( hashtag -> builder.hashtag(hashtag.getName()) );
 
