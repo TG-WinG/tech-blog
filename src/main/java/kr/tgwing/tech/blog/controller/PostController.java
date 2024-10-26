@@ -40,14 +40,20 @@ public class PostController {
     @GetMapping // 블로그 전체 가져오기 - GET, /api/blog
     public Page<PostOverview> getAllPostswithSearch(
         @ModelAttribute PostQuery query,
-        @PageableDefault Pageable pageable
+        @PageableDefault Pageable pageable,
+        Principal principal
     ) {
-        return postService.getPostOverviews(query, pageable);
+        String studentNumber = getStudentNumber(principal);
+        return postService.getPostOverviews(query, studentNumber, pageable);
     }
 
     @GetMapping("{postId}") // 특정 블로그 가져오기 - GET, /api/blog/{postId}
-    public PostDetail getPost(@PathVariable Long postId) {
-        return postService.getPost(postId);
+    public PostDetail getPost(
+        @PathVariable Long postId,
+        Principal principal
+    ) {
+        String studentNumber = getStudentNumber(principal);
+        return postService.getPost(postId, studentNumber);
     }
 
     @PostMapping // 블로그 작성 - POST, /api/blog
@@ -55,7 +61,7 @@ public class PostController {
         @RequestBody PostForm form,
         Principal principal
     ) {
-        String studentNumber = principal.getName();
+        String studentNumber = getStudentNumber(principal);
         return postService.createPost(form, studentNumber);
     }
 
@@ -66,7 +72,7 @@ public class PostController {
         @RequestBody PostForm form,
         Principal principal
     ) {
-        String studentNumber = principal.getName();
+        String studentNumber = getStudentNumber(principal);
         return postService.updatePost(postId, form, studentNumber);
     }
 
@@ -75,7 +81,7 @@ public class PostController {
         @PathVariable Long postId,
         Principal principal
     ) {
-        String studentNumber = principal.getName();
+        String studentNumber = getStudentNumber(principal);
         postService.deletePost(postId, studentNumber);
     }
 
@@ -93,7 +99,7 @@ public class PostController {
         @RequestBody CommentForm form,
         Principal principal
     ) {
-        String studentNumber = principal.getName();
+        String studentNumber = getStudentNumber(principal);
         return postService.createComment(postId, form, studentNumber);
     }
 
@@ -104,7 +110,7 @@ public class PostController {
         @RequestBody CommentForm form,
         Principal principal
     ) {
-        String studentNumber = principal.getName();
+        String studentNumber = getStudentNumber(principal);
         return postService.updateComment(postId, commentId, form, studentNumber);
     }
 
@@ -114,7 +120,7 @@ public class PostController {
         @PathVariable Long commentId,
         Principal principal
     ) {
-        String studentNumber = principal.getName();
+        String studentNumber = getStudentNumber(principal);
         postService.deleteComment(postId, commentId, studentNumber);
     }
 
@@ -134,7 +140,7 @@ public class PostController {
         @RequestBody ReplyForm form,
         Principal principal
     ) {
-        String studentNumber = principal.getName();
+        String studentNumber = getStudentNumber(principal);
         return postService.createReply(postId, commentId, form, studentNumber);
     }
 
@@ -146,7 +152,7 @@ public class PostController {
         @RequestBody ReplyForm form,
         Principal principal
     ) {
-        String studentNumber = principal.getName();
+        String studentNumber = getStudentNumber(principal);
         return postService.updateReply(postId, commentId, replyId, form, studentNumber);
     }
 
@@ -157,7 +163,7 @@ public class PostController {
         @PathVariable Long replyId,
         Principal principal
     ) {
-        String studentNumber = principal.getName();
+        String studentNumber = getStudentNumber(principal);
         postService.deleteReply(postId, commentId, replyId, studentNumber);
     }
 
@@ -166,9 +172,16 @@ public class PostController {
         @PathVariable Long postId,
         Principal principal
     ) {
-        String studentNumber = principal.getName();
+        String studentNumber = getStudentNumber(principal);
         return postService.toggleLike(postId, studentNumber);
     }
 
+    private String getStudentNumber(Principal principal) {
+        String studentNumber = null;
+        if (principal != null) {
+            studentNumber = principal.getName();
+        }
+        return studentNumber;
+    }
 }
 

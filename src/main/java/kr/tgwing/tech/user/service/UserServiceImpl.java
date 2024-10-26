@@ -1,15 +1,12 @@
 package kr.tgwing.tech.user.service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -22,10 +19,10 @@ import org.thymeleaf.spring6.SpringTemplateEngine;
 import lombok.RequiredArgsConstructor;
 
 import kr.tgwing.tech.blog.dto.PostOverview;
+import kr.tgwing.tech.blog.entity.LikeHistory;
 import kr.tgwing.tech.blog.entity.Post;
-import kr.tgwing.tech.blog.repository.CommentRepository;
+import kr.tgwing.tech.blog.repository.LikeHistoryRepository;
 import kr.tgwing.tech.blog.repository.PostRepository;
-import kr.tgwing.tech.blog.repository.ReplyRepository;
 import kr.tgwing.tech.user.dto.EmailMessageDTO;
 import kr.tgwing.tech.user.dto.checkdto.CheckNumberDTO;
 import kr.tgwing.tech.user.dto.checkdto.CheckUserDTO;
@@ -54,6 +51,7 @@ public class UserServiceImpl implements UserService {
     private final SpringTemplateEngine templateEngine;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final TempUserRepository tempUserRepository;
+    private final LikeHistoryRepository likeHistoryRepository;
 
     @Override
     public Long register(UserDTO userDTO){
@@ -108,7 +106,12 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(UserNotFoundException::new);
 
         Page<Post> myBlog = postRepository.findByWriter(user, pageable);
-        return myBlog.map(PostOverview::of);
+        return myBlog.map((post) -> {
+            LikeHistory likeHistory = likeHistoryRepository.findById(
+                new LikeHistory.Key(user.getStudentId(), post.getId())).orElse(null);
+            boolean iLikeIt = likeHistory != null && likeHistory.isCanceled() == false;
+            return PostOverview.of(post, iLikeIt);
+        });
     }
 
     @Override

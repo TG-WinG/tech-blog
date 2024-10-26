@@ -25,8 +25,9 @@ public class PostOverview {
     private int likeCount;
     private int commentCount;
     @Singular private final Set<String> hashtags;
+    private boolean iLikeIt;
 
-    public static PostOverview of(Post post) {
+    public static PostOverview of(Post post, boolean iLikeIt) {
         String content = post.getContent();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return PostOverview.builder()
@@ -38,6 +39,7 @@ public class PostOverview {
                 .modDate(post.getModDate().format(formatter))
                 .commentCount(post.getCommentCount())
                 .likeCount(post.getLikeCount())
+                .iLikeIt(iLikeIt)
                 .hashtags(post.getHashtags().stream().map(hashtag -> hashtag.getName()).toList())
                 .build(); 
     }
