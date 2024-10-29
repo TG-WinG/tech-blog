@@ -6,6 +6,8 @@ import jakarta.persistence.criteria.Join;
 
 import org.springframework.data.jpa.domain.Specification;
 
+import kr.tgwing.tech.user.entity.User;
+
 /**
  * PostSpecification
  */
@@ -32,6 +34,13 @@ public class PostSpecifications {
         return (root, query, cb) -> {
             Join<Hashtag, Post> hashtagPost = root.join("hashtags");
             return hashtagPost.get("name").in(hashtags);
+        };
+    }
+
+    public static Specification<Post> hasWriterStudentNumber(String studentNumber) {
+        return (root, query, cb) -> {
+            Join<User, Post> userPost = root.join("writer");
+            return userPost.get("studentNumber").in(studentNumber);
         };
     }
 
