@@ -133,6 +133,10 @@ public class PostServiceImpl implements PostService {
             spec = spec.and(PostSpecifications.hasHashtagIn(query.getHashtag()));
         }
 
+        if (query.isMe()) {
+            spec = spec.and(PostSpecifications.hasWriterStudentNumber(userStudentNumber));
+        }
+
         Page<Post> posts = postRepository.findAll(spec, pageable);
         return posts.map((post) -> {
             return PostOverview.of(post, doILikeIt(post.getId(), user));

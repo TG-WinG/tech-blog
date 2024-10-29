@@ -9,5 +9,6 @@ public class PostQuery {
 
     private String keyword = "";
     private Set<String> hashtag;
+    private boolean me = false;
 
 }
