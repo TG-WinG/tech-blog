@@ -20,7 +20,6 @@ public class JwtUtil {
         secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
-
     public String getStudentId(String token) {
 
         return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token).getBody().getSubject();
@@ -36,6 +35,7 @@ public class JwtUtil {
         return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(token)
                 .getBody().getExpiration().before(new Date());
     }
+
 
     public String createJwt(String studentId, String profilePicture, String role, Long expiredTime) {
         // name : token에 들어있는 것으로 사용함

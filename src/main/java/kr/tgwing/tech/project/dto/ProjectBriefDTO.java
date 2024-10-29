@@ -15,16 +15,18 @@ public class ProjectBriefDTO {
     private String title;
     private LocalDate start;
     private LocalDate end;
+    private String description;
     private String thumbnail;
     private String devStatus;
     private String devType;
 
     @Builder
-    public ProjectBriefDTO(Long id, String title, LocalDate start, LocalDate end, String thumbnail, String devStatus, String devType) {
+    public ProjectBriefDTO(Long id, String title, LocalDate start, LocalDate end, String description, String thumbnail, String devStatus, String devType) {
         this.id = id;
         this.title = title;
         this.start = start;
         this.end = end;
+        this.description = description;
         this.thumbnail = thumbnail;
         this.devStatus = devStatus;
         this.devType = devType;

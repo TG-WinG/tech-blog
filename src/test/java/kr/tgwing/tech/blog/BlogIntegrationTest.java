@@ -206,7 +206,7 @@ public class BlogIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.totalElements").value(2));
     }
-
+  
     @Test
     void post_can_have_big_text_as_content() throws Exception {
         JSONObject json = new JSONObject();

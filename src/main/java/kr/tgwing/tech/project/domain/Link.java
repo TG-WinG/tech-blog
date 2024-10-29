@@ -30,7 +30,6 @@ public class Link extends BaseEntity {
     private String url;
 
     private String description;
-
     public void setProject(Project project) {
         this.project = project;
     }

@@ -1,5 +1,6 @@
 package kr.tgwing.tech.project.dto;
 
+import kr.tgwing.tech.project.domain.Image;
 import kr.tgwing.tech.project.domain.Project;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -18,19 +19,21 @@ public class ProjectCreateDTO {
     private String description;
     private LocalDate start;
     private LocalDate end;
-    private String thumbnail;
+    private List<String> imageUrls;
     private String devStatus;
     private String devType;
     private List<ParticipantDTO> participants = new ArrayList<>();
     private List<LinkDTO> links = new ArrayList<>();
 
     @Builder
-    public ProjectCreateDTO(String title, String description, LocalDate start, LocalDate end, String thumbnail, String devStatus, String devType, List<ParticipantDTO> participants, List<LinkDTO> links) {
+    public ProjectCreateDTO(String title, String description, LocalDate start, LocalDate end,
+                            List<String> imageUrls, String devStatus, String devType,
+                            List<ParticipantDTO> participants, List<LinkDTO> links) {
         this.title = title;
         this.description = description;
         this.start = start;
         this.end = end;
-        this.thumbnail = thumbnail;
+        this.imageUrls = imageUrls;
         this.devStatus = devStatus;
         this.devType = devType;
         this.links = links;
@@ -44,7 +47,11 @@ public class ProjectCreateDTO {
                 .description(projectCreateDTO.getDescription())
                 .start(projectCreateDTO.getStart())
                 .end(projectCreateDTO.getEnd())
-                .thumbnail(projectCreateDTO.getThumbnail())
+                .imageUrls(projectCreateDTO.getImageUrls().stream().map(
+                        url -> Image.builder()
+                                .imageUrl(url)
+                                .build()
+                ).toList())
                 .devStatus(projectCreateDTO.getDevStatus())
                 .devType(projectCreateDTO.getDevType())
                 .links(projectCreateDTO.getLinks().stream()
