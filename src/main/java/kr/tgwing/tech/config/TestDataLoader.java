@@ -30,7 +30,7 @@ public class TestDataLoader {
     @Profile({"dev", "default"})
     public CommandLineRunner loadTestData(PostRepository postRepository,
                                           UserRepository userRepository,
-                                          CommentRepository CommentRepository,
+                                          CommentRepository commentRepository,
                                           ReplyRepository replyRepository
     ) {
         return args -> {
@@ -116,7 +116,7 @@ public class TestDataLoader {
                 post.increaseCommentCount();
 
                 postRepository.save(post);
-                CommentRepository.save(comment);
+                commentRepository.save(comment);
             }
 
             post1.getHashtags().add(tag1);
@@ -130,7 +130,7 @@ public class TestDataLoader {
 
             postRepository.save(post1);
             postRepository.save(post2);
-            CommentRepository.save(comment1);
+            commentRepository.save(comment1);
             replyRepository.save(reply1);
         };
     }

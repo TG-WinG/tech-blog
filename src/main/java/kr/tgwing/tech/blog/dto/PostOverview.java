@@ -41,7 +41,7 @@ public class PostOverview {
                 .likeCount(post.getLikeCount())
                 .iLikeIt(iLikeIt)
                 .hashtags(post.getHashtags().stream().map(hashtag -> hashtag.getName()).toList())
-                .build(); 
+                .build();
     }
 
 }

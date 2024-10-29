@@ -49,7 +49,7 @@ public class PostController {
 
     @GetMapping("{postId}") // 특정 블로그 가져오기 - GET, /api/blog/{postId}
     public PostDetail getPost(
-        @PathVariable Long postId,
+        @PathVariable(name = "postId") Long postId,
         Principal principal
     ) {
         String studentNumber = getStudentNumber(principal);
