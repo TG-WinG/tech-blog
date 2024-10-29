@@ -161,4 +161,11 @@ public class BlogIntegrationTest {
                     .andExpect(jsonPath("$.totalElements").value(1));
         });
     }
+
+    @Test
+    void throw_when_get_my_posts_but_not_logged_in() throws Exception {
+        mvc.perform(get("/post?me=true"))
+            .andExpect(status().isBadRequest());
+    }
+    
 }
