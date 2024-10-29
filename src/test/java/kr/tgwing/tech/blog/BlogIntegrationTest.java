@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import kr.tgwing.tech.annotation.IntegrationTest;
 import kr.tgwing.tech.blog.entity.Comment;
@@ -84,7 +86,7 @@ public class BlogIntegrationTest {
                 .post(post2)
                 .build();
         Hashtag tag3 = Hashtag.builder()
-                .name("tag2")
+                .name("tag3")
                 .post(post1)
                 .build();
         Comment comment1 = Comment.builder()
@@ -149,17 +151,9 @@ public class BlogIntegrationTest {
 
     @Test
     void get_my_posts() throws Exception {
-        mvc.perform(post("/login")
-            .param("username", "2018000000")
-            .param("password", "12345678"))
+        performAsUser(get("/post?me=true"))
             .andExpect(status().isOk())
-            .andExpect(header().exists("Authorization"))
-            .andDo((result) -> {
-                String token = result.getResponse().getHeader("Authorization");
-                mvc.perform(get("/post?me=true").header("Authorization", token))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.totalElements").value(1));
-        });
+            .andExpect(jsonPath("$.totalElements").value(1));
     }
 
     @Test
@@ -167,5 +161,39 @@ public class BlogIntegrationTest {
         mvc.perform(get("/post?me=true"))
             .andExpect(status().isBadRequest());
     }
-    
+
+    @Test
+    void get_list_of_all_hashtags() throws Exception {
+        mvc.perform(get("/hashtag"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.totalElements").value(3));
+    }
+
+    @Test
+    void get_hashtags_containing_keword() throws Exception {
+        final String keyword = "1";
+        mvc.perform(get("/hashtag").queryParam("keyword", keyword))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.totalElements").value(1));
+    }
+
+    @Test
+    void get_hashtags_of_post_that_i_wrote() throws Exception {
+        performAsUser(get("/hashtag").queryParam("me", "true"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.totalElements").value(2));
+    }
+
+    private ResultActions performAsUser(MockHttpServletRequestBuilder builder) throws Exception {
+        var result = mvc.perform(post("/login")
+            .param("username", "2018000000")
+            .param("password", "12345678"))
+            .andExpect(status().isOk())
+            .andExpect(header().exists("Authorization"))
+            .andReturn();
+
+        String token = result.getResponse().getHeader("Authorization");
+        return mvc.perform(builder.header("Authorization", token));
+    }
+
 }
