@@ -3,14 +3,6 @@ package kr.tgwing.tech.config;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-import kr.tgwing.tech.project.domain.Enum.Part;
-import kr.tgwing.tech.project.domain.Image;
-import kr.tgwing.tech.project.domain.Link;
-import kr.tgwing.tech.project.domain.Participant;
-import kr.tgwing.tech.project.domain.Project;
-import kr.tgwing.tech.project.repository.LinkRepository;
-import kr.tgwing.tech.project.repository.ParticipantRepository;
-import kr.tgwing.tech.project.repository.ProjectRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,6 +18,14 @@ import kr.tgwing.tech.blog.entity.Reply;
 import kr.tgwing.tech.blog.repository.CommentRepository;
 import kr.tgwing.tech.blog.repository.PostRepository;
 import kr.tgwing.tech.blog.repository.ReplyRepository;
+import kr.tgwing.tech.project.domain.Image;
+import kr.tgwing.tech.project.domain.Link;
+import kr.tgwing.tech.project.domain.Participant;
+import kr.tgwing.tech.project.domain.Project;
+import kr.tgwing.tech.project.domain.Enum.Part;
+import kr.tgwing.tech.project.repository.LinkRepository;
+import kr.tgwing.tech.project.repository.ParticipantRepository;
+import kr.tgwing.tech.project.repository.ProjectRepository;
 import kr.tgwing.tech.user.entity.User;
 import kr.tgwing.tech.user.repository.UserRepository;
 
@@ -39,7 +39,7 @@ public class TestDataLoader {
     @Profile({"dev", "default"})
     public CommandLineRunner loadTestData(PostRepository postRepository,
                                           UserRepository userRepository,
-                                          CommentRepository CommentRepository,
+                                          CommentRepository commentRepository,
                                           ReplyRepository replyRepository,
                                           ProjectRepository projectRepository,
                                           ParticipantRepository participantRepository,
