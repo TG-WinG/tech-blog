@@ -24,16 +24,6 @@ public class TempUser extends BaseUser{
         super(studentNumber, password, email, name, birth, phoneNumber);
     }
 
-    public AdminCheckUserDto toAdminCheckUserDto(TempUser user) {
-        return AdminCheckUserDto.builder()
-                .studentId(user.getStudentId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .studentNumber(user.getStudentNumber())
-                .phoneNumber(user.getPhoneNumber())
-                .build();
-    }
-
     public User toUser(TempUser user) {
         return User.builder()
                 .studentNumber(user.getStudentNumber())

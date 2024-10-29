@@ -17,7 +17,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Transactional
     void deleteByStudentNumber(String studentNumber);
 
-
     @Transactional
     @Modifying
     @Query("UPDATE User U SET U.name = :name, U.phoneNumber = :phoneNumber, U.profilePicture = :profilePicture " +
