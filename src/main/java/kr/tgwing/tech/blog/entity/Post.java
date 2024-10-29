@@ -33,8 +33,7 @@ public class Post extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Lob
-    @Column(nullable = false)
+    @Column(nullable = false, length = 65536)
     private String content;
 
     @Column(name = "thumbnail_url")
