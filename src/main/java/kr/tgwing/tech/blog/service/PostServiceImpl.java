@@ -29,6 +29,7 @@ import kr.tgwing.tech.blog.entity.Reply;
 import kr.tgwing.tech.blog.exception.comment.CommentNotFoundException;
 import kr.tgwing.tech.blog.exception.post.PostNotFoundException;
 import kr.tgwing.tech.blog.exception.post.UserIsNotPostWriterException;
+import kr.tgwing.tech.blog.exception.post.UserNotLoggedInException;
 import kr.tgwing.tech.blog.exception.reply.ReplyNotFoundException;
 import kr.tgwing.tech.blog.repository.CommentRepository;
 import kr.tgwing.tech.blog.repository.LikeHistoryRepository;
@@ -134,6 +135,8 @@ public class PostServiceImpl implements PostService {
         }
 
         if (query.isMe()) {
+            if (userStudentNumber == null || userStudentNumber.isEmpty())
+                throw new UserNotLoggedInException();
             spec = spec.and(PostSpecifications.hasWriterStudentNumber(userStudentNumber));
         }
 

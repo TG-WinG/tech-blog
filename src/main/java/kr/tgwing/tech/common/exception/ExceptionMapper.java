@@ -10,6 +10,7 @@ import kr.tgwing.tech.blog.exception.post.PageExceededDataException;
 import kr.tgwing.tech.blog.exception.post.PathHasNoPostIdException;
 import kr.tgwing.tech.blog.exception.post.PostNotFoundException;
 import kr.tgwing.tech.blog.exception.post.UserIsNotPostWriterException;
+import kr.tgwing.tech.blog.exception.post.UserNotLoggedInException;
 import kr.tgwing.tech.blog.exception.post.WrongPostRequestException;
 import kr.tgwing.tech.blog.exception.reply.ReplyBadRequestException;
 import kr.tgwing.tech.blog.exception.reply.ReplyForbiddenException;
@@ -59,6 +60,9 @@ public class ExceptionMapper { // 예외 객체 -> 예외 상태로 바꿔주는
                 ExceptionSituation.of("블로그 수정(삭제) 권한이 존재하지 않습니다", HttpStatus.FORBIDDEN, 4404));
         mapper.put(WrongPostRequestException.class,
                 ExceptionSituation.of("요청에 잘못된 정보가 포함되어 있습니다", HttpStatus.BAD_REQUEST, 4406));
+        mapper.put(UserNotLoggedInException.class,
+                ExceptionSituation.of("로그인되지 않았습니다.", HttpStatus.BAD_REQUEST, 4407));
+
     }
 
     private static void setUpReplyException() {
