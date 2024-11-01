@@ -64,12 +64,12 @@ public class ProfileController {
     }
 
     @Operation(summary = "내 프로젝트 가져오기")
-    @GetMapping("/myPosting")
+    @GetMapping("/project")
     public ResponseEntity<?> getMyProject(
             Principal principal,
             @PageableDefault Pageable pageable,
             @ModelAttribute ProjectQuery query) {
         Page<ProjectBriefDTO> myProjects = userService.getMyProject(pageable, query, principal.getName());
-        return ResponseEntity.ok(ApiResponse.created(myProjects));
+        return ResponseEntity.ok(ApiResponse.ok(myProjects));
     }
 }
