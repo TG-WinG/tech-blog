@@ -1,17 +1,20 @@
 package kr.tgwing.tech.project.service;
 
-import kr.tgwing.tech.project.domain.Image;
-import kr.tgwing.tech.project.domain.Link;
-import kr.tgwing.tech.project.domain.Participant;
-import kr.tgwing.tech.project.domain.Project;
+import kr.tgwing.tech.project.domain.*;
 import kr.tgwing.tech.project.dto.*;
 import kr.tgwing.tech.project.exception.ProjectNotFoundException;
 import kr.tgwing.tech.project.repository.ImageRepository;
 import kr.tgwing.tech.project.repository.ParticipantRepository;
 import kr.tgwing.tech.project.repository.LinkRepository;
 import kr.tgwing.tech.project.repository.ProjectRepository;
+import kr.tgwing.tech.user.entity.User;
+import kr.tgwing.tech.user.exception.UserNotFoundException;
+import kr.tgwing.tech.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,20 +30,24 @@ public class ProjectServiceImpl{
     private final ParticipantRepository participantRepository;
     private final LinkRepository linkRepository;
     private final ImageRepository imageRepository;
+    private final UserRepository userRepository;
 
-    /*
-    * 페이지네이션 안함.
-    * */
     @Transactional
-    public List<ProjectBriefDTO> getProjects() {
-        List<Project> projects = projectRepository.findAll();
-        if(projects == null){ return null; }
-        else { return projects.stream()
-                    .map(ProjectServiceImpl::entity2ProjectBriefDTO)
-                    .toList(); }
+    public Page<ProjectBriefDTO> getProjects(Pageable pageable, ProjectQuery query) {
+        Specification<Project> spec = ProjectSpecification.hasKeywordInProject(query.getKeyword());
+        Page<Project> projects = projectRepository.findAll(spec, pageable);
+        if(projects == null) return null;
+        return projects.map( project -> ProjectBriefDTO.of(project));
     }
 
     public Long createProjects(ProjectCreateDTO projectCreateDTO) {
+        projectCreateDTO.getParticipants().stream().forEach(
+                participantDTO -> {
+                    Optional<User> user = userRepository.findByStudentNumber(participantDTO.getStudentNumber());
+                    if(user.isPresent()) participantDTO.setUser(user.get());
+                }
+        );
+
         Project project = projectCreateDTO.toEntity(projectCreateDTO);
         project.getParticipants().stream().forEach(participant -> participant.setProject(project));
         project.getLinks().stream().forEach(link -> link.setProject(project));
@@ -61,14 +68,6 @@ public class ProjectServiceImpl{
     public Long updateProject(ProjectUpdateDTO projectUpdateDTO, Long project_id) {
         Project findProject = projectRepository.findById(project_id)
                 .orElseThrow(ProjectNotFoundException::new);
-//        findProject.updateProject(projectUpdateDTO);
-//
-//        findProject.setParticipants(projectUpdateDTO.getParticipants());
-//        findProject.getParticipants().forEach(participant -> participant.setProject(findProject));
-//        findProject.setLinks(projectUpdateDTO.getLinks());
-//        findProject.getLinks().forEach(link -> link.setProject(findProject));
-//        findProject.setImageUrls(projectUpdateDTO.getImageUrls());
-//        findProject.getImageUrls().forEach(url -> url.setProject(findProject));
 
         List<Participant> findParticipants = participantRepository.findAllByProjectId(project_id);
         List<Link> findLinks = linkRepository.findAllByProjectId(project_id);
@@ -124,6 +123,8 @@ public class ProjectServiceImpl{
 
         for (Participant newParticipant : newParticipants) {
             if (!findParticipants.contains(newParticipant)) {
+                Optional<User> user = userRepository.findByStudentNumber(newParticipant.getStudentNumber());
+                if(user.isPresent()) newParticipant.setUser(user.get());
                 newParticipant.setProject(project);
                 participantRepository.save(newParticipant);
             }
@@ -146,18 +147,6 @@ public class ProjectServiceImpl{
         }
     }
 
-    public static ProjectBriefDTO entity2ProjectBriefDTO(Project project){
-        return ProjectBriefDTO.builder()
-                .id(project.getId())
-                .title(project.getTitle())
-                .start(project.getStartDate())
-                .end(project.getEndDate())
-                .description(project.getDescription())
-                .thumbnail(project.getImageUrls().stream().findFirst().get().getImageUrl())
-                .devStatus(project.getDevStatus())
-                .devType(project.getDevType())
-                .build();
-    }
 
     public static ProjectDetailDTO entity2ProjectDetailDTO(Project project){
         return ProjectDetailDTO.builder()

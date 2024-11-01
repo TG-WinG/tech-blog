@@ -1,12 +1,12 @@
 package kr.tgwing.tech.project.dto;
 
+import kr.tgwing.tech.project.domain.Project;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -30,5 +30,18 @@ public class ProjectBriefDTO {
         this.thumbnail = thumbnail;
         this.devStatus = devStatus;
         this.devType = devType;
+    }
+
+    public static ProjectBriefDTO of(Project project) {
+        return ProjectBriefDTO.builder()
+                .id(project.getId())
+                .title(project.getTitle())
+                .start(project.getStartDate())
+                .end(project.getEndDate())
+                .description(project.getDescription())
+                .thumbnail(project.getImageUrls().stream().findFirst().get().getImageUrl())
+                .devStatus(project.getDevStatus())
+                .devType(project.getDevType())
+                .build();
     }
 }

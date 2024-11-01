@@ -5,6 +5,8 @@ import java.util.List;
 
 import kr.tgwing.tech.blog.dto.PostOverview;
 import kr.tgwing.tech.blog.entity.Post;
+import kr.tgwing.tech.project.dto.ProjectBriefDTO;
+import kr.tgwing.tech.project.dto.ProjectQuery;
 import kr.tgwing.tech.user.dto.EmailMessageDTO;
 import kr.tgwing.tech.user.dto.checkdto.CheckNumberDTO;
 import kr.tgwing.tech.user.dto.checkdto.CheckUserDTO;
@@ -28,7 +30,7 @@ public interface UserService{
 
     ProfileDTO showUser(String name);
 
-    Page<PostOverview> showMyBlog(String studentNumber, Pageable pageable);
+    Page<PostOverview> getMyBlog(String studentNumber, Pageable pageable);
 
     void checkUser(CheckUserDTO checkUserDTO); // 본인 확인하기
 
@@ -37,4 +39,6 @@ public interface UserService{
     Long setNewPassword(String studentNumber, PasswordCheckDTO password);
 
     void checkCode(String code, CheckNumberDTO checkNumberDTO);
+
+    Page<ProjectBriefDTO> getMyProject(Pageable pageable, ProjectQuery query, String studentNumber);
 }

@@ -31,6 +31,7 @@ public class Project extends BaseEntity {
     @Lob
     @Column(columnDefinition = "TEXT")
     private String description;
+
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "start_date")
     private LocalDate startDate;

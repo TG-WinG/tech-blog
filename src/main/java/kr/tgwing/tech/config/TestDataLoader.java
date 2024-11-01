@@ -158,6 +158,7 @@ public class TestDataLoader {
                     .participants(new ArrayList<>())
                     .build();
 
+
             Image image1 = Image.builder()
                     .imageUrl("img1")
                     .project(project)
@@ -184,21 +185,26 @@ public class TestDataLoader {
 
             Participant participant1 = Participant.builder()
                     .part(Part.DESIGNER)
+                    .studentNumber("2020211121")
                     .name("design")
                     .major("디자인과")
                     .project(project)
                     .build();
             Participant participant2 = Participant.builder()
                     .part(Part.BACK)
-                    .name("song")
+                    .studentNumber("2018000000")
+                    .name("늙은이")
                     .major("컴공")
                     .project(project)
+                    .user(writer1)
                     .build();
             Participant participant3 = Participant.builder()
                     .part(Part.FRONT)
-                    .name("jin")
+                    .studentNumber("2022000000")
+                    .name("젊은이")
                     .project(project)
                     .major("컴공")
+                    .user(writer2)
                     .build();
 
             project.getParticipants().add(participant1);

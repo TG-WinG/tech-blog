@@ -6,8 +6,14 @@ import java.util.Random;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
+import kr.tgwing.tech.project.domain.Project;
+import kr.tgwing.tech.project.domain.ProjectSpecification;
+import kr.tgwing.tech.project.dto.ProjectBriefDTO;
+import kr.tgwing.tech.project.dto.ProjectQuery;
+import kr.tgwing.tech.project.repository.ProjectRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -52,6 +58,7 @@ public class UserServiceImpl implements UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final TempUserRepository tempUserRepository;
     private final LikeHistoryRepository likeHistoryRepository;
+    private final ProjectRepository projectRepository;
 
     @Override
     public Long register(UserDTO userDTO){
@@ -101,7 +108,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<PostOverview> showMyBlog(String studentNumber, Pageable pageable){
+    public Page<PostOverview> getMyBlog(String studentNumber, Pageable pageable){
         User user = userRepository.findByStudentNumber(studentNumber)
                 .orElseThrow(UserNotFoundException::new);
 
@@ -139,6 +146,13 @@ public class UserServiceImpl implements UserService {
         }
 
         return authNum;
+    }
+
+    @Override
+    public Page<ProjectBriefDTO> getMyProject(Pageable pageable, ProjectQuery query, String studentNumber) {
+        Specification<Project> spec = ProjectSpecification.hasKeywordInMyProject(query.getKeyword());
+        Page<Project> myProjects = projectRepository.findAll(spec, pageable);
+        return myProjects.map(myProject -> ProjectBriefDTO.of(myProject));
     }
 
     public String createCode() {
