@@ -81,7 +81,7 @@ public class TestDataLoader {
 
             Post post1 = Post.builder()
                     .title("sample blog 1")
-                    .content("sample content 1")x
+                    .content("sample content 1")
                     .thumbnail("sample thumbnail 1")
                     .writer(writer1)
                     .build();
