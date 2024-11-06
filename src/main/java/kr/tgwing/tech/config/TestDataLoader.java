@@ -62,15 +62,26 @@ public class TestDataLoader {
                     .password("12345678")
                     .birth(LocalDate.parse("2003-01-01"))
                     .build();
+            User admin = User.builder()
+                    .studentNumber("admin")
+                    .name("관리자")
+                    .password("1234")
+                    .email("email")
+                    .birth(LocalDate.parse("2000-01-01"))
+                    .role("ROLE_ADMIN")
+                    .phoneNumber("01011111111")
+                    .build();
             writer1.hashPassword(bCryptPasswordEncoder);
             writer2.hashPassword(bCryptPasswordEncoder);
+            admin.hashPassword(bCryptPasswordEncoder);
 
             userRepository.save(writer1);
             userRepository.save(writer2);
+            userRepository.save(admin);
 
             Post post1 = Post.builder()
                     .title("sample blog 1")
-                    .content("sample content 1")
+                    .content("sample content 1")x
                     .thumbnail("sample thumbnail 1")
                     .writer(writer1)
                     .build();
