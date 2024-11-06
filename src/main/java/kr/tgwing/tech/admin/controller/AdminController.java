@@ -30,7 +30,7 @@ public class AdminController {
             @PageableDefault Pageable pageable,
             @ModelAttribute StudentQuery studentQuery
     ) {
-        Page<AdminCheckUserDto> allAssignments = adminService.checkAssingments(studentQuery, pageable);
+        Page<AdminCheckUserDto> allAssignments = adminService.checkAssignments(studentQuery, pageable);
         return ResponseEntity.ok(ApiResponse.ok(allAssignments));
     }
 
@@ -57,7 +57,6 @@ public class AdminController {
         Long refusedId = adminService.refuseUsers(id);
         return ResponseEntity.ok(ApiResponse.delete(refusedId));
     }
-
 
 
     @Operation(summary = "동아리원 강제 삭제")

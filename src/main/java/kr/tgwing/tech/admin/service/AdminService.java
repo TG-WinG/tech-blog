@@ -31,7 +31,7 @@ public class AdminService {
     private final TempUserRepository tempUserRepository;
     private final PostRepository postRepository;
 
-    public Page<AdminCheckUserDto> checkAssingments(StudentQuery studentQuery, Pageable pageable) {
+    public Page<AdminCheckUserDto> checkAssignments(StudentQuery studentQuery, Pageable pageable) {
         Specification<TempUser> spec = UserSpecification.hasKeywordInTempUser(studentQuery.getKeyword());
         Page<TempUser> allAssignments = tempUserRepository.findAll(spec, pageable);
         if(allAssignments.isEmpty()) return null; // 여기 값은 예외로 보내야하느건지, 어떻게 보내야하는거지?
@@ -67,7 +67,7 @@ public class AdminService {
 
     public Long refuseUsers(Long studentId) {
         TempUser user = tempUserRepository.findById(studentId).orElseThrow(UserNotFoundException::new);
-        userRepository.deleteById(studentId);
+        tempUserRepository.deleteById(studentId);
         return user.getStudentId();
     }
 
