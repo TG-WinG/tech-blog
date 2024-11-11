@@ -53,6 +53,7 @@ public class TestDataLoader {
                     .name("늙은이")
                     .password("12345678")
                     .birth(LocalDate.parse("1999-01-01"))
+                    .role("ROLE_USER")
                     .build();
             User writer2 = User.builder()
                     .studentNumber("2022000000")
@@ -61,6 +62,7 @@ public class TestDataLoader {
                     .name("젊은이")
                     .password("12345678")
                     .birth(LocalDate.parse("2003-01-01"))
+                    .role("ROLE_USER")
                     .build();
             User admin = User.builder()
                     .studentNumber("admin")

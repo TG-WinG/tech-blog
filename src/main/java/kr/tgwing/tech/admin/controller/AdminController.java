@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
 
     private final AdminService adminService;
-
+    
     @Operation(summary = "동아리 가입요청 목록 조회")
     @GetMapping
     public ResponseEntity<ApiResponse<Page<AdminCheckUserDto>>> checkAllAssignments(

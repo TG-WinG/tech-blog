@@ -12,6 +12,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -40,7 +41,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     //로그인 성공시 실행하는 메소드 (여기서 JWT를 발급하면 됨)
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) {
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException {
     //UserDetailsS
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
@@ -56,6 +57,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String token = jwtUtil.createJwt(username, profilePicture, role, 24*60*60*1000*30L);
 
         response.addHeader("Authorization", "Bearer " + token);
+
+        boolean isAdmin = role.equals("ROLE_ADMIN");
+        String jsonResponse = "{\"isAdmin\": " + isAdmin + "}";
+
+        response.setContentType("application/json");  // 응답 타입을 JSON으로 설정
+        response.setCharacterEncoding("UTF-8");       // 인코딩 설정
+        response.getWriter().write(jsonResponse);      // JSON 응답 작성
     }
 
     //로그인 실패시 실행하는 메소드
