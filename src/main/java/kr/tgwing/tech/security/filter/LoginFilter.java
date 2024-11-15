@@ -3,8 +3,13 @@ package kr.tgwing.tech.security.filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import kr.tgwing.tech.common.exception.CommonException;
 import kr.tgwing.tech.security.service.CustomUserDetails;
 import kr.tgwing.tech.security.util.JwtUtil;
+import kr.tgwing.tech.user.entity.TempUser;
+import kr.tgwing.tech.user.exception.NotAssignmentException;
+import kr.tgwing.tech.user.exception.UserNotFoundException;
+import kr.tgwing.tech.user.repository.TempUserRepository;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -13,17 +18,22 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Optional;
 
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+    private final TempUserRepository tempUserRepository;
 
-    public LoginFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+    public LoginFilter(AuthenticationManager authenticationManager,
+                       JwtUtil jwtUtil,
+                       TempUserRepository tempUserRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
-
+        this.tempUserRepository = tempUserRepository;
     }
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
@@ -41,7 +51,10 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     //로그인 성공시 실행하는 메소드 (여기서 JWT를 발급하면 됨)
     @Override
-    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException {
+    protected void successfulAuthentication(HttpServletRequest request,
+                                            HttpServletResponse response,
+                                            FilterChain chain,
+                                            Authentication authentication) throws IOException {
     //UserDetailsS
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
@@ -68,7 +81,15 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     //로그인 실패시 실행하는 메소드
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
+    protected void unsuccessfulAuthentication(HttpServletRequest request,
+                                              HttpServletResponse response,
+                                              AuthenticationException failed) throws IOException {
         response.setStatus(401);
+
+        Optional<TempUser> tempUser = tempUserRepository.findByStudentNumber(obtainUsername(request));
+        if(tempUser.isPresent()) {
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"message\": \"사용자가 아직 승인받지 못했습니다.\"}");
+        }
     }
 }

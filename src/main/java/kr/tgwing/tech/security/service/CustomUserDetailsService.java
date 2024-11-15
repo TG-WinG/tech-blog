@@ -1,6 +1,9 @@
 package kr.tgwing.tech.security.service;
 
+import jakarta.servlet.http.HttpServletResponse;
+import kr.tgwing.tech.user.entity.TempUser;
 import kr.tgwing.tech.user.entity.User;
+import kr.tgwing.tech.user.repository.TempUserRepository;
 import kr.tgwing.tech.user.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -22,12 +25,10 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         //DB에서 조회
         Optional<User> userData = userRepository.findByStudentNumber(studentNumber);
-
         if (userData.isPresent()) {
             //UserDetails에 담아서 return하면 AutneticationManager가 검증 함
             return new CustomUserDetails(userData.get());
         }
-
         return null;
     }
 }

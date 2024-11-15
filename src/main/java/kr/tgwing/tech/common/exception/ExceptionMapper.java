@@ -3,6 +3,7 @@ package kr.tgwing.tech.common.exception;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import kr.tgwing.tech.user.exception.*;
 import org.springframework.http.HttpStatus;
 
 import kr.tgwing.tech.blog.exception.post.InappropriateUserPostRelationException;
@@ -16,11 +17,6 @@ import kr.tgwing.tech.blog.exception.reply.ReplyBadRequestException;
 import kr.tgwing.tech.blog.exception.reply.ReplyForbiddenException;
 import kr.tgwing.tech.blog.exception.reply.ReplyNotFoundException;
 import kr.tgwing.tech.project.exception.ProjectNotFoundException;
-import kr.tgwing.tech.user.exception.EmailCodeException;
-import kr.tgwing.tech.user.exception.MessageException;
-import kr.tgwing.tech.user.exception.PasswordException;
-import kr.tgwing.tech.user.exception.UserDuplicatedException;
-import kr.tgwing.tech.user.exception.UserNotFoundException;
 
 public class ExceptionMapper { // 예외 객체 -> 예외 상태로 바꿔주는 mapper
 
@@ -45,6 +41,8 @@ public class ExceptionMapper { // 예외 객체 -> 예외 상태로 바꿔주는
                 ExceptionSituation.of("메일에서 에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR, 1003));
         mapper.put(EmailCodeException.class,
                 ExceptionSituation.of("인증번호가 서로 인치하지 않습니다.", HttpStatus.CONFLICT, 1004));
+        mapper.put(NotAssignmentException.class,
+                ExceptionSituation.of("사용자가 승인되지 않았습니다.", HttpStatus.UNAUTHORIZED, 1005));
     }
 
     private static void setUpPostException() {

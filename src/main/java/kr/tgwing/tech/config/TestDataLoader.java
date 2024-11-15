@@ -3,6 +3,8 @@ package kr.tgwing.tech.config;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+import kr.tgwing.tech.user.entity.TempUser;
+import kr.tgwing.tech.user.repository.TempUserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,9 +45,19 @@ public class TestDataLoader {
                                           ReplyRepository replyRepository,
                                           ProjectRepository projectRepository,
                                           ParticipantRepository participantRepository,
-                                          LinkRepository linkRepository
+                                          LinkRepository linkRepository,
+                                          TempUserRepository tempUserRepository
     ) {
         return args -> {
+            TempUser assignment = TempUser.builder()
+                    .studentNumber("2020202020")
+                    .phoneNumber("01000000000")
+                    .email("helloworld@khu.ac.kr")
+                    .name("동아리원")
+                    .password("1234")
+                    .birth(LocalDate.parse("1999-01-01"))
+                    .build();
+
             User writer1 = User.builder()
                     .studentNumber("2018000000")
                     .phoneNumber("01000000000")
@@ -80,6 +92,7 @@ public class TestDataLoader {
             userRepository.save(writer1);
             userRepository.save(writer2);
             userRepository.save(admin);
+            tempUserRepository.save(assignment);
 
             Post post1 = Post.builder()
                     .title("sample blog 1")

@@ -6,6 +6,7 @@ import kr.tgwing.tech.security.filter.JwtFilter;
 import kr.tgwing.tech.security.service.JwtBlackListService;
 import kr.tgwing.tech.security.util.JwtUtil;
 import kr.tgwing.tech.security.filter.LoginFilter;
+import kr.tgwing.tech.user.repository.TempUserRepository;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -32,6 +33,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JwtUtil jwtUtil;
+    private final TempUserRepository tempUserRepository;
     private static final String[] PERMIT_URL_ARRAY = {
             /* swagger v2 */
             "/v2/api-docs",
@@ -54,22 +56,19 @@ public class SecurityConfig {
             "/api-docs/json/swagger-config",
             "/api-docs/json"
     };
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JwtUtil jwtUtil, JwtBlackListService jwtBlackListService) {
-
+    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JwtUtil jwtUtil, TempUserRepository tempUserRepository) {
         this.authenticationConfiguration = authenticationConfiguration;
         this.jwtUtil = jwtUtil;
+        this.tempUserRepository = tempUserRepository;
     }
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        log.info("WebSecurity......................");
-
         return web -> web.ignoring()
                 .requestMatchers(PathRequest.toStaticResources().atCommonLocations());
     }
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-
         return configuration.getAuthenticationManager();
     }
     @Bean
@@ -84,7 +83,6 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable) // 토큰 사용하기에 csrf 불가능
                 .cors(AbstractHttpConfigurer::disable)
-
                 // .formLogin(Customizer.withDefaults())// -> 로그인 화면 구성되면 사용해야함.
                 .logout((logout) -> logout
                         .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
@@ -94,17 +92,6 @@ public class SecurityConfig {
                         .logoutSuccessHandler(((request, response, authentication) -> {
                             response.setStatus(HttpServletResponse.SC_OK);
                         }))) // 세션 쿠키 삭제
-//                .logout((logout) -> )
-//                .logoutUrl("/logout")
-//                .addLogoutHandler((request, response, authentication) -> {
-//                    HttpSession session = request.getSession();
-//                    if (session != null) {
-//                        session.invalidate();
-//                    }
-//                })
-//                .logoutSuccessHandler((request, response, authentication) -> {
-//                    response.sendRedirect("/login");
-//                })
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(PERMIT_URL_ARRAY)
                         .permitAll()
@@ -116,28 +103,11 @@ public class SecurityConfig {
                         .permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil),
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, tempUserRepository),
                         UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .build();
     }
-
-//    public HttpSecurity logout(Customizer<LogoutConfigurer<HttpSecurity>> logoutCustomizer) throws Exception {
-//        logoutCustomizer.customize(getOrApply(new LogoutConfigurer<>()));
-//        return HttpSecurity.this;
-//    }
-
-    // @Bean
-    // @ConditionalOnMissingBean(UserDetailsService.class)
-    // InMemoryUserDetailsManager inMemoryUserDetailsManager() {
-    // User.UserBuilder users = User.withDefaultPasswordEncoder();
-    // UserDetails admin = users
-    // .username("admin")
-    // .password("admin")
-    // .roles("ADMIN")
-    // .build();
-    // return new InMemoryUserDetailsManager(admin);
-    // }
 
 }
