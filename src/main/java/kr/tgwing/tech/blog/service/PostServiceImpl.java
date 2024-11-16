@@ -119,9 +119,11 @@ public class PostServiceImpl implements PostService {
 
         // 해당 URL을 요청한 사람이 공지 작성자인 경우에만 삭제 가능
         if(post.getWriter().equals(postWriter)) {
+            likeHistoryRepository.deleteAllByPost(post);
             postRepository.deleteById(postId);
         } else {
-            throw new UserIsNotPostWriterException(); }
+            throw new UserIsNotPostWriterException();
+        }
     }
 
     @Override
