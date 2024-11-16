@@ -52,6 +52,7 @@ public class PostServiceImpl implements PostService {
     private final LikeHistoryRepository likeHistoryRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public PostDetail getPost(Long postId, String userStudentNumber) {
         User user = getUserEntity(userStudentNumber);
         Post post = getPostEntity(postId);
@@ -119,12 +120,15 @@ public class PostServiceImpl implements PostService {
 
         // 해당 URL을 요청한 사람이 공지 작성자인 경우에만 삭제 가능
         if(post.getWriter().equals(postWriter)) {
+            likeHistoryRepository.deleteAllByPost(post);
             postRepository.deleteById(postId);
         } else {
-            throw new UserIsNotPostWriterException(); }
+            throw new UserIsNotPostWriterException();
+        }
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<PostOverview> getPostOverviews(PostQuery query, String userStudentNumber, Pageable pageable) {
         User user = getUserEntity(userStudentNumber);
         Specification<Post> spec = PostSpecifications.hasTitleLike(query.getKeyword())
@@ -147,6 +151,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public PostOverview getPostOverview(Long postId, String userStudentNumber) {
         Post post = getPostEntity(postId);
         User user = getUserEntity(userStudentNumber);
@@ -201,6 +206,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<CommentView> getComments(Long postId, Pageable pageable) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(PostNotFoundException::new);
@@ -260,6 +266,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Page<ReplyView> getReplies(Long postId, Long commentId, Pageable pageable) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(CommentNotFoundException::new);
