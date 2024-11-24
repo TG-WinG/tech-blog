@@ -44,4 +44,10 @@ public class PostSpecifications {
         };
     }
 
+    public static Specification<Post> hasWriterNameLike(String name) {
+        return (root, query, cb) -> {
+            Join<User, Post> userPost = root.join("writer");
+            return cb.like(userPost.get("name"), "%" + name + "%");
+        };
+    }
 }

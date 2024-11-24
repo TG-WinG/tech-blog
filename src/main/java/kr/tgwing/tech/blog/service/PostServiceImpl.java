@@ -132,7 +132,8 @@ public class PostServiceImpl implements PostService {
     public Page<PostOverview> getPostOverviews(PostQuery query, String userStudentNumber, Pageable pageable) {
         User user = getUserEntity(userStudentNumber);
         Specification<Post> spec = PostSpecifications.hasTitleLike(query.getKeyword())
-                .or(PostSpecifications.hasContentLike(query.getKeyword()));
+                .or(PostSpecifications.hasContentLike(query.getKeyword()))
+                .or(PostSpecifications.hasWriterNameLike(query.getKeyword()));
 
         if (query.getHashtag() != null && query.getHashtag().size() > 0) {
             spec = spec.and(PostSpecifications.hasHashtagIn(query.getHashtag()));
