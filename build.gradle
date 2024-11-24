@@ -63,5 +63,5 @@ tasks.named('test') {
 
 // 배포용 태스크
 tasks.register('jarPath') {
-	println "${project.buildDir}/libs/${project.name}-${version}.jar"
+  println "${project.buildDir}/libs/${project.name}-${version}.jar"
 }
