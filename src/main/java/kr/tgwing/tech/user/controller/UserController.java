@@ -3,16 +3,12 @@ package kr.tgwing.tech.user.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.tgwing.tech.common.ApiResponse;
-import kr.tgwing.tech.security.service.JwtBlackListService;
-import kr.tgwing.tech.security.util.JwtUtil;
 import kr.tgwing.tech.user.dto.*;
 import kr.tgwing.tech.user.dto.checkdto.CheckNumberDTO;
 import kr.tgwing.tech.user.dto.checkdto.CheckUserDTO;
 import kr.tgwing.tech.user.dto.checkdto.PasswordCheckDTO;
 import kr.tgwing.tech.user.dto.registerdto.EmailDto;
 import kr.tgwing.tech.user.dto.registerdto.UserDTO;
-import kr.tgwing.tech.user.exception.EmailCodeException;
-import kr.tgwing.tech.user.exception.MessageException;
 import kr.tgwing.tech.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -34,7 +30,6 @@ public class UserController {
 
     private final UserService userService;
     private final RedisTemplate<String, String> redisTemplate;
-    private final JwtBlackListService jwtBlackListService;
 
     @Operation(summary = "회원가입 1단계: 인증코드 이메일로 전송")
     @PostMapping("/register/email")
@@ -109,22 +104,6 @@ public class UserController {
         Long userId = userService.setNewPassword(studentId, passwordCheckDTO);
 
         return ResponseEntity.ok(ApiResponse.updated(userId));
-    }
-
-    @Operation(summary = "로그아웃")
-    @PostMapping("/logout")
-    public ResponseEntity<ApiResponse<Void>> logout(
-            @RequestHeader(name = "Authorization") String authorization) {
-        String token = authorization.split(" ")[1];
-        jwtBlackListService.addToBlacklist(token);
-
-        return ResponseEntity.ok(ApiResponse.ok());
-    }
-
-    @Operation(summary = "로그아웃 시, 리다이렉트(임시용)")
-    @GetMapping("/login")
-    public String login() {
-        return "login";
     }
 }
 

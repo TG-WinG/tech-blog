@@ -1,220 +1,328 @@
 package kr.tgwing.tech.blog.service;
 
+import java.util.stream.Collectors;
 
-import kr.tgwing.tech.blog.dto.PostCreationDto;
-import kr.tgwing.tech.blog.dto.PostDto;
-import kr.tgwing.tech.blog.entity.HashTagEntity;
-import kr.tgwing.tech.blog.entity.PostEntity;
-import kr.tgwing.tech.blog.entity.PostTagEntity;
-import kr.tgwing.tech.blog.exception.post.PostNotFoundException;
-import kr.tgwing.tech.blog.exception.post.UserIsNotPostWriterException;
-import kr.tgwing.tech.blog.exception.post.WrongPostRequestException;
-import kr.tgwing.tech.blog.repository.HashtagRepository;
-import kr.tgwing.tech.blog.repository.PostRepository;
-import kr.tgwing.tech.blog.repository.PostTagRepository;
-import kr.tgwing.tech.user.entity.User;
-import kr.tgwing.tech.user.exception.UserNotFoundException;
-import kr.tgwing.tech.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-import static kr.tgwing.tech.blog.entity.PostEntity.toDto;
+import kr.tgwing.tech.blog.dto.CommentForm;
+import kr.tgwing.tech.blog.dto.CommentView;
+import kr.tgwing.tech.blog.dto.LikeHistoryView;
+import kr.tgwing.tech.blog.dto.PostDetail;
+import kr.tgwing.tech.blog.dto.PostForm;
+import kr.tgwing.tech.blog.dto.PostOverview;
+import kr.tgwing.tech.blog.dto.PostQuery;
+import kr.tgwing.tech.blog.dto.ReplyForm;
+import kr.tgwing.tech.blog.dto.ReplyView;
+import kr.tgwing.tech.blog.entity.Comment;
+import kr.tgwing.tech.blog.entity.Hashtag;
+import kr.tgwing.tech.blog.entity.LikeHistory;
+import kr.tgwing.tech.blog.entity.Post;
+import kr.tgwing.tech.blog.entity.PostSpecifications;
+import kr.tgwing.tech.blog.entity.Reply;
+import kr.tgwing.tech.blog.exception.comment.CommentNotFoundException;
+import kr.tgwing.tech.blog.exception.post.PostNotFoundException;
+import kr.tgwing.tech.blog.exception.post.UserIsNotPostWriterException;
+import kr.tgwing.tech.blog.exception.post.UserNotLoggedInException;
+import kr.tgwing.tech.blog.exception.reply.ReplyNotFoundException;
+import kr.tgwing.tech.blog.repository.CommentRepository;
+import kr.tgwing.tech.blog.repository.LikeHistoryRepository;
+import kr.tgwing.tech.blog.repository.PostRepository;
+import kr.tgwing.tech.blog.repository.ReplyRepository;
+import kr.tgwing.tech.user.entity.User;
+import kr.tgwing.tech.user.exception.UserNotFoundException;
+import kr.tgwing.tech.user.repository.UserRepository;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 @Slf4j
 public class PostServiceImpl implements PostService {
+
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-
-    @Autowired
-    private HashtagRepository hashtagRepository;
-    @Autowired
-    private PostTagRepository postTagRepository;
+    private final CommentRepository commentRepository;
+    private final ReplyRepository replyRepository;
+    private final LikeHistoryRepository likeHistoryRepository;
 
     @Override
-    public PostDto getPost(Long postId) // 특정 게시글 가져오기
-    {
-        Set<HashTagEntity> hashtags = new HashSet<>();
-        // 입력된 postId에 해당하는 글 찾기
-        Optional<PostEntity> postEntityInOp = postRepository.findById(postId);
-        PostEntity postEntity = postEntityInOp.orElseThrow(PostNotFoundException::new);
+    @Transactional(readOnly = true)
+    public PostDetail getPost(Long postId, String userStudentNumber) {
+        User user = getUserEntity(userStudentNumber);
+        Post post = getPostEntity(postId);
+        boolean iLikeIt = doILikeIt(postId, user);
 
-        List<PostTagEntity> postTags = postTagRepository.findAllByPostId(postId);
-        postTags.forEach(posttag -> {
-            Long tagId = posttag.getHashtagId();
-            HashTagEntity tagEntity = hashtagRepository.findById(tagId).orElseThrow();
-            hashtags.add(tagEntity);
-        });
-        System.out.println(postEntity.toString());
-
-        return toDto(postEntity, hashtags);
-    }
-
-
-
-    private Page<PostEntity> searchPosts(String search, PageRequest pageRequest) { // 공지 내용으로 검색하기
-        return postRepository.findByTitleContains(search, pageRequest);
-    }
-    private Page<PostEntity> getAllPosts(PageRequest pageRequest) { // 모든 공지 가져오기
-        return postRepository.findAllByOrderByIdDesc(pageRequest);
+        return PostDetail.of(post, iLikeIt);
     }
 
     @Override
-    public PostDto createPost(PostCreationDto requestDto, String studentNumber)  // 공지 생성하기
-    {
+    public PostDetail createPost(PostForm form, String writerStudentNumber) {
         // 글을 작성할 user 조회
-        Optional<User> byStudentId = userRepository.findByStudentNumber(studentNumber);
-        User userEntity = byStudentId.orElseThrow(UserNotFoundException::new);
+        User writer = getUserEntity(writerStudentNumber);
 
-        // 현재 사용자와 요청 시 들어온 writer가 같은지 확인
-        if (!Objects.equals(userEntity.getStudentId(), studentNumber)) {
-            throw new WrongPostRequestException();
-        }
-
-        // entity에 작성자 Id 설정해서 저장하기
-        // 해시태그 엔티티로 바꿔와서 함께 블로그 엔티티 생성
-
-        //getHashtag - 요청으로 들어온 해시태그 집합을 데이터베이스에 블로그 연관 테이블, 해시태그 테이블에 저장 및 엔티티 집합 반환
-        Set<HashTagEntity> hashtags = getHashtag(requestDto.getHashtags());
-        PostEntity postEntity = PostCreationDto.toEntity(requestDto);
-        postEntity.setWriter(userEntity.getStudentId());
-        PostEntity savedEntity = postRepository.save(postEntity);
-
-        hashtags.forEach(tag -> {
-            PostTagEntity postTag = PostTagEntity.builder().postId(savedEntity.getId()).hashtagId(tag.getId()).build();
-            postTagRepository.save(postTag);
+        Post newPost = Post.builder()
+                .title(form.getTitle())
+                .content(form.getContent())
+                .thumbnail(form.getThumbnail())
+                .writer(writer)
+                .build();
+        form.getHashtags().forEach(hashtag -> {
+            newPost.getHashtags().add(Hashtag.builder()
+                    .post(newPost)
+                    .name(hashtag)
+                    .build());
         });
+        Post savedPost = postRepository.save(newPost);
 
-        System.out.println(toDto(savedEntity, hashtags).toString());
-
-        return toDto(savedEntity, hashtags);
+        return PostDetail.of(savedPost, false);
     }
 
     @Override
-    public PostDto updatePost(PostDto postDto, Long postId, String utilStudentId) // 게시글 수정하기
-    {
-        Optional<PostEntity> postById = postRepository.findById(postId);
-        PostEntity postEntity = postById.orElseThrow(PostNotFoundException::new);
+    public PostDetail updatePost(Long postId, PostForm form, String writerStudentNumber) {
+        Post post = getPostEntity(postId);
+        User writer = getUserEntity(writerStudentNumber);
+        boolean iLikeIt = doILikeIt(postId, writer);
 
-        // 해당 URL을 요청자 ==  공지 작성자 일 때에만 수정 가능
-        // 수정 목록 : title, content, thumbnail
+        if(post.getWriter().equals(writer)) {
+            post.setTitle(form.getTitle());
+            post.setContent(form.getContent());
+            post.setThumbnail(form.getThumbnail());
+            post.setHashtags(form.getHashtags().stream().map(hashtag -> {
+                return Hashtag.builder()
+                        .post(post)
+                        .name(hashtag)
+                        .build();
+            }).collect(Collectors.toSet()));
 
-        Optional<User> userById = userRepository.findById(postEntity.getWriter());
-        User userEntity = userById.orElseThrow(UserNotFoundException::new); // 유저 notfound 예외처리
+            Post updatedPost = postRepository.save(post);
 
-        log.info("util학번 = {}", utilStudentId);
-        log.info("user학번 = {}", userEntity.getStudentId());
-
-        // DB 내 게시글 작성자 - 요청된 유저 ID 동일 & DB 내 게시글 작성자 - 요청된 게시글 작성자 동일
-        if(Objects.equals(userEntity.getStudentId(), utilStudentId)) {
-            log.info("학번 일치 - 작성자 확인");
-            Set<HashTagEntity> hashtags = getHashtag(postDto.getHashtags());
-            postTagRepository.deleteAllByPostId(postId);
-
-            postEntity.updateContent(postDto, hashtags); // entity 정보 수정
-
-            PostEntity savedEntity = postRepository.save(postEntity);
-
-            hashtags.forEach(tag -> {
-                PostTagEntity postTag = PostTagEntity.builder().postId(savedEntity.getId()).hashtagId(tag.getId()).build();
-                postTagRepository.save(postTag);
-            });
-            return toDto(savedEntity, hashtags);
+            return PostDetail.of(updatedPost, iLikeIt);
         }
         else { // 공지 작성자가 아닌 경우 -- 수정 불가능
             log.info("학번 불일치 - 작성자가 아니므로 수정 불가능");
             throw new UserIsNotPostWriterException();
         }
     }
-    @Override
-    public void deletePost(Long postId, String utilStudentId) // 게시글 삭제하기
-    {
-        Optional<PostEntity> postById = postRepository.findById(postId);
-        PostEntity postEntity = postById.orElseThrow(PostNotFoundException::new);
 
-        Optional<User> userById = userRepository.findById(postEntity.getWriter());
-        User userEntity = userById.orElseThrow(UserNotFoundException::new);
+    @Override
+    public void deletePost(Long postId, String writerStudentNumber) {
+        Post post = postRepository.findById(postId)
+               .orElseThrow(PostNotFoundException::new);
+
+        User postWriter = userRepository.findByStudentNumber(writerStudentNumber)
+                .orElseThrow(UserNotFoundException::new);
 
         // 해당 URL을 요청한 사람이 공지 작성자인 경우에만 삭제 가능
-        if(Objects.equals(userEntity.getStudentId(), utilStudentId)) {
-            log.info("학번 일치 - 작성자 확인");
-            postTagRepository.deleteAllByPostId(postId);
+        if(post.getWriter().equals(postWriter)) {
+            likeHistoryRepository.deleteAllByPost(post);
             postRepository.deleteById(postId);
         } else {
-            log.info("학번 불일치 - 작성자가 아니므로 삭제 불가능");
-            throw new UserIsNotPostWriterException(); }
+            throw new UserIsNotPostWriterException();
+        }
     }
 
     @Override
-    public Page<PostDto> getPostsInPage(String text, Pageable pageable) {
-        int size = pageable.getPageSize();
-        int page = pageable.getPageNumber();
-        long total = 0L;
-        Page<PostEntity> postPage = null;
+    @Transactional(readOnly = true)
+    public Page<PostOverview> getPostOverviews(PostQuery query, String userStudentNumber, Pageable pageable) {
+        User user = getUserEntity(userStudentNumber);
+        Specification<Post> spec = PostSpecifications.hasTitleLike(query.getKeyword())
+                .or(PostSpecifications.hasContentLike(query.getKeyword()));
 
-                // Post DB에서 Page 단위로 가져오기
-        PageRequest pageRequest = PageRequest.of(page, size);
-
-        // 파라미터 없이 get 요청된 경우 - 그냥 전체 반환
-        if(text == null) {
-            postPage = getAllPosts(pageRequest);
-            total = postRepository.count();
-            log.info("total = " + total);
-        }
-        else { // - 파라미터로 검색된 블로그만 걸러서 반환
-            postPage = searchPosts(text, pageRequest);
-            total = postRepository.countByTitleContains(text);
-            log.info("total = " + total);
+        if (query.getHashtag() != null && query.getHashtag().size() > 0) {
+            spec = spec.and(PostSpecifications.hasHashtagIn(query.getHashtag()));
         }
 
-        if(!(total > page * size)) {throw new WrongPostRequestException(); }
-        // 이후 ExceptionHandler 정의 필요
-
-        if (postPage.isEmpty()) {
-            log.info("page 조회 불가");
+        if (query.isMe()) {
+            if (userStudentNumber == null || userStudentNumber.isEmpty())
+                throw new UserNotLoggedInException();
+            spec = spec.and(PostSpecifications.hasWriterStudentNumber(userStudentNumber));
         }
 
-        // stream이 비어있는 경우
-        postPage.stream().findFirst().orElseThrow(()-> new PostNotFoundException());
-
-        // page가 총 데이터 건수를 초과하는 경우
-        long totalCount = postPage.getTotalElements();
-        long requestCount = (postPage.getTotalPages() - 1) * postPage.getSize();
-        if(!(totalCount > requestCount)) { throw new WrongPostRequestException(); }
-
-        // Entity -> Dto 변환 - Dto 담은 page 반환
-        List<PostEntity> posts = postPage.getContent();
-        List<PostDto> dtos = posts.stream().map(postEntity -> toDto(postEntity, null)).collect(Collectors.toList());
-
-        return new PageImpl<>(dtos, pageable, postPage.getTotalElements());
+        Page<Post> posts = postRepository.findAll(spec, pageable);
+        return posts.map((post) -> {
+            return PostOverview.of(post, doILikeIt(post.getId(), user));
+        });
     }
 
-    // 해시태그 이름 set 가져와서
-    // 새로운 해시태그 저장 및 해시태그 엔티티 생성
-    // 해시태그 엔티티 set 반환
-    private Set<HashTagEntity> getHashtag(Set<String> hashtags) {
-        Set<HashTagEntity> resultTagIds = new HashSet<>();
-        for (String tagname : hashtags) {
-            HashTagEntity hashTagEntity = hashtagRepository.findByName(tagname).orElseGet(() -> {
-                HashTagEntity newHashtag = HashTagEntity.builder()
-                        .name(tagname).build();
-                return hashtagRepository.save(newHashtag);
-            });
-            resultTagIds.add(hashTagEntity);
-        }
+    @Override
+    @Transactional(readOnly = true)
+    public PostOverview getPostOverview(Long postId, String userStudentNumber) {
+        Post post = getPostEntity(postId);
+        User user = getUserEntity(userStudentNumber);
 
-        return resultTagIds;
+        return PostOverview.of(post, doILikeIt(postId, user));
     }
+
+    @Override
+    public CommentView createComment(Long postId, CommentForm form, String writerStudentNumber) {
+        User writer = userRepository.findByStudentNumber(writerStudentNumber)
+                .orElseThrow(UserNotFoundException::new);
+        Post post = getPostEntity(postId);
+        Comment newComment = Comment.builder()
+                .post(post)
+                .content(form.getContent())
+                .writer(writer)
+                .build();
+        post.increaseCommentCount();
+
+        postRepository.save(post);
+        commentRepository.save(newComment);
+
+        return CommentView.of(newComment);
+    }
+
+    @Override
+    public CommentView updateComment(Long postId, Long commentId, CommentForm form, String writerStudentNumber) {
+        User writer = userRepository.findByStudentNumber(writerStudentNumber)
+                .orElseThrow(UserNotFoundException::new);
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(CommentNotFoundException::new);
+
+        if (!comment.getWriter().equals(writer)) throw new RuntimeException();
+        comment.setContent(form.getContent());
+        Comment updatedComment = commentRepository.save(comment);
+
+        return CommentView.of(updatedComment);
+    }
+
+    @Override
+    public void deleteComment(Long postId, Long commentId, String writerStudentNumber) {
+        User writer = userRepository.findByStudentNumber(writerStudentNumber)
+                .orElseThrow(UserNotFoundException::new);
+        Post post = getPostEntity(postId);
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(CommentNotFoundException::new);
+
+        if (!comment.getWriter().equals(writer)) throw new RuntimeException();
+        commentRepository.delete(comment);
+        post.decreaseCommentCount();
+        postRepository.save(post);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<CommentView> getComments(Long postId, Pageable pageable) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(PostNotFoundException::new);
+
+        Page<Comment> comments = commentRepository.findAllByPost(post, pageable);
+        return comments.map(CommentView::of);
+    }
+
+    @Override
+    public ReplyView createReply(Long postId, Long commentId, ReplyForm form, String writerStudentNumber) {
+        User writer = userRepository.findByStudentNumber(writerStudentNumber)
+                .orElseThrow(UserNotFoundException::new);
+        Post post = getPostEntity(postId);
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(CommentNotFoundException::new);
+        Reply newReply = Reply.builder()
+                .post(post)
+                .comment(comment)
+                .content(form.getContent())
+                .writer(writer)
+                .build();
+        post.increaseCommentCount();
+
+        replyRepository.save(newReply);
+
+        return ReplyView.of(newReply);
+    }
+
+    @Override
+    public ReplyView updateReply(Long postId, Long commentId, Long replyId, ReplyForm form, String writerStudentNumber) {
+        User writer = userRepository.findByStudentNumber(writerStudentNumber)
+                .orElseThrow(UserNotFoundException::new);
+
+        Reply reply = replyRepository.findById(replyId)
+                .orElseThrow(ReplyNotFoundException::new);
+
+        if (!reply.getWriter().equals(writer)) throw new RuntimeException();
+
+        reply.setContent(form.getContent());
+        Reply updatedReply = replyRepository.save(reply);
+
+        return ReplyView.of(updatedReply);
+    }
+
+    @Override
+    public void deleteReply(Long postId, Long commentId, Long replyId, String writerStudentNumber) {
+        User writer = userRepository.findByStudentNumber(writerStudentNumber)
+                .orElseThrow(UserNotFoundException::new);
+        Post post = getPostEntity(postId);
+        Reply reply = replyRepository.findById(replyId)
+                .orElseThrow(ReplyNotFoundException::new);
+
+        if (!reply.getWriter().equals(writer)) throw new RuntimeException();
+        replyRepository.delete(reply);
+        post.decreaseCommentCount();
+        postRepository.save(post);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ReplyView> getReplies(Long postId, Long commentId, Pageable pageable) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(CommentNotFoundException::new);
+
+        Page<Reply> replies = replyRepository.findAllByComment(comment, pageable);
+        return replies.map(ReplyView::of);
+    }
+
+    @Override
+    public LikeHistoryView toggleLike(Long postId, String userStudentNumber) {
+        User user = userRepository.findByStudentNumber(userStudentNumber)
+                .orElseThrow(UserNotFoundException::new);
+        Post post = getPostEntity(postId);
+        LikeHistory.Key key = new LikeHistory.Key(user.getStudentId(), postId);
+        LikeHistory likeHistory = likeHistoryRepository.findById(key).orElse(null);
+
+        if (likeHistory == null) {
+            likeHistory = LikeHistory.builder()
+                        .user(user)
+                        .post(post)
+                        .canceled(false)
+                        .build();
+            post.increaseLikeCount();
+        } else {
+            likeHistory.toggle();
+            if (likeHistory.isCanceled())
+                post.decreaseLikeCount();
+            else
+                post.increaseLikeCount();
+        }
+        likeHistoryRepository.save(likeHistory);
+        postRepository.save(post);
+
+        return LikeHistoryView.of(likeHistory);
+    }
+
+    private Post getPostEntity(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(PostNotFoundException::new);
+        return post;
+    }
+
+    private User getUserEntity(String userStudentNumber) {
+        if (userStudentNumber == null) return null;
+
+        User user = userRepository.findByStudentNumber(userStudentNumber)
+                .orElseThrow(UserNotFoundException::new);
+        return user;
+    }
+
+    private boolean doILikeIt(Long postId, User user) {
+        if (user == null) return false;
+
+        LikeHistory likeHistory = likeHistoryRepository.findById(new LikeHistory.Key(user.getStudentId(), postId))
+                .orElse(null);
+        return likeHistory != null && likeHistory.isCanceled() == false;
+    }
+
 }

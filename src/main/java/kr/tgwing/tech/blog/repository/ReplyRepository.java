@@ -1,20 +1,23 @@
 package kr.tgwing.tech.blog.repository;
 
-import kr.tgwing.tech.blog.entity.ReplyEntity;
+import java.util.List;
+
+import kr.tgwing.tech.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import kr.tgwing.tech.blog.entity.Comment;
+import kr.tgwing.tech.blog.entity.Reply;
 
-@Repository
-public interface ReplyRepository extends JpaRepository<ReplyEntity, Long> {
-    @Query(value = "select * from reply r where r.post = :postId", nativeQuery = true)
-    List<ReplyEntity> findAllByPost(Long postId);
+/**
+ * ReplyRepository
+ */
+public interface ReplyRepository extends JpaRepository<Reply, Long> {
 
-    void deleteById(Long id);
+    List<Comment> findAllByComment(Comment post);
+    Page<Reply> findAllByComment(Comment comment, Pageable pageable);
 
-    Page<ReplyEntity> findAllByPostOrderByModDateDesc(Pageable pageable, Long postId);
+    List<Comment> findAllByWriter(User user);
+
 }

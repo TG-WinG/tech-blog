@@ -1,15 +1,22 @@
 package kr.tgwing.tech.common.exception;
 
-import kr.tgwing.tech.blog.exception.post.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import kr.tgwing.tech.user.exception.*;
+import org.springframework.http.HttpStatus;
+
+import kr.tgwing.tech.blog.exception.post.InappropriateUserPostRelationException;
+import kr.tgwing.tech.blog.exception.post.PageExceededDataException;
+import kr.tgwing.tech.blog.exception.post.PathHasNoPostIdException;
+import kr.tgwing.tech.blog.exception.post.PostNotFoundException;
+import kr.tgwing.tech.blog.exception.post.UserIsNotPostWriterException;
+import kr.tgwing.tech.blog.exception.post.UserNotLoggedInException;
+import kr.tgwing.tech.blog.exception.post.WrongPostRequestException;
 import kr.tgwing.tech.blog.exception.reply.ReplyBadRequestException;
 import kr.tgwing.tech.blog.exception.reply.ReplyForbiddenException;
 import kr.tgwing.tech.blog.exception.reply.ReplyNotFoundException;
 import kr.tgwing.tech.project.exception.ProjectNotFoundException;
-import kr.tgwing.tech.user.exception.*;
-import org.springframework.http.HttpStatus;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class ExceptionMapper { // 예외 객체 -> 예외 상태로 바꿔주는 mapper
 
@@ -34,6 +41,8 @@ public class ExceptionMapper { // 예외 객체 -> 예외 상태로 바꿔주는
                 ExceptionSituation.of("메일에서 에러가 발생했습니다.", HttpStatus.INTERNAL_SERVER_ERROR, 1003));
         mapper.put(EmailCodeException.class,
                 ExceptionSituation.of("인증번호가 서로 인치하지 않습니다.", HttpStatus.CONFLICT, 1004));
+        mapper.put(NotAssignmentException.class,
+                ExceptionSituation.of("사용자가 승인되지 않았습니다.", HttpStatus.UNAUTHORIZED, 1005));
     }
 
     private static void setUpPostException() {
@@ -49,6 +58,9 @@ public class ExceptionMapper { // 예외 객체 -> 예외 상태로 바꿔주는
                 ExceptionSituation.of("블로그 수정(삭제) 권한이 존재하지 않습니다", HttpStatus.FORBIDDEN, 4404));
         mapper.put(WrongPostRequestException.class,
                 ExceptionSituation.of("요청에 잘못된 정보가 포함되어 있습니다", HttpStatus.BAD_REQUEST, 4406));
+        mapper.put(UserNotLoggedInException.class,
+                ExceptionSituation.of("로그인되지 않았습니다.", HttpStatus.BAD_REQUEST, 4407));
+
     }
 
     private static void setUpReplyException() {
@@ -65,10 +77,8 @@ public class ExceptionMapper { // 예외 객체 -> 예외 상태로 바꿔주는
                 ExceptionSituation.of("찾고자 하는 프로젝트가 존재하지 않습니다.", HttpStatus.NOT_FOUND, 6600));
     }
 
-
     public static ExceptionSituation getSituationOf(Exception exception) {
         return mapper.get(exception.getClass());
     }
-
 
 }

@@ -1,5 +1,6 @@
 package kr.tgwing.tech.project.dto;
 
+import kr.tgwing.tech.project.domain.Image;
 import kr.tgwing.tech.project.domain.Link;
 import kr.tgwing.tech.project.domain.Participant;
 import kr.tgwing.tech.project.domain.Project;
@@ -20,19 +21,19 @@ public class ProjectUpdateDTO {
     private String description;
     private LocalDate start;
     private LocalDate end;
-    private String thumbnail;
+    private List<String> imageUrls;
     private String devStatus;
     private String devType;
     private List<ParticipantDTO> participants = new ArrayList<>();
     private List<LinkDTO> links = new ArrayList<>();
 
     @Builder
-    public ProjectUpdateDTO(String title, String description, LocalDate start, LocalDate end, String thumbnail, String devStatus, String devType, List<ParticipantDTO> participants, List<LinkDTO> links) {
+    public ProjectUpdateDTO(String title, String description, LocalDate start, LocalDate end, List<String> imagesUrls, String devStatus, String devType, List<ParticipantDTO> participants, List<LinkDTO> links) {
         this.title = title;
         this.description = description;
         this.start = start;
         this.end = end;
-        this.thumbnail = thumbnail;
+        this.imageUrls = imagesUrls;
         this.devStatus = devStatus;
         this.devType = devType;
         this.participants = participants;
@@ -47,6 +48,10 @@ public class ProjectUpdateDTO {
                 .end(projectUpdateDTO.getEnd())
                 .devStatus(projectUpdateDTO.getDevStatus())
                 .devType(projectUpdateDTO.getDevType())
+                .imageUrls(projectUpdateDTO.getImageUrls().stream()
+                        .map( img -> Image.builder()
+                                .imageUrl(img)
+                                .build()).toList())
                 .participants(projectUpdateDTO.getParticipants().stream()
                         .map(ParticipantDTO::toParticipantEntity).toList())
                 .links(projectUpdateDTO.getLinks().stream()

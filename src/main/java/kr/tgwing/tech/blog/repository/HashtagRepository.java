@@ -1,12 +1,13 @@
 package kr.tgwing.tech.blog.repository;
 
-import kr.tgwing.tech.blog.entity.HashTagEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-import java.util.Optional;
+import kr.tgwing.tech.blog.entity.Hashtag;
 
-@Repository
-public interface HashtagRepository extends JpaRepository<HashTagEntity, Long> {
-    Optional<HashTagEntity> findByName(String name);
+/**
+ * HashtagRepository
+ */
+public interface HashtagRepository extends JpaRepository<Hashtag, Long>, JpaSpecificationExecutor<Hashtag> {
+
 }

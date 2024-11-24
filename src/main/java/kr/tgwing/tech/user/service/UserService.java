@@ -1,17 +1,21 @@
 package kr.tgwing.tech.user.service;
 
 
-import kr.tgwing.tech.blog.entity.PostEntity;
-import kr.tgwing.tech.user.dto.*;
+import java.util.List;
+
+import kr.tgwing.tech.blog.dto.PostOverview;
+import kr.tgwing.tech.blog.entity.Post;
+import kr.tgwing.tech.project.dto.ProjectBriefDTO;
+import kr.tgwing.tech.project.dto.ProjectQuery;
+import kr.tgwing.tech.user.dto.EmailMessageDTO;
 import kr.tgwing.tech.user.dto.checkdto.CheckNumberDTO;
 import kr.tgwing.tech.user.dto.checkdto.CheckUserDTO;
 import kr.tgwing.tech.user.dto.checkdto.PasswordCheckDTO;
 import kr.tgwing.tech.user.dto.profiledto.ProfileDTO;
 import kr.tgwing.tech.user.dto.profiledto.ProfileReqDTO;
 import kr.tgwing.tech.user.dto.registerdto.UserDTO;
-import kr.tgwing.tech.user.entity.User;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface UserService{
 
@@ -26,7 +30,7 @@ public interface UserService{
 
     ProfileDTO showUser(String name);
 
-    List<PostEntity> showMyBlog(String studentNumber);
+    Page<PostOverview> getMyBlog(String studentNumber, Pageable pageable);
 
     void checkUser(CheckUserDTO checkUserDTO); // 본인 확인하기
 
@@ -35,4 +39,6 @@ public interface UserService{
     Long setNewPassword(String studentNumber, PasswordCheckDTO password);
 
     void checkCode(String code, CheckNumberDTO checkNumberDTO);
+
+    Page<ProjectBriefDTO> getMyProject(Pageable pageable, ProjectQuery query, String studentNumber);
 }

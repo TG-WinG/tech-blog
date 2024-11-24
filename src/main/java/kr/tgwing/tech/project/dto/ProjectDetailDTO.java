@@ -21,23 +21,22 @@ public class ProjectDetailDTO {
     private String description;
     private LocalDate start;
     private LocalDate end;
-    private String thumbnail;
     private String devStatus;
     private String devType;
-
-    // 참여인원에 대해 ParticipateEntity;
+    private List<String> imageUrls = new ArrayList<>();
     private List<ParticipantDTO> participants = new ArrayList<>();
-    // link
     private List<LinkDTO> links = new ArrayList<>();
 
     @Builder
-    public ProjectDetailDTO(Long id, String title, String description, LocalDate start, LocalDate end, String thumbnail, String devStatus, String devType, List<ParticipantDTO> participants, List<LinkDTO> links) {
+    public ProjectDetailDTO(Long id, String title, String description,
+                            LocalDate start, LocalDate end, String devStatus, String devType,
+                            List<String> imageUrls, List<ParticipantDTO> participants, List<LinkDTO> links) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.start = start;
         this.end = end;
-        this.thumbnail = thumbnail;
+        this.imageUrls = imageUrls;
         this.devStatus = devStatus;
         this.devType = devType;
         this.participants = participants;

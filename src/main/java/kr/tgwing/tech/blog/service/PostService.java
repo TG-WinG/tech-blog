@@ -1,14 +1,41 @@
 package kr.tgwing.tech.blog.service;
 
-import kr.tgwing.tech.blog.dto.PostCreationDto;
-import kr.tgwing.tech.blog.dto.PostDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import kr.tgwing.tech.blog.dto.CommentForm;
+import kr.tgwing.tech.blog.dto.CommentView;
+import kr.tgwing.tech.blog.dto.LikeHistoryView;
+import kr.tgwing.tech.blog.dto.PostDetail;
+import kr.tgwing.tech.blog.dto.PostForm;
+import kr.tgwing.tech.blog.dto.PostOverview;
+import kr.tgwing.tech.blog.dto.PostQuery;
+import kr.tgwing.tech.blog.dto.ReplyForm;
+import kr.tgwing.tech.blog.dto.ReplyView;
+
+/**
+ * {@summary 블로그 포스트 및 댓글의 CRUD를 담당하는 서비스.}
+ *
+ * @author 3un0ia, wwingyu
+ */
 public interface PostService {
-    public PostDto getPost(Long postId);
-    public PostDto createPost(PostCreationDto requestDto, String token);
-    public PostDto updatePost(PostDto postDto, Long postId, String utilStudentId);
-    public void deletePost(Long postId, String utilStudentId);
-    public Page<PostDto> getPostsInPage(String text, Pageable pageable);
+
+    public PostDetail getPost(Long postId, String userStudentNumber);
+    public PostOverview getPostOverview(Long postId, String userStudentNumber);
+    public PostDetail createPost(PostForm form, String writerStudentNumber);
+    public PostDetail updatePost(Long postId, PostForm form, String writerStudentNumber);
+    public void deletePost(Long postId, String writerStudentNumber);
+    public Page<PostOverview> getPostOverviews(PostQuery query, String userStudentNumber, Pageable pageable);
+
+    public CommentView createComment(Long postId, CommentForm form, String writerStudentNumber);
+    public CommentView updateComment(Long postId, Long commentId, CommentForm form, String writerStudentNumber);
+    public void deleteComment(Long postId, Long commentId, String writerStudentNumber);
+    public Page<CommentView> getComments(Long postId, Pageable pageable);
+
+    public ReplyView createReply(Long postId, Long commentId, ReplyForm form, String writerStudentNumber);
+    public ReplyView updateReply(Long postId, Long commentId, Long replyId, ReplyForm form, String writerStudentNumber);
+    public void deleteReply(Long postId, Long commentId, Long replyId, String writerStudentNumber);
+    public Page<ReplyView> getReplies(Long postId, Long commentId, Pageable pageable);
+
+    public LikeHistoryView toggleLike(Long postId, String userStudentNumber);
 }

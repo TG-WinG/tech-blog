@@ -1,22 +1,19 @@
 package kr.tgwing.tech.user.service;
 
+import java.util.Optional;
+import java.util.Random;
+
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import kr.tgwing.tech.blog.entity.PostEntity;
-import kr.tgwing.tech.blog.repository.PostRepository;
-import kr.tgwing.tech.user.dto.*;
-import kr.tgwing.tech.user.dto.checkdto.CheckNumberDTO;
-import kr.tgwing.tech.user.dto.checkdto.CheckUserDTO;
-import kr.tgwing.tech.user.dto.checkdto.PasswordCheckDTO;
-import kr.tgwing.tech.user.dto.profiledto.ProfileDTO;
-import kr.tgwing.tech.user.dto.profiledto.ProfileReqDTO;
-import kr.tgwing.tech.user.dto.registerdto.UserDTO;
-import kr.tgwing.tech.user.entity.TempUser;
-import kr.tgwing.tech.user.entity.User;
-import kr.tgwing.tech.user.exception.*;
-import kr.tgwing.tech.user.repository.TempUserRepository;
-import kr.tgwing.tech.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
+
+import kr.tgwing.tech.project.domain.Project;
+import kr.tgwing.tech.project.domain.ProjectSpecification;
+import kr.tgwing.tech.project.dto.ProjectBriefDTO;
+import kr.tgwing.tech.project.dto.ProjectQuery;
+import kr.tgwing.tech.project.repository.ProjectRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -25,9 +22,29 @@ import org.springframework.transaction.annotation.Transactional;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
+import lombok.RequiredArgsConstructor;
+
+import kr.tgwing.tech.blog.dto.PostOverview;
+import kr.tgwing.tech.blog.entity.LikeHistory;
+import kr.tgwing.tech.blog.entity.Post;
+import kr.tgwing.tech.blog.repository.LikeHistoryRepository;
+import kr.tgwing.tech.blog.repository.PostRepository;
+import kr.tgwing.tech.user.dto.EmailMessageDTO;
+import kr.tgwing.tech.user.dto.checkdto.CheckNumberDTO;
+import kr.tgwing.tech.user.dto.checkdto.CheckUserDTO;
+import kr.tgwing.tech.user.dto.checkdto.PasswordCheckDTO;
+import kr.tgwing.tech.user.dto.profiledto.ProfileDTO;
+import kr.tgwing.tech.user.dto.profiledto.ProfileReqDTO;
+import kr.tgwing.tech.user.dto.registerdto.UserDTO;
+import kr.tgwing.tech.user.entity.TempUser;
+import kr.tgwing.tech.user.entity.User;
+import kr.tgwing.tech.user.exception.EmailCodeException;
+import kr.tgwing.tech.user.exception.MessageException;
+import kr.tgwing.tech.user.exception.PasswordException;
+import kr.tgwing.tech.user.exception.UserDuplicatedException;
+import kr.tgwing.tech.user.exception.UserNotFoundException;
+import kr.tgwing.tech.user.repository.TempUserRepository;
+import kr.tgwing.tech.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +57,8 @@ public class UserServiceImpl implements UserService {
     private final SpringTemplateEngine templateEngine;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final TempUserRepository tempUserRepository;
+    private final LikeHistoryRepository likeHistoryRepository;
+    private final ProjectRepository projectRepository;
 
     @Override
     public Long register(UserDTO userDTO){
@@ -89,11 +108,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<PostEntity> showMyBlog(String studentNumber){
+    public Page<PostOverview> getMyBlog(String studentNumber, Pageable pageable){
         User user = userRepository.findByStudentNumber(studentNumber)
                 .orElseThrow(UserNotFoundException::new);
-        List<PostEntity> myBlog = postRepository.findByWriter(user.getStudentId());
-        return myBlog;
+
+        Page<Post> myBlog = postRepository.findByWriter(user, pageable);
+        return myBlog.map((post) -> {
+            LikeHistory likeHistory = likeHistoryRepository.findById(
+                new LikeHistory.Key(user.getStudentId(), post.getId())).orElse(null);
+            boolean iLikeIt = likeHistory != null && likeHistory.isCanceled() == false;
+            return PostOverview.of(post, iLikeIt);
+        });
     }
 
     @Override
@@ -121,6 +146,13 @@ public class UserServiceImpl implements UserService {
         }
 
         return authNum;
+    }
+
+    @Override
+    public Page<ProjectBriefDTO> getMyProject(Pageable pageable, ProjectQuery query, String studentNumber) {
+        Specification<Project> spec = ProjectSpecification.hasKeywordInMyProject(query.getKeyword());
+        Page<Project> myProjects = projectRepository.findAll(spec, pageable);
+        return myProjects.map(myProject -> ProjectBriefDTO.of(myProject));
     }
 
     public String createCode() {

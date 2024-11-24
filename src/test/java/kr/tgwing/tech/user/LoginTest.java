@@ -1,8 +1,9 @@
 package kr.tgwing.tech.user;
 
-import kr.tgwing.tech.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import kr.tgwing.tech.user.repository.UserRepository;
 
 @SpringBootTest
 public class LoginTest {
