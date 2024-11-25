@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @RestControllerAdvice
 public class ExceptionAdvice { // Exception Handler
@@ -24,6 +25,11 @@ public class ExceptionAdvice { // Exception Handler
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Void> handleException(Exception e) {
+        if (e instanceof NoResourceFoundException) {
+            defaultLog.info(e.getMessage());
+            return ResponseEntity.notFound().build();
+        }
+
         defaultLog.error(e.getMessage());
         exceptionLog.error(e.getMessage(), e);
 
