@@ -101,7 +101,8 @@ public class SecurityConfig {
 //                        .hasRole("ADMIN")
                         .requestMatchers("/**")
                         .permitAll()
-                        .anyRequest().authenticated())
+                        .anyRequest().authenticated()
+                )
                 .addFilterBefore(new JwtFilter(jwtUtil), LoginFilter.class)
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, tempUserRepository),
                         UsernamePasswordAuthenticationFilter.class)

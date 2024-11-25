@@ -21,7 +21,8 @@ import java.util.List;
 @DynamicInsert
 @NoArgsConstructor
 @Table(name= "project")
-public class Project extends BaseEntity {
+public class
+Project extends BaseEntity {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="project_id")
     private Long id;

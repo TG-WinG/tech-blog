@@ -1,5 +1,6 @@
 package kr.tgwing.tech.project.dto;
 
+import kr.tgwing.tech.project.domain.Image;
 import kr.tgwing.tech.project.domain.Project;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -7,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Data
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -33,13 +35,20 @@ public class ProjectBriefDTO {
     }
 
     public static ProjectBriefDTO of(Project project) {
+        String imgUrl;
+        Optional<Image> first = project.getImageUrls().stream().findFirst();
+        if (first.isEmpty()) {
+            imgUrl = null;
+        } else {
+            imgUrl = first.get().getImageUrl();
+        }
         return ProjectBriefDTO.builder()
                 .id(project.getId())
                 .title(project.getTitle())
                 .start(project.getStartDate())
                 .end(project.getEndDate())
                 .description(project.getDescription())
-                .thumbnail(project.getImageUrls().stream().findFirst().get().getImageUrl())
+                .thumbnail(imgUrl)
                 .devStatus(project.getDevStatus())
                 .devType(project.getDevType())
                 .build();
