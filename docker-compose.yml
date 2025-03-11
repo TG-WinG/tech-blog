@@ -1,0 +1,8 @@
+services:
+  app:
+    image: juhhoho/docker-test
+    container_name: spring-app
+    restart: always
+    ports:
+      - "80:8080"  # 80번 포트로 포워딩 (외부에서 80으로 접근 가능)
+    pull_policy: always  # 최신 이미지 항상 가져오기
