@@ -5,41 +5,13 @@ on:
     branches: ["qwe"] # 'dev' 브랜치에 push될 때만 실행
 
 jobs:
-  # ci: # ✅ CI 단계: 코드 빌드 및 테스트 실행
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     contents: read
-  #   steps:
-  #     - uses: actions/checkout@v4 # GitHub 저장소 체크아웃
-
-  #     - name: Ensure resources directory exists
-  #       run: mkdir -p ./src/main/resources/ # application.yml 파일을 저장할 디렉토리 생성
-
-  #     - name: Create application.yml from LOCAL_YML
-  #       run: echo "${{ secrets.LOCAL_YML }}" | base64 --decode > ./src/main/resources/application.yml # 환경변수에서 application.yml 생성
-
-  #     - name: Set up JDK 17
-  #       uses: actions/setup-java@v4
-  #       with:
-  #         java-version: '17'
-  #         distribution: 'temurin' # JDK 17 설정
-
-  #     - name: Grant execute permission for Gradle Wrapper
-  #       run: chmod +x gradlew # Gradle 실행 권한 부여
-
-  #     - name: Setup Gradle
-  #       uses: gradle/actions/setup-gradle@v4 # Gradle 설정
-
-  #     - name: Build and test with Gradle (LOCAL_YML)
-  #       run: ./gradlew build # 프로젝트 빌드 및 테스트 실행
-
-  cd: # ✅ CD 단계: Docker 이미지 빌드 및 AWS 배포
+  deploy: # ✅ CD 단계: Docker 이미지 빌드 및 AWS 배포
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     env:
       DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
       DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-    # needs: [ci] # CI 완료 후 실행
+      
     steps:
       - uses: actions/checkout@v4 # GitHub 저장소 체크아웃
 
@@ -93,27 +65,7 @@ jobs:
             --application-name spring-app \
             --deployment-group-name spring-app-group \
             --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=zip,key=deploy.zip # AWS CodeDeploy를 통해 배포 진행
-  
-  # push-slack: # ✅ 배포 완료 후 Slack 알림 전송
-  #   if: github.event_name == 'push'
-  #   needs: [cd] # CD 완료 후 실행
-  #   runs-on: ubuntu-latest
-  #   permissions:
-  #     contents: read
-  #     actions: read
-  #     statuses: write
-  #   steps:
-  #     - name: Slack Notification for Push CI/CD
-  #       uses: 8398a7/action-slack@v3
-  #       with:
-  #         status: ${{ job.status }}
-  #         author_name: "GitHub Actions 🚀"
-  #         fields: commit,author,ref,job,took
-  #         text: ":rocket: *코드가 배포되었습니다!* - `${{ github.repository }}`\n🔗 *커밋:* <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|커밋 보기>"
-  #       env:
-  #         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-  #         GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-  #       if: always() # 항상 실행
+
 # name: AWS EC2 자동 배포
 
 # on:
