@@ -94,26 +94,26 @@ jobs:
             --deployment-group-name spring-app-group \
             --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=zip,key=deploy.zip # AWS CodeDeploy를 통해 배포 진행
   
-  push-slack: # ✅ 배포 완료 후 Slack 알림 전송
-    if: github.event_name == 'push'
-    needs: [cd] # CD 완료 후 실행
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      actions: read
-      statuses: write
-    steps:
-      - name: Slack Notification for Push CI/CD
-        uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          author_name: "GitHub Actions 🚀"
-          fields: commit,author,ref,job,took
-          text: ":rocket: *코드가 배포되었습니다!* - `${{ github.repository }}`\n🔗 *커밋:* <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|커밋 보기>"
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-        if: always() # 항상 실행
+  # push-slack: # ✅ 배포 완료 후 Slack 알림 전송
+  #   if: github.event_name == 'push'
+  #   needs: [cd] # CD 완료 후 실행
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     contents: read
+  #     actions: read
+  #     statuses: write
+  #   steps:
+  #     - name: Slack Notification for Push CI/CD
+  #       uses: 8398a7/action-slack@v3
+  #       with:
+  #         status: ${{ job.status }}
+  #         author_name: "GitHub Actions 🚀"
+  #         fields: commit,author,ref,job,took
+  #         text: ":rocket: *코드가 배포되었습니다!* - `${{ github.repository }}`\n🔗 *커밋:* <https://github.com/${{ github.repository }}/commit/${{ github.sha }}|커밋 보기>"
+  #       env:
+  #         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  #         GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+  #       if: always() # 항상 실행
 # name: AWS EC2 자동 배포
 
 # on:
