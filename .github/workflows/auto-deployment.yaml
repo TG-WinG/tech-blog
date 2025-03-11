@@ -57,14 +57,14 @@ jobs:
           cp -r scripts deploy/ # 배포 스크립트 복사
           envsubst < scripts/deploy.sh > deploy/scripts/deploy.sh # 환경변수를 적용한 배포 스크립트 생성
           zip -r deploy.zip deploy/ # 배포용 ZIP 파일 생성
-          aws s3 cp deploy.zip s3://${{ secrets.S3_BUCKET_NAME }}/deploy.zip # S3에 ZIP 파일 업로드
+          aws s3 cp deploy.zip s3://${{ secrets.AWS_S3_BUCKET_NAME }}/deploy.zip # S3에 ZIP 파일 업로드
 
       - name: Deploy with CodeDeploy
         run: |
           aws deploy create-deployment \
             --application-name spring-app \
             --deployment-group-name spring-app-group \
-            --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},bundleType=zip,key=deploy.zip # AWS CodeDeploy를 통해 배포 진행
+            --s3-location bucket=${{ secrets.AWS_S3_BUCKET_NAME }},bundleType=zip,key=deploy.zip # AWS CodeDeploy를 통해 배포 진행
 
 # name: AWS EC2 자동 배포
 
